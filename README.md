@@ -4,6 +4,7 @@
 This script is intended to be used on a directory containing films. It searches through the given directory and sub-directories, and finds MKV files. It converts the file names into films, assuming that the MKV files are in the format: "Film title (year)" or "Film.title.year". 
 
 It should work on unedited file names from trackers, but there may still be edge cases where a film name isn't correctly extracted. It's worth checking that film names have been correctly parsed in the output.
+* Note if non-english films are spelt differently to how they're named on Ant, a match will not be found
 
 The script outputs a csv file containing a list of films it's found, with the link to the anthelion torrent if it already exists, or "NOT FOUND" if not.
 
