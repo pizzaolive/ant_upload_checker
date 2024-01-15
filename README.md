@@ -31,6 +31,7 @@ The script outputs a csv file containing a list of films it's found, with the li
 
 ## Future ideas
 * Ensure regex works for unforseen edge cases
+    * Look into guessit package
 * Add tests
 * Use enquirer or GUI to select folder paths?
 * Automatic torrent creation
