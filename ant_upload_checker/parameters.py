@@ -2,5 +2,5 @@
 API_KEY = ""
 
 # Ensure there is no backslash at the end of the string
-INPUT_FOLDER = r"C:\Media\Movies"  
+INPUT_FOLDER = r"C:\Media\Films"  
 OUTPUT_FOLDER = r"C:\Media"

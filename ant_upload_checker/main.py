@@ -9,7 +9,7 @@ from ant_upload_checker.output import write_film_list_to_csv
 
 
 def main():
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s",datefmt="%H:%M:%S")
 
     film_info = (
         get_video_file_paths(INPUT_FOLDER)
