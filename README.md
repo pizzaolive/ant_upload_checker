@@ -1,7 +1,7 @@
 # Ant upload checker
 
 # What does this script do?
-This script is intended to be used on a directory containing films. It searches through the given directory and sub-directories, and finds MKV files. It converts the file names into films, assuming that the MKV files are in the format: Film title (year) or Film.title.year. 
+This script is intended to be used on a directory containing films. It searches through the given directory and sub-directories, and finds MKV files. It converts the file names into films, assuming that the MKV files are in the format: "Film title (year)" or "Film.title.year". 
 
 It should work on unedited file names from trackers, but there may still be edge cases where a film name isn't correctly extracted. It's worth checking that film names have been correctly parsed in the output.
 
@@ -22,8 +22,9 @@ The script outputs a csv file containing a list of films it's found, with the li
 ## Running the script
 1. Navigate into the root folder. You should be able to see the README and setup files.
 2. Open the terminal in the current folder. You can do this by clicking the directory bar at the top, typing in 'cmd', and pressing Enter.
-3. Type `pip install .` into the terminal and press Enter - this should use setup.py and install the modules required (pandas, Pillow, mutagen and requests).
-4. Once the modules have finished installing, type `python -m ant_upload_checker.main` and press Enter.
+3. Type `pip install .` into the terminal and press Enter - this should use setup.py and install the packages required (pandas, requests, ratelimit, pytest).
+4. Once the packages have finished installing, type `python -m ant_upload_checker.main` and press Enter.
+    * You should see some information being printed in the terminal, including a message once it's finished running.
 5. Open the output csv file to see which films already exist on the tracker
 
 
