@@ -1,0 +1,7 @@
+{
+    "python.testing.pytestArgs": [
+        "ant_upload_checker/tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}
