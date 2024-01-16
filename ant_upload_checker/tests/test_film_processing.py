@@ -1,6 +1,5 @@
 import ant_upload_checker.film_processing as funcs
 import pandas as pd
-from pathlib import Path
 
 
 def test_add_film_name_column():
@@ -47,6 +46,7 @@ def test_add_film_name_column():
 
     pd.testing.assert_frame_equal(actual_df, expected_df)
 
+
 def test_remove_edition_info():
     test_series = pd.DataFrame(
         {
@@ -55,7 +55,7 @@ def test_remove_edition_info():
                 "Test film theatrical cut 2020",
                 "test film THEATrical cut 2019",
                 "Test film EXTended cut 2020",
-                "Extended arm film 2020"
+                "Extended arm film 2020",
             ],
         }
     )
@@ -63,15 +63,14 @@ def test_remove_edition_info():
     actual_df = funcs.remove_edition_info(test_series)
     expected_df = pd.DataFrame(
         {
-            "film name": [
+            "file name": [
                 "Test film (2020)",
-                "Tesh film 2020",
+                "Test film 2020",
                 "test film 2019",
                 "Test film 2020",
-                "Extended arm film 2020"
+                "Extended arm film 2020",
             ],
         }
     )
 
     pd.testing.assert_frame_equal(actual_df, expected_df)
-
