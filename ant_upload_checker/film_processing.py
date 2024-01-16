@@ -26,7 +26,7 @@ def get_film_file_paths():
 def get_clean_film_file_paths(input_folder):
     paths = get_film_file_paths(input_folder)
 
-    cleaned_paths = remove_extras_folder_from_paths(paths)
+    cleaned_paths = remove_paths_containing_extras_folder(paths)
 
     paths_df = (
         pd.DataFrame({"full path": cleaned_paths})
@@ -37,7 +37,7 @@ def get_clean_film_file_paths(input_folder):
     return paths_df
 
 
-def remove_extras_folder_from_paths(paths):
+def remove_paths_containing_extras_folder(paths):
     cleaned_paths = [path for path in paths if path.parent.name != "Extras"]
 
     return cleaned_paths

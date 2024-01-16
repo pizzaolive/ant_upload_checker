@@ -1,5 +1,6 @@
 import ant_upload_checker.film_processing as funcs
 import pandas as pd
+from pathlib import Path
 
 
 def test_add_film_name_column():
@@ -79,3 +80,24 @@ def test_remove_edition_info():
     )
 
     pd.testing.assert_frame_equal(actual_df, expected_df)
+
+
+def test_remove_paths_containing_extras_folder():
+    test_paths = [
+        "C:\The Extras 2030\The Extras 2030.mkv",
+        "C:\The Extras 2030\Extras\Bloopers.mkv",
+        "C:\Godzilla: King of the Monsters (2019)\Godzilla: King of the Monsters (2019).mkv",
+        "C:\Godzilla: King of the Monsters (2019)\Extras\Godzilla extras (2019).mkv",
+        "C:\Godzilla: King of the Monsters (2019)\Extras\Godzilla: King of the Monsters (2019).mkv",
+    ]
+    test_paths = [Path(x) for x in test_paths]
+
+    actual_list = funcs.remove_paths_containing_extras_folder(test_paths)
+
+    expected_list = [
+        "C:\The Extras 2030\The Extras 2030.mkv",
+        "C:\Godzilla: King of the Monsters (2019)\Godzilla: King of the Monsters (2019).mkv",
+    ]
+    expected_list = [Path(x) for x in expected_list]
+
+    assert actual_list == expected_list
