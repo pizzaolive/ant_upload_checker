@@ -77,7 +77,7 @@ def remove_edition_info(file_name_series):
 
 @sleep_and_retry
 @limits(calls=1, period=2)
-def check_if_film_exists_on_anthelion(film_name):
+def check_if_film_exists_on_ant(film_name):
     logging.info("Searching for %s", film_name)
     url = "https://anthelion.me/api.php"
 
@@ -100,10 +100,10 @@ def check_if_film_exists_on_anthelion(film_name):
         return torrent_link
 
 
-def check_if_films_exist_on_anthelion(films_df):
+def check_if_films_exist_on_ant(films_df):
     films_df_output = films_df.copy()
-    films_df_output["already on anthelion?"] = films_df_output["film name"].apply(
-        check_if_film_exists_on_anthelion
+    films_df_output["already on ANT?"] = films_df_output["film name"].apply(
+        check_if_film_exists_on_ant
     )
 
     return films_df_output
