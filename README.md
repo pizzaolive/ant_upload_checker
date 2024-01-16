@@ -1,4 +1,4 @@
-# Ant upload checker
+# ANT upload checker
 
 # What does this script do?
 This script is intended to be used on a directory containing films. It searches through the given directory and sub-directories, and finds MKV files. It converts the file names into films, assuming that the MKV files are in the format: "Film title (year)" or "Film.title.year". 
