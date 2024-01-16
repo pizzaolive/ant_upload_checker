@@ -8,7 +8,7 @@
             "name": "main",
             "type": "python",
             "request": "launch",
-            "module": "main",
+            "module": "ant_upload_checker.main",
             "justMyCode": true
         }
     ]
