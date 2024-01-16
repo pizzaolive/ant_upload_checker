@@ -7,7 +7,7 @@ import logging
 
 
 def get_video_file_paths(input_folder):
-    file_extensions = ["mkv"]
+    file_extensions = ["mkv", "m2ts"]
 
     paths = []
     for ext in file_extensions:
@@ -18,16 +18,24 @@ def get_video_file_paths(input_folder):
             "No video files were found, check the INPUT_FOLDER value in parameters.py"
         )
 
-    paths_df = pd.DataFrame({"full path": paths})
+    cleaned_paths = remove_extras_folder_from_paths(paths)
+    paths_df = (
+        pd.DataFrame({"full path": cleaned_paths})
+        .sort_values(by="full path")
+        .reset_index(drop=True)
+    )
 
     return paths_df
 
 
-def get_film_details_from_path(paths_df, limit_to_5=True):
-    paths_with_info = add_stem_column(paths_df).pipe(add_film_name_column)
+def remove_extras_folder_from_paths(paths):
+    cleaned_paths = [path for path in paths if path.parent.name != "Extras"]
 
-    if limit_to_5:
-        paths_with_info = paths_with_info.loc[:5, :]
+    return cleaned_paths
+
+
+def get_film_details_from_path(paths_df):
+    paths_with_info = add_stem_column(paths_df).pipe(add_film_name_column)
 
     return paths_with_info
 
