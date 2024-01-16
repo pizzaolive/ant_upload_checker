@@ -6,5 +6,5 @@ setup(
    description='Check if films in input directory are already uploaded to ANT',
    author='pizzaolive',
    packages=['ant_upload_checker'], 
-   install_requires=["pandas","requests","ratelimit","pytest"],
+   install_requires=["pandas","requests","ratelimit","guessit","pytest"],
 )
