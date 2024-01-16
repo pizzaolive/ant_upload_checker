@@ -1,24 +1,33 @@
 import pandas as pd
 import requests
+import logging
+import guessit
 from pathlib import Path
 from ratelimit import limits, sleep_and_retry
 from ant_upload_checker.parameters import API_KEY
-import logging
+from ant_upload_checker.parameters import INPUT_FOLDER
 
 
-def get_video_file_paths(input_folder):
+def get_film_file_paths():
     file_extensions = ["mkv", "m2ts"]
 
     paths = []
     for ext in file_extensions:
-        paths.extend(Path(input_folder).glob(f"**/*.{ext}"))
+        paths.extend(Path(INPUT_FOLDER).glob(f"**/*.{ext}"))
 
     if not paths:
         raise ValueError(
-            "No video files were found, check the INPUT_FOLDER value in parameters.py"
+            "No films were found, check the INPUT_FOLDER value in parameters.py"
         )
 
+    return paths
+
+
+def get_clean_film_file_paths(input_folder):
+    paths = get_film_file_paths(input_folder)
+
     cleaned_paths = remove_extras_folder_from_paths(paths)
+
     paths_df = (
         pd.DataFrame({"full path": cleaned_paths})
         .sort_values(by="full path")
