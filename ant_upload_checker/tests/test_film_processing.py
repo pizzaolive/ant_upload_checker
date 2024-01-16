@@ -6,16 +6,18 @@ def test_add_film_name_column():
     test_df = pd.DataFrame(
         {
             "full path": [
-                r"C:\Nick Fury: Agent of S.H.I.E.L.D. (1998)",
-                r"C:\L.A. Confidential (1997) test....",
-                r"C:\tick tick. BOOM! 2021 test....",
-                r"C:\Da.5.Bloods.2020.test....",
+                r"C:\Nick Fury: Agent of S.H.I.E.L.D. (1998).mkv",
+                r"C:\L.A. Confidential (1997) test.mkv",
+                r"C:\tick tick. BOOM! 2021 test.mkv",
+                r"C:\Da.5.Bloods.2020.test.mkv",
+                r"C:\Short term 12 2013\Short term 12 2013 film info.mkv",
             ],
             "file name": [
-                r"Nick Fury: Agent of S.H.I.E.L.D. (1998)",
-                "L.A. Confidential (1997)  test....",
+                r"Nick Fury: Agent of S.H.I.E.L.D. (1998).mkv",
+                "L.A. Confidential (1997) test.mkv",
                 "tick tick. BOOM! 2021 test....",
-                "Da.5.Bloods.2020.test....",
+                "Da.5.Bloods.2020.test.mkv",
+                "Short term 12 2013 film info.mkv.",
             ],
         }
     )
@@ -24,22 +26,25 @@ def test_add_film_name_column():
     expected_df = pd.DataFrame(
         {
             "full path": [
-                r"C:\Nick Fury: Agent of S.H.I.E.L.D. (1998)",
-                r"C:\L.A. Confidential (1997) test....",
-                r"C:\tick tick. BOOM! 2021 test....",
-                r"C:\Da.5.Bloods.2020.test....",
+                r"C:\Nick Fury: Agent of S.H.I.E.L.D. (1998).mkv",
+                r"C:\L.A. Confidential (1997) test.mkv",
+                r"C:\tick tick. BOOM! 2021 test.mkv",
+                r"C:\Da.5.Bloods.2020.test.mkv",
+                r"C:\Short term 12 2013\Short term 12 2013 film info.mkv",
             ],
             "file name": [
-                r"Nick Fury: Agent of S.H.I.E.L.D. (1998)",
-                "L.A. Confidential (1997)  test....",
+                r"Nick Fury: Agent of S.H.I.E.L.D. (1998).mkv",
+                "L.A. Confidential (1997) test.mkv",
                 "tick tick. BOOM! 2021 test....",
-                "Da.5.Bloods.2020.test....",
+                "Da.5.Bloods.2020.test.mkv",
+                "Short term 12 2013 film info.mkv.",
             ],
             "film name": [
                 "Nick Fury: Agent of S.H.I.E.L.D.",
                 "L.A. Confidential",
                 "tick tick. BOOM!",
                 "Da 5 Bloods",
+                "Short term 12",
             ],
         }
     )
