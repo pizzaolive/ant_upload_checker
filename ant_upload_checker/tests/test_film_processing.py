@@ -3,56 +3,6 @@ import pandas as pd
 from pathlib import Path
 
 
-def test_add_film_name_column():
-    test_df = pd.DataFrame(
-        {
-            "full path": [
-                r"C:\Nick Fury: Agent of S.H.I.E.L.D. (1998).mkv",
-                r"C:\L.A. Confidential (1997) test.mkv",
-                r"C:\tick tick. BOOM! 2021 test.mkv",
-                r"C:\Da.5.Bloods.2020.test.mkv",
-                r"C:\Short term 12 2013\Short term 12 2013 film info.mkv",
-            ],
-            "file name": [
-                r"Nick Fury: Agent of S.H.I.E.L.D. (1998).mkv",
-                "L.A. Confidential (1997) test.mkv",
-                "tick tick. BOOM! 2021 test....",
-                "Da.5.Bloods.2020.test.mkv",
-                "Short term 12 2013 film info.mkv.",
-            ],
-        }
-    )
-
-    actual_df = funcs.add_film_name_column(test_df)
-    expected_df = pd.DataFrame(
-        {
-            "full path": [
-                r"C:\Nick Fury: Agent of S.H.I.E.L.D. (1998).mkv",
-                r"C:\L.A. Confidential (1997) test.mkv",
-                r"C:\tick tick. BOOM! 2021 test.mkv",
-                r"C:\Da.5.Bloods.2020.test.mkv",
-                r"C:\Short term 12 2013\Short term 12 2013 film info.mkv",
-            ],
-            "file name": [
-                r"Nick Fury: Agent of S.H.I.E.L.D. (1998).mkv",
-                "L.A. Confidential (1997) test.mkv",
-                "tick tick. BOOM! 2021 test....",
-                "Da.5.Bloods.2020.test.mkv",
-                "Short term 12 2013 film info.mkv.",
-            ],
-            "film name": [
-                "Nick Fury: Agent of S.H.I.E.L.D.",
-                "L.A. Confidential",
-                "tick tick. BOOM!",
-                "Da 5 Bloods",
-                "Short term 12",
-            ],
-        }
-    )
-
-    pd.testing.assert_frame_equal(actual_df, expected_df)
-
-
 def test_remove_edition_info():
     test_series = pd.DataFrame(
         {
@@ -99,5 +49,28 @@ def test_remove_paths_containing_extras_folder():
         "C:\Godzilla: King of the Monsters (2019)\Godzilla: King of the Monsters (2019).mkv",
     ]
     expected_list = [Path(x) for x in expected_list]
+
+    assert actual_list == expected_list
+
+
+def test_get_titles_from_film_paths():
+    test_list = [
+        "C:/Nick Fury: Agent of S.H.I.E.L.D. (1998).mkv",
+        "C:/L.A. Confidential (1997) test.mkv",
+        "C:/tick tick... BOOM! 2021 test.mkv",
+        "C:/Da.5.Bloods.2020.test.mkv",
+        "C:/Short term 12 2013/Short term 12 2013 film info.mkv",
+    ]
+    test_list = [Path(x) for x in test_list]
+
+    actual_list = funcs.get_titles_from_film_paths(test_list)
+
+    expected_list = [
+        "Nick Fury: Agent of S.H.I.E.L.D.",
+        "L.A. Confidential",
+        "tick tick BOOM!",
+        "Da 5 Bloods",
+        "Short term 12",
+    ]
 
     assert actual_list == expected_list

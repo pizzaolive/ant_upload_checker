@@ -1,11 +1,12 @@
 import pandas as pd
 import requests
 import logging
-import guessit
+from guessit import guessit
 from pathlib import Path
 from ratelimit import limits, sleep_and_retry
 from ant_upload_checker.parameters import API_KEY
 from ant_upload_checker.parameters import INPUT_FOLDER
+import re
 
 
 def get_film_file_paths():
@@ -23,65 +24,38 @@ def get_film_file_paths():
     return paths
 
 
-def get_clean_film_file_paths(input_folder):
-    paths = get_film_file_paths(input_folder)
+def get_titles_from_film_paths(film_paths):
+    titles = [get_film_title_from_path(path) for path in film_paths]
+    cleaned_titles = [fix_title_if_contains_acronym(title) for title in titles]
 
-    cleaned_paths = remove_paths_containing_extras_folder(paths)
+    return cleaned_titles
 
-    paths_df = (
-        pd.DataFrame({"full path": cleaned_paths})
-        .sort_values(by="full path")
-        .reset_index(drop=True)
+
+def get_film_title_from_path(path):
+    film_title = guessit(path)["title"]
+
+    return film_title
+
+
+def fix_title_if_contains_acronym(film_title):
+    """
+    e.g. L A Confidential -> L.A Confidential -> L.A. Confidential
+    """
+    titles_with_acronym_spaces_as_dots = re.sub(
+        r"(?<=\b[A-z]{1})\s(?=[A-z]{1}\b)", ".", film_title
     )
 
-    return paths_df
+    title_with_acronym_suffixed_with_a_dot = re.sub(
+        r"(?<=\.[A-z]{1})\s(?=[^\s])", ". ", titles_with_acronym_spaces_as_dots
+    )
+
+    return title_with_acronym_suffixed_with_a_dot
 
 
 def remove_paths_containing_extras_folder(paths):
     cleaned_paths = [path for path in paths if path.parent.name != "Extras"]
 
     return cleaned_paths
-
-
-def get_film_details_from_path(paths_df):
-    paths_with_info = add_stem_column(paths_df).pipe(add_film_name_column)
-
-    return paths_with_info
-
-
-def add_stem_column(paths_df):
-    paths_with_stem = paths_df.copy()
-    paths_with_stem["file name"] = paths_df["full path"].apply(lambda x: x.stem)
-
-    return paths_with_stem
-
-
-def add_film_name_column(paths_df):
-    paths_with_file_name = paths_df.copy()
-    paths_with_file_name["film name"] = (
-        paths_with_file_name["file name"]
-        .astype(str)
-        .replace({r"\(|\)": ""}, regex=True)
-        .pipe(replace_dots_between_word_boundaries)
-        .pipe(replace_spaces_between_consecutive_single_letters_with_dots)
-        .pipe(remove_edition_info)
-        .str.extract(r"(.*?)(?=\s\d{4})")
-    )
-    return paths_with_file_name
-
-
-def replace_dots_between_word_boundaries(file_name_series):
-    cleaned_file_names = file_name_series.replace(
-        {r"(?<=\b)\.(?=\b|\d)": " "}, regex=True
-    )
-    return cleaned_file_names
-
-
-def replace_spaces_between_consecutive_single_letters_with_dots(file_name_series):
-    cleaned_file_names = file_name_series.replace(
-        {r"(?<=\b[A-z]{1})\s(?=[A-z]{1}\b)": "."}, regex=True
-    )
-    return cleaned_file_names
 
 
 def remove_edition_info(file_name_series):
