@@ -3,7 +3,7 @@
 # What does this script do?
 This script is intended to be used on a directory containing films. It scans for films, parses their film titles and checks whether each film already exists on ANT. The script outputs a csv file containing the film list along with info on whether it's been uploaded or not. The idea is to help find films in your library that could potentially be uploaded.
 
-# How does it work?
+## How does it work?
 
 This script is intended to be used on a directory containing films. It searches through the given directory and sub-directories, and finds MKV files. It converts the file names into films, assuming that the MKV files are in the format: "Film title (year)" or "Film.title.year". 
 
