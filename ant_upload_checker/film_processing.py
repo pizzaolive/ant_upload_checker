@@ -94,9 +94,14 @@ def create_film_list_dataframe(film_file_paths, film_titles):
     Combine the full file paths and film titles into a
     pandas DataFrame.
     """
-    films_df = pd.DataFrame(
-        {"Full file path": film_file_paths, "Parsed film title": film_titles}
-    ).astype(str)
+    films_df = (
+        pd.DataFrame(
+            {"Full file path": film_file_paths, "Parsed film title": film_titles}
+        )
+        .astype(str)
+        .sort_values(by="Parsed film title")
+        .reset_index(drop=True)
+    )
 
     return films_df
 
