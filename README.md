@@ -39,8 +39,8 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 
 ## Future ideas
-* Ensure regex works for unforseen edge cases
-    * Look into guessit package
+* Can regex matching be further improved? Tweaking guessit config?
+* Add ability to exclude TV shows if some are found within directory
 * Add tests
 * Use enquirer or GUI to select folder paths?
 * Automatic torrent creation
