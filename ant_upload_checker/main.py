@@ -1,8 +1,9 @@
 import logging
 from ant_upload_checker.film_processing import (
-    get_film_file_paths,
-    remove_paths_containing_extras_folder,
-    get_titles_from_film_paths
+    get_filtered_film_file_paths,
+    get_titles_from_film_paths,
+    create_film_list_dataframe,
+    check_if_films_exist_on_ant,
 )
 
 from ant_upload_checker.output import write_film_list_to_csv
@@ -13,12 +14,13 @@ def main():
         level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S"
     )
 
-    paths = get_film_file_paths()
-    filtered_paths = remove_paths_containing_extras_folder(paths)
-    film_titles = get_titles_from_film_paths(filtered_paths)
+    film_file_paths = get_filtered_film_file_paths()
+    film_titles = get_titles_from_film_paths(film_file_paths)
 
+    films_df = create_film_list_dataframe(film_file_paths, film_titles)
+    films_checked_on_ant = check_if_films_exist_on_ant(films_df)
 
-    write_film_list_to_csv(film_info)
+    write_film_list_to_csv(films_checked_on_ant)
 
     logging.info("Script has ended")
 

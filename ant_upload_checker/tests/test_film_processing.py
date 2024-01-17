@@ -3,35 +3,6 @@ import pandas as pd
 from pathlib import Path
 
 
-def test_remove_edition_info():
-    test_series = pd.DataFrame(
-        {
-            "file name": [
-                "Test film extended cut (2020)",
-                "Test film theatrical cut 2020",
-                "test film THEATrical cut 2019",
-                "Test film EXTended cut 2020",
-                "Extended arm film 2020",
-            ],
-        }
-    )
-
-    actual_df = funcs.remove_edition_info(test_series)
-    expected_df = pd.DataFrame(
-        {
-            "file name": [
-                "Test film (2020)",
-                "Test film 2020",
-                "test film 2019",
-                "Test film 2020",
-                "Extended arm film 2020",
-            ],
-        }
-    )
-
-    pd.testing.assert_frame_equal(actual_df, expected_df)
-
-
 def test_remove_paths_containing_extras_folder():
     test_paths = [
         "C:\The Extras 2030\The Extras 2030.mkv",
@@ -71,6 +42,38 @@ def test_get_titles_from_film_paths():
         "tick tick BOOM!",
         "Da 5 Bloods",
         "Short term 12",
+    ]
+
+    assert actual_list == expected_list
+
+
+def test_fix_title_if_contains_acronym():
+    test_list = [
+        "X: First Class",
+        "A normal film with I am",
+        "L A Confidential",
+        "A I Artificial Intelligence",
+        "G I Jane",
+        "Agents of S H I E L D",
+        "Agents of S.H.I.E.L.D.",
+        "E T the Extra-Terrestrial",
+        "S W A T",
+        "S.W.A.T.",
+    ]
+
+    actual_list = [funcs.fix_title_if_contains_acronym(x) for x in test_list]
+
+    expected_list = [
+        "X: First Class",
+        "A normal film with I am",
+        "L.A. Confidential",
+        "A.I. Artificial Intelligence",
+        "G.I. Jane",
+        "Agents of S.H.I.E.L.D.",
+        "Agents of S.H.I.E.L.D.",
+        "E.T. the Extra-Terrestrial",
+        "S.W.A.T.",
+        "S.W.A.T.",
     ]
 
     assert actual_list == expected_list
