@@ -5,10 +5,12 @@ This script is intended to be used on a directory containing films. It scans for
 
 ## How does it work?
 
-This script is intended to be used on a directory containing films. It searches through the given directory and sub-directories, and finds MKV files. It converts the file names into films, assuming that the MKV files are in the format: "Film title (year)" or "Film.title.year". 
+This script is intended to be used on a directory containing films. It searches through the given directory and sub-directories, and finds them by searching for common video file formats (currently:"mp4","avi","mkv","mpeg","m2ts"). Using an existing package called guessit and some additional tweaks, film titles are parsed from the file paths.
 
-It should work on unedited file names from trackers, but there may still be edge cases where a film name isn't correctly extracted. It's worth checking that film names have been correctly parsed in the output.
-* Note if non-english films are spelt differently to how they're named on Ant, a match will not be found
+There may still be some edge cases where films are not parsed 100% correctly, and so are not found on ANT. If the film title looks incorrect or odd, double check it on ANT.
+Some examples:
+* Non-english films that might differ in spelling between ANT and the film path
+* Films with ellipsis - currently guessit automatically removes these e.g. Tick Tick... BOOM! -> Tick Tick Boom!
 
 The script outputs a csv file containing a list of films it's found, with the link to the ANT torrent if it already exists, or "NOT FOUND" if not.
 
