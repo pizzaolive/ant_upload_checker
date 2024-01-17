@@ -21,7 +21,7 @@ def get_film_file_paths():
     Scan the input folder from parameters for the given file extensions,
     adding any files to a list.
     """
-    file_extensions = ["mkv", "m2ts"]
+    file_extensions = ["mp4","avi","mkv","mpeg","m2ts"]
 
     paths = []
     for ext in file_extensions:
