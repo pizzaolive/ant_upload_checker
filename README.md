@@ -11,6 +11,7 @@ There may still be some edge cases where films are not parsed 100% correctly, an
 Some examples:
 * Non-english films that might differ in spelling between ANT and the film path
 * Films with ellipsis - currently guessit automatically removes these e.g. Tick Tick... BOOM! -> Tick Tick Boom!
+* Films containing & vs 'and' on ANT - this is in the pipeline to be fixed
 
 The script outputs a csv file containing a list of films it's found, with the link to the ANT torrent if it already exists, or "NOT FOUND" if not.
 
@@ -40,6 +41,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 ## Future ideas
 * Can regex matching be further improved? Tweaking guessit config?
+    * If film contains & or and, search for both if first not found
 * Add ability to exclude TV shows if some are found within directory
 * Add tests
 * Use enquirer or GUI to select folder paths?

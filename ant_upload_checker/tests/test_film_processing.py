@@ -54,7 +54,7 @@ def test_film_paths():
 def test_get_film_title_from_path(test_film_paths):
     # Note the issues with some acronyms with guessit
     # Note path parent folder is taken e.g. Atlantics instead of Atlantique
-        # Where the year is in brackets ()
+    # Where the year is in brackets ()
 
     actual_list = [funcs.get_film_title_from_path(x) for x in test_film_paths]
     expected_list = [
@@ -137,16 +137,22 @@ def test_get_formatted_titles_from_film_paths(test_film_paths):
 
 
 def test_create_film_list_dataframe():
-    test_film_titles = [
-        Path("C:/Short term 12 2013/Short term 12 2013 film info.mkv"),
-        Path("C:/X: First Class (2100)"),
+    test_film_paths = [
+        Path("C:\X: First Class (2100)"),
+        Path("C:\Short term 12 2013\Short term 12 2013 film info.mkv"),
     ]
-    test_film_titles = ["Short term 12", "X: First Class"]
+    test_film_titles = ["X: First Class", "Short term 12"]
 
-    actual_df = funcs.create_film_list_dataframe(test_film_titles, test_film_titles)
+    actual_df = funcs.create_film_list_dataframe(test_film_paths, test_film_titles)
 
     expected_df = pd.DataFrame(
-        {"Full file path": test_film_titles, "Parsed film title": test_film_titles}
+        {
+            "Full file path": [
+                "C:\Short term 12 2013\Short term 12 2013 film info.mkv",
+                "C:\X: First Class (2100)",
+            ],
+            "Parsed film title": ["Short term 12", "X: First Class"],
+        }
     ).astype(str)
 
     pd.testing.assert_frame_equal(actual_df, expected_df)
