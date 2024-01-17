@@ -54,6 +54,7 @@ def test_film_paths():
 def test_get_film_title_from_path(test_film_paths):
     # Note the issues with some acronyms with guessit
     # Note path parent folder is taken e.g. Atlantics instead of Atlantique
+        # Where the year is in brackets ()
 
     actual_list = [funcs.get_film_title_from_path(x) for x in test_film_paths]
     expected_list = [
