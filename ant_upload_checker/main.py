@@ -1,7 +1,7 @@
 import logging
 from ant_upload_checker.film_processing import (
     get_filtered_film_file_paths,
-    get_titles_from_film_paths,
+    get_formatted_titles_from_film_paths,
     create_film_list_dataframe,
     check_if_films_exist_on_ant,
 )
@@ -15,7 +15,7 @@ def main():
     )
 
     film_file_paths = get_filtered_film_file_paths()
-    film_titles = get_titles_from_film_paths(film_file_paths)
+    film_titles = get_formatted_titles_from_film_paths(film_file_paths)
 
     films_df = create_film_list_dataframe(film_file_paths, film_titles)
     films_checked_on_ant = check_if_films_exist_on_ant(films_df)

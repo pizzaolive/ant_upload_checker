@@ -44,7 +44,7 @@ def remove_paths_containing_extras_folder(paths):
     return cleaned_paths
 
 
-def get_titles_from_film_paths(film_paths):
+def get_formatted_titles_from_film_paths(film_paths):
     """
     Use guessit to get film titles, then fix titles missing
     full stops within acronyms
@@ -95,7 +95,7 @@ def create_film_list_dataframe(film_file_paths, film_titles):
     pandas DataFrame.
     """
     films_df = pd.DataFrame(
-        {"Full file paths": film_file_paths, "Parsed film title": film_titles}
+        {"Full file path": film_file_paths, "Parsed film title": film_titles}
     ).astype(str)
 
     return films_df
@@ -107,9 +107,9 @@ def check_if_films_exist_on_ant(films_df):
     each film already exists on ANT or not.
     """
     films_checked_on_ant = films_df.copy()
-    films_checked_on_ant["Already on ANT?"] = films_checked_on_ant["Parsed film title"].apply(
-        check_if_film_exists_on_ant
-    )
+    films_checked_on_ant["Already on ANT?"] = films_checked_on_ant[
+        "Parsed film title"
+    ].apply(check_if_film_exists_on_ant)
 
     return films_checked_on_ant
 
@@ -133,7 +133,7 @@ def check_if_film_exists_on_ant(film_title):
         "t": "movie",
         "o": "json",
         "limit": 1,
-    } 
+    }
     response = requests.get(url, json).json()
 
     if response["response"]["total"] == 0:
