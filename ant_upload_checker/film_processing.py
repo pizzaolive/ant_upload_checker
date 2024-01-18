@@ -119,31 +119,64 @@ def check_if_films_exist_on_ant(films_df):
     return films_checked_on_ant
 
 
+def check_if_film_exists_on_ant(film_title):
+    logging.info("Searching for %s...", film_title)
+    first_check = search_for_film_title_on_ant(film_title)
+
+    if first_check != "NOT FOUND":
+        return first_check
+
+    and_word_regex = r"(?i)\sand\s"
+    and_symbol_regex = r"(?i)\s&\s"
+
+    if re.search(and_word_regex, film_title):
+        re_check = replace_word_and_re_search(film_title, and_word_regex, " & ")
+        if re_check != "NOT FOUND":
+            return re_check
+    elif re.search(and_symbol_regex, film_title):
+        re_check = replace_word_and_re_search(film_title, and_symbol_regex, " and ")
+        if re_check != "NOT FOUND":
+            return re_check
+
+    logging.info("--- Not found on ANT ---\n")
+    return "NOT FOUND"
+
+
 @sleep_and_retry
 @limits(calls=1, period=2)
-def check_if_film_exists_on_ant(film_title):
+def search_for_film_title_on_ant(film_title):
     """
     Use the ANT API to search for a film title and
     return the first URL if found, else a NOT FOUND string
     """
-    logging.info("Searching for %s...", film_title)
     url = "https://anthelion.me/api.php"
 
     if API_KEY == "":
         raise ValueError("The API_KEY must be set in parameters.py")
 
-    json = {
+    payload = {
         "api_key": API_KEY,
         "q": film_title,
         "t": "movie",
         "o": "json",
         "limit": 1,
     }
-    response = requests.get(url, json).json()
+    response = requests.get(url, payload).json()
 
     if response["response"]["total"] == 0:
-        logging.info("--- Not found on ANT ---\n")
         return "NOT FOUND"
     else:
         torrent_link = response["item"][0]["guid"]
         return torrent_link
+
+
+def replace_word_and_re_search(film_title, regex_pattern, replacement):
+    cleaned_film_title = re.sub(
+        regex_pattern,
+        replacement,
+        film_title,
+    )
+    logging.info("Searching for %s as well, just in case...", cleaned_film_title)
+    film_check = search_for_film_title_on_ant(cleaned_film_title)
+
+    return film_check

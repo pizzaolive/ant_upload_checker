@@ -39,11 +39,13 @@ This is a work in progress - please feel free to give helpful feedback and repor
 5. Open the output csv file to see which films already exist on the tracker
 
 
+## To do
+* Add file size to output csv
+* Fix outstanding issues
+
 ## Future ideas
-* Can regex matching be further improved? Tweaking guessit config?
-    * If film contains & or and, search for both if first not found
+* 
 * Add ability to exclude TV shows if some are found within directory
-* Add tests
 * Use enquirer or GUI to select folder paths?
 * Automatic torrent creation
 * Look into auto-upload missing torrents
