@@ -1,3 +1,6 @@
+Version 1.3
+* Films containing "&" or "and" are re-searched if not initially found, with "&" or "and" substituted. Should improve film title matching.
+
 Version 1.2
 * Add additional video container formats
 * Improved film title parsing: now uses 'guessit' package alongside own regex functions
