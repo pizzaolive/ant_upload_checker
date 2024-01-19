@@ -65,6 +65,29 @@ def get_film_title_from_path(path):
     return film_title
 
 
+def get_film_sizes_from_film_paths(film_paths):
+    film_sizes = [get_file_size_from_path(path) for path in film_paths]
+
+    return film_sizes
+
+
+def get_file_size_from_path(path):
+    file_size_in_bytes = path.stat().st_size
+    file_size = convert_bytes(file_size_in_bytes)
+
+    return file_size
+
+
+def convert_bytes(num):
+    """
+    Convert bytes to correct unit of measurement as a string
+    """
+    for x in ["bytes", "KB", "MB", "GB", "TB"]:
+        if num < 1024.0:
+            return f"{num:.2f} {x}"
+        num /= 1024.0
+
+
 def fix_title_if_contains_acronym(film_title):
     """
     After guessit has extracted film title, fix instances where
