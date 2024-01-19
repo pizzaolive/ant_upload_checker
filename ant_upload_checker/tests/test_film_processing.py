@@ -156,3 +156,11 @@ def test_create_film_list_dataframe():
     ).astype(str)
 
     pd.testing.assert_frame_equal(actual_df, expected_df)
+
+
+def test_convert_bytes_to_gb():
+    test_list = [1073741824, 1610612736, 1309965025]
+    actual_list = [funcs.convert_bytes_to_gb(num) for num in test_list]
+    expected_list = [1, 1.5, 1.22]
+
+    assert actual_list == expected_list

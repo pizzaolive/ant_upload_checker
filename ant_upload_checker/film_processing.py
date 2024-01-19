@@ -32,6 +32,8 @@ def get_film_file_paths():
             "No films were found, check the INPUT_FOLDER value in parameters.py"
         )
 
+    paths.sort()
+
     return paths
 
 
@@ -73,19 +75,18 @@ def get_film_sizes_from_film_paths(film_paths):
 
 def get_file_size_from_path(path):
     file_size_in_bytes = path.stat().st_size
-    file_size = convert_bytes(file_size_in_bytes)
+    file_size = convert_bytes_to_gb(file_size_in_bytes)
 
     return file_size
 
 
-def convert_bytes(num):
+def convert_bytes_to_gb(num_in_bytes):
     """
     Convert bytes to correct unit of measurement as a string
     """
-    for x in ["bytes", "KB", "MB", "GB", "TB"]:
-        if num < 1024.0:
-            return f"{num:.2f} {x}"
-        num /= 1024.0
+    num_in_gb = round((num_in_bytes / 1073741824), 2)
+
+    return num_in_gb
 
 
 def fix_title_if_contains_acronym(film_title):
@@ -112,14 +113,18 @@ def fix_title_if_contains_acronym(film_title):
     return acronym_at_end_of_title_suffixed_with_full_stop
 
 
-def create_film_list_dataframe(film_file_paths, film_titles):
+def create_film_list_dataframe(film_file_paths, film_titles, film_sizes):
     """
     Combine the full file paths and film titles into a
     pandas DataFrame.
     """
     films_df = (
         pd.DataFrame(
-            {"Full file path": film_file_paths, "Parsed film title": film_titles}
+            {
+                "Full file path": film_file_paths,
+                "Film size (GB)": film_sizes,
+                "Parsed film title": film_titles,
+            }
         )
         .astype(str)
         .sort_values(by="Parsed film title")
@@ -143,25 +148,37 @@ def check_if_films_exist_on_ant(films_df):
 
 
 def check_if_film_exists_on_ant(film_title):
+    """
+    Take a film title, and search for it using the ANT API.
+    If an initial match is not found, re-search for a
+    modified version of the film title if it meets certain conditions.
+    """
     logging.info("Searching for %s...", film_title)
     first_check = search_for_film_title_on_ant(film_title)
 
     if first_check != "NOT FOUND":
         return first_check
 
+    second_check = search_for_film_if_contains_and(film_title)
+    if second_check == "NOT FOUND":
+        logging.info("--- Not found on ANT ---\n")
+
+    return second_check
+
+
+def search_for_film_if_contains_and(film_title):
+    """
+    If film title contains and or &, replace with the oppposite
+    and search for the new title on ANT. Else, return NOT FOUND.
+    """
     and_word_regex = r"(?i)\sand\s"
     and_symbol_regex = r"(?i)\s&\s"
 
     if re.search(and_word_regex, film_title):
-        re_check = replace_word_and_re_search(film_title, and_word_regex, " & ")
-        if re_check != "NOT FOUND":
-            return re_check
+        return replace_word_and_re_search(film_title, and_word_regex, " & ")
     elif re.search(and_symbol_regex, film_title):
-        re_check = replace_word_and_re_search(film_title, and_symbol_regex, " and ")
-        if re_check != "NOT FOUND":
-            return re_check
+        return replace_word_and_re_search(film_title, and_symbol_regex, " and ")
 
-    logging.info("--- Not found on ANT ---\n")
     return "NOT FOUND"
 
 
