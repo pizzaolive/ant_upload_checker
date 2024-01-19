@@ -49,11 +49,9 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 
 ## To do
-* Add file size to output csv
 * Fix outstanding issues
 
 ## Future ideas
-* 
 * Add ability to exclude TV shows if some are found within directory
 * Use enquirer or GUI to select folder paths?
 * Automatic torrent creation
