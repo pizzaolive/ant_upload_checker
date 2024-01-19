@@ -3,6 +3,15 @@
 # What does this script do?
 This script is intended to be used on a directory containing films. It scans for films, parses their film titles and checks whether each film already exists on ANT. The script outputs a csv file containing the film list along with info on whether it's been uploaded or not. The idea is to help find films in your library that could potentially be uploaded.
 
+Example CSV output:
+
+| Full file path                                             | Film size (GB) | Parsed film title | Already on ANT? |
+|------------------------------------------------------------|----------------|-------------------|-----------------|
+| C:\Movies\Asteroid City (2023)\Asteroid.City.2023.1080.mkv | 10.62          | Asteroid City     | url       |
+| C:\Movies\A made up film (2023)\A made up film (2023).mp4  | 5.14           | A made up film    | NOT FOUND       |
+
+
+
 ## How does it work?
 
 This script is intended to be used on a directory containing films. It searches through the given directory and sub-directories, and finds them by searching for common video file formats (currently:"mp4","avi","mkv","mpeg","m2ts"). Using an existing package called guessit and some additional tweaks, film titles are parsed from the file paths.

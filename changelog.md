@@ -1,3 +1,8 @@
+Version 1.3.1
+* Output now provides the size of the film in GB
+* Reformatted some code, added test
+* Paths now sorted after initial path search
+
 Version 1.3
 * Films containing "&" or "and" are re-searched if not initially found, with "&" or "and" substituted. Should improve film title matching.
 
