@@ -142,8 +142,9 @@ def test_create_film_list_dataframe():
         Path("C:\Short term 12 2013\Short term 12 2013 film info.mkv"),
     ]
     test_film_titles = ["X: First Class", "Short term 12"]
+    test_film_sizes = [5.11, 2.14]
 
-    actual_df = funcs.create_film_list_dataframe(test_film_paths, test_film_titles)
+    actual_df = funcs.create_film_list_dataframe(test_film_paths,test_film_sizes,test_film_titles)
 
     expected_df = pd.DataFrame(
         {
@@ -151,9 +152,10 @@ def test_create_film_list_dataframe():
                 "C:\Short term 12 2013\Short term 12 2013 film info.mkv",
                 "C:\X: First Class (2100)",
             ],
+            "Film size (GB)": [2.14, 5.11],
             "Parsed film title": ["Short term 12", "X: First Class"],
         }
-    ).astype(str)
+    )
 
     pd.testing.assert_frame_equal(actual_df, expected_df)
 

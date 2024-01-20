@@ -19,7 +19,7 @@ def main():
     film_sizes = get_film_sizes_from_film_paths(film_file_paths)
     film_titles = get_formatted_titles_from_film_paths(film_file_paths)
 
-    films_df = create_film_list_dataframe(film_file_paths, film_titles, film_sizes)
+    films_df = create_film_list_dataframe(film_file_paths,film_sizes, film_titles)
     films_checked_on_ant = check_if_films_exist_on_ant(films_df)
 
     write_film_list_to_csv(films_checked_on_ant)

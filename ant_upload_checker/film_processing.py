@@ -113,7 +113,7 @@ def fix_title_if_contains_acronym(film_title):
     return acronym_at_end_of_title_suffixed_with_full_stop
 
 
-def create_film_list_dataframe(film_file_paths, film_titles, film_sizes):
+def create_film_list_dataframe(film_file_paths, film_sizes, film_titles):
     """
     Combine the full file paths and film titles into a
     pandas DataFrame.
@@ -126,7 +126,9 @@ def create_film_list_dataframe(film_file_paths, film_titles, film_sizes):
                 "Parsed film title": film_titles,
             }
         )
-        .astype(str)
+        .astype(
+            {"Full file path": str, "Film size (GB)": float, "Parsed film title": str}
+        )
         .sort_values(by="Parsed film title")
         .reset_index(drop=True)
     )
