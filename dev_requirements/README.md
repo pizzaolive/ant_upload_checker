@@ -18,4 +18,3 @@ pip install -r dev_requirements\requirements.txt
 * Update the packages listed within setup.py
 * Install pip tools: `python -m pip install pip-tools`
 * Run pip-compile to create a new requirements.txt file: `pip-compile --extra test -o dev_requirements\dev-requirements.txt pyproject.toml`
-* 
