@@ -1,4 +1,5 @@
 import pandas as pd
+import logging
 from guessit import guessit
 from pathlib import Path
 import re
@@ -6,8 +7,14 @@ from ant_upload_checker.parameters import INPUT_FOLDER
 
 
 class FilmProcessor:
-    def __init__(self, input_folder):
+    def __init__(self, input_folder, output_folder):
         self.input_folder = input_folder
+        self.output_folder = output_folder
+        self.film_list_df_types = {
+            "Full file path": str,
+            "Film size (GB)": float,
+            "Parsed film title": str,
+        }
 
     def get_filtered_film_file_paths(self):
         film_paths = self.get_film_file_paths()
@@ -22,6 +29,8 @@ class FilmProcessor:
         film_list_df = self.create_film_list_dataframe(
             film_file_paths, film_sizes, film_titles
         )
+
+        test = self.get_existing_film_list_if_exists()
 
         return film_list_df
 
@@ -127,15 +136,24 @@ class FilmProcessor:
                     "Parsed film title": film_titles,
                 }
             )
-            .astype(
-                {
-                    "Full file path": str,
-                    "Film size (GB)": float,
-                    "Parsed film title": str,
-                }
-            )
+            .astype(self.film_list_df_types)
             .sort_values(by="Parsed film title")
             .reset_index(drop=True)
         )
 
         return films_df
+
+    def get_existing_film_list_if_exists(self):
+        output_file_path = Path(self.output_folder).joinpath("Film list.csv")
+        if not output_file_path.is_file():
+            logging.info(
+                "An existing output file in %s was not found, processing films "
+                "from scratch...",
+                output_file_path,
+            )
+            return False
+        existing_film_list = pd.read_csv(output_file_path).astype(
+            self.film_list_df_types
+        )
+
+        return existing_film_list
