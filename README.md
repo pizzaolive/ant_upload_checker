@@ -49,6 +49,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 
 ## To do
+* Feature - get process to check if a csv already exists. If it does, ask if user wants to re-scan all films, or just any new films relative to the list
 * Fix outstanding issues
 
 ## Future ideas
