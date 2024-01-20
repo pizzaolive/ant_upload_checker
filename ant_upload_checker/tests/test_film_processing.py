@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-import ant_upload_checker.film_processing as funcs
+from ant_upload_checker.film_processor import FilmProcessor
 import pandas as pd
 
 
@@ -18,7 +18,8 @@ def test_extras_file_paths():
 
 
 def test_remove_paths_containing_extras_folder(test_extras_file_paths):
-    actual_list = funcs.remove_paths_containing_extras_folder(test_extras_file_paths)
+    fp = FilmProcessor("test")
+    actual_list = fp.remove_paths_containing_extras_folder(test_extras_file_paths)
 
     expected_list = [
         "C:/The Extras 2030/The Extras 2030.mkv",
@@ -55,8 +56,9 @@ def test_get_film_title_from_path(test_film_paths):
     # Note the issues with some acronyms with guessit
     # Note path parent folder is taken e.g. Atlantics instead of Atlantique
     # Where the year is in brackets ()
+    fp = FilmProcessor("test")
 
-    actual_list = [funcs.get_film_title_from_path(x) for x in test_film_paths]
+    actual_list = [fp.get_film_title_from_path(x) for x in test_film_paths]
     expected_list = [
         "Atlantics",
         "tick tick BOOM!",
@@ -77,6 +79,8 @@ def test_get_film_title_from_path(test_film_paths):
 
 
 def test_fix_title_if_contains_acronym():
+    fp = FilmProcessor("test")
+
     test_list = [
         "Atlantics",
         "tick tick BOOM!",
@@ -93,7 +97,7 @@ def test_fix_title_if_contains_acronym():
         "T E.S.T Test film",
     ]
 
-    actual_list = [funcs.fix_title_if_contains_acronym(x) for x in test_list]
+    actual_list = [fp.fix_title_if_contains_acronym(x) for x in test_list]
 
     expected_list = [
         "Atlantics",
@@ -115,7 +119,8 @@ def test_fix_title_if_contains_acronym():
 
 
 def test_get_formatted_titles_from_film_paths(test_film_paths):
-    actual_list = funcs.get_formatted_titles_from_film_paths(test_film_paths)
+    fp = FilmProcessor("test")
+    actual_list = fp.get_formatted_titles_from_film_paths(test_film_paths)
 
     expected_list = [
         "Atlantics",
@@ -137,6 +142,7 @@ def test_get_formatted_titles_from_film_paths(test_film_paths):
 
 
 def test_create_film_list_dataframe():
+    fp = FilmProcessor("test")
     test_film_paths = [
         Path("C:\X: First Class (2100)"),
         Path("C:\Short term 12 2013\Short term 12 2013 film info.mkv"),
@@ -144,7 +150,7 @@ def test_create_film_list_dataframe():
     test_film_titles = ["X: First Class", "Short term 12"]
     test_film_sizes = [5.11, 2.14]
 
-    actual_df = funcs.create_film_list_dataframe(test_film_paths,test_film_sizes,test_film_titles)
+    actual_df = fp.create_film_list_dataframe(test_film_paths,test_film_sizes,test_film_titles)
 
     expected_df = pd.DataFrame(
         {
@@ -161,8 +167,9 @@ def test_create_film_list_dataframe():
 
 
 def test_convert_bytes_to_gb():
+    fp = FilmProcessor("test")
     test_list = [1073741824, 1610612736, 1309965025]
-    actual_list = [funcs.convert_bytes_to_gb(num) for num in test_list]
+    actual_list = [fp.convert_bytes_to_gb(num) for num in test_list]
     expected_list = [1, 1.5, 1.22]
 
     assert actual_list == expected_list
