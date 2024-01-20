@@ -1,7 +1,10 @@
 import pytest
+import logging
 from pathlib import Path
 from ant_upload_checker.film_processor import FilmProcessor
 import pandas as pd
+
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -150,7 +153,9 @@ def test_create_film_list_dataframe():
     test_film_titles = ["X: First Class", "Short term 12"]
     test_film_sizes = [5.11, 2.14]
 
-    actual_df = fp.create_film_list_dataframe(test_film_paths,test_film_sizes,test_film_titles)
+    actual_df = fp.create_film_list_dataframe(
+        test_film_paths, test_film_sizes, test_film_titles
+    )
 
     expected_df = pd.DataFrame(
         {
@@ -173,3 +178,37 @@ def test_convert_bytes_to_gb():
     expected_list = [1, 1.5, 1.22]
 
     assert actual_list == expected_list
+
+
+def test_false_get_existing_film_list_if_exists(tmp_path, caplog):
+    caplog.set_level(logging.INFO)
+
+    fp = FilmProcessor(input_folder="", output_folder=tmp_path)
+
+    assert fp.get_existing_film_list_if_exists() == False
+    assert "An existing output file" in caplog.text
+
+
+def test_true_get_existing_film_list_if_exists(tmp_path, caplog):
+    caplog.set_level(logging.INFO)
+    test_df = pd.DataFrame(
+        {
+            "Full file path": ["test"],
+            "Film size (GB)": 10.11,
+            "Parsed film title": "test",
+        }
+    )
+    test_df.to_csv(tmp_path.joinpath("Film list.csv"),index=False)
+
+    fp = FilmProcessor(input_folder="", output_folder=tmp_path)
+    actual_return_value = fp.get_existing_film_list_if_exists()
+
+    expected_df = pd.DataFrame(
+        {
+            "Full file path": ["test"],
+            "Film size (GB)": 10.11,
+            "Parsed film title": "test",
+        }
+    )
+
+    pd.testing.assert_frame_equal(actual_return_value, expected_df)

@@ -13,8 +13,9 @@ def main():
     films = FilmProcessor(INPUT_FOLDER, OUTPUT_FOLDER)
     film_file_paths = films.get_filtered_film_file_paths()
     film_list_df = films.get_film_info_from_file_paths(film_file_paths)
+    film_list_filtered = films.filter_films_to_search_if_csv_already_exists(film_list_df)
 
-    film_searcher = FilmSearcher(film_list_df, API_KEY)
+    film_searcher = FilmSearcher(film_list_filtered, API_KEY)
     films_checked_on_ant = film_searcher.check_if_films_exist_on_ant()
 
     write_film_list_to_csv(films_checked_on_ant)

@@ -4,6 +4,7 @@ from guessit import guessit
 from pathlib import Path
 import re
 from ant_upload_checker.parameters import INPUT_FOLDER
+import sys
 
 
 class FilmProcessor:
@@ -30,9 +31,40 @@ class FilmProcessor:
             film_file_paths, film_sizes, film_titles
         )
 
-        test = self.get_existing_film_list_if_exists()
+        return film_list_df
+
+    def filter_films_to_search_if_csv_already_exists(self, film_list_df):
+        existing_film_list_df = self.get_existing_film_list_if_exists()
+
+        if isinstance(existing_film_list_df, pd.DataFrame):
+            logging.info(
+                "Removing any films that already in the existing output file "
+                "to speed up the process..."
+            )
+            filtered_film_list = (
+                pd.concat([existing_film_list_df, film_list_df])
+                .drop_duplicates(
+                    subset=["Film size (GB)", "Parsed film title"], keep=False
+                )
+                .reset_index(drop=True)
+            )
+
+            self.stop_process_if_all_films_already_in_existing_csv(filtered_film_list)
+
+            return filtered_film_list
 
         return film_list_df
+
+    def stop_process_if_all_films_already_in_existing_csv(self, film_list_df):
+        if film_list_df.empty:
+            logging.info(
+                "----\n\n"
+                "After removing films that were already in the existing output file, "
+                "there are no more films to search.\n"
+                "Ending the process early.\n\n"
+                "----"
+            )
+            sys.exit(0)
 
     def get_film_file_paths(self):
         """
@@ -152,6 +184,7 @@ class FilmProcessor:
                 output_file_path,
             )
             return False
+        logging.info("An existing output file '%s' was found", output_file_path)
         existing_film_list = pd.read_csv(output_file_path).astype(
             self.film_list_df_types
         )
