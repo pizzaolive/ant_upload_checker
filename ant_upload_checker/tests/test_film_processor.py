@@ -166,7 +166,7 @@ def test_create_film_list_dataframe():
             ],
             "Film size (GB)": [2.14, 5.11],
             "Parsed film title": ["Short term 12", "X: First Class"],
-            "Already on ANT?": [np.nan,np.nan]
+            "Already on ANT?": [np.nan, np.nan],
         }
     )
 
@@ -185,7 +185,7 @@ def test_convert_bytes_to_gb():
 def test_false_get_existing_film_list_if_exists(tmp_path, caplog):
     caplog.set_level(logging.INFO)
 
-    fp = FilmProcessor(input_folder="", output_folder=tmp_path)
+    fp = FilmProcessor(input_folders="", output_folder=tmp_path)
 
     assert fp.get_existing_film_list_if_exists() == False
     assert "An existing output file" in caplog.text
@@ -202,7 +202,7 @@ def test_true_get_existing_film_list_if_exists(tmp_path, caplog):
     )
     test_df.to_csv(tmp_path.joinpath("Film list.csv"), index=False)
 
-    fp = FilmProcessor(input_folder="", output_folder=tmp_path)
+    fp = FilmProcessor(input_folders="", output_folder=tmp_path)
     actual_return_value = fp.get_existing_film_list_if_exists()
 
     expected_df = pd.DataFrame(

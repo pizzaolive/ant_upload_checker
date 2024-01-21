@@ -3,7 +3,7 @@ import requests
 import logging
 from ratelimit import limits, sleep_and_retry
 from ant_upload_checker.parameters import API_KEY
-from ant_upload_checker.parameters import INPUT_FOLDER
+from ant_upload_checker.parameters import INPUT_FOLDERS
 import re
 
 
