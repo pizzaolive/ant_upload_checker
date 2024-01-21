@@ -166,6 +166,7 @@ def test_create_film_list_dataframe():
             ],
             "Film size (GB)": [2.14, 5.11],
             "Parsed film title": ["Short term 12", "X: First Class"],
+            "Already on ANT?": [np.nan,np.nan]
         }
     )
 

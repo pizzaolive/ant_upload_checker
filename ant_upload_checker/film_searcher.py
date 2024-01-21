@@ -20,12 +20,15 @@ class FilmSearcher:
         search for these on ANT, indicating whether they exist on ANT or not.
         """
         films_to_skip = self.film_list_df.loc[
-            self.film_list_df["Already on ANT?"].str.contains("torrentid", na=False)
+            self.film_list_df["Already on ANT?"]
+            .astype(str)
+            .str.contains("torrentid", na=False)
         ]
-        logging.info(
-            "Skipping %s films already found on ANT in the previous output file...",
-            len(films_to_skip),
-        )
+        if not films_to_skip.empty:
+            logging.info(
+                "Skipping %s films already found on ANT in the previous output file...",
+                len(films_to_skip),
+            )
 
         films_to_process = self.film_list_df.drop(films_to_skip.index)
         films_to_process["Already on ANT?"] = films_to_process[

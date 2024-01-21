@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import logging
 from guessit import guessit
 from pathlib import Path
@@ -156,6 +157,8 @@ class FilmProcessor:
         """
         Combine the full file paths and film titles into a
         pandas DataFrame.
+        Add empty ANT check column before we attempt to combine an existing
+        film list csv, in case one does not exist.
         """
         films_df = (
             pd.DataFrame(
@@ -163,6 +166,7 @@ class FilmProcessor:
                     "Full file path": film_file_paths,
                     "Film size (GB)": film_sizes,
                     "Parsed film title": film_titles,
+                    "Already on ANT?": np.repeat(np.nan, len(film_file_paths)),
                 }
             )
             .astype(self.film_list_df_types)
@@ -176,12 +180,12 @@ class FilmProcessor:
         output_file_path = Path(self.output_folder).joinpath("Film list.csv")
         if not output_file_path.is_file():
             logging.info(
-                "An existing output file in %s was not found, processing films "
+                "An existing output file at %s was not found, processing films "
                 "from scratch...",
                 output_file_path,
             )
             return False
-        logging.info("An existing output file '%s' was found", output_file_path)
+        logging.info("An existing output file '%s' was found.", output_file_path)
         existing_film_list = pd.read_csv(output_file_path).astype(
             self.film_list_df_types
         )
