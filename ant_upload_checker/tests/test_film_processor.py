@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 from ant_upload_checker.film_processor import FilmProcessor
 import pandas as pd
+import numpy as np
 
 LOGGER = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ def test_extras_file_paths():
 
 
 def test_remove_paths_containing_extras_folder(test_extras_file_paths):
-    fp = FilmProcessor("test")
+    fp = FilmProcessor("test", "test")
     actual_list = fp.remove_paths_containing_extras_folder(test_extras_file_paths)
 
     expected_list = [
@@ -59,7 +60,7 @@ def test_get_film_title_from_path(test_film_paths):
     # Note the issues with some acronyms with guessit
     # Note path parent folder is taken e.g. Atlantics instead of Atlantique
     # Where the year is in brackets ()
-    fp = FilmProcessor("test")
+    fp = FilmProcessor("test", "test")
 
     actual_list = [fp.get_film_title_from_path(x) for x in test_film_paths]
     expected_list = [
@@ -82,7 +83,7 @@ def test_get_film_title_from_path(test_film_paths):
 
 
 def test_fix_title_if_contains_acronym():
-    fp = FilmProcessor("test")
+    fp = FilmProcessor("test", "test")
 
     test_list = [
         "Atlantics",
@@ -122,7 +123,7 @@ def test_fix_title_if_contains_acronym():
 
 
 def test_get_formatted_titles_from_film_paths(test_film_paths):
-    fp = FilmProcessor("test")
+    fp = FilmProcessor("test", "test")
     actual_list = fp.get_formatted_titles_from_film_paths(test_film_paths)
 
     expected_list = [
@@ -145,7 +146,7 @@ def test_get_formatted_titles_from_film_paths(test_film_paths):
 
 
 def test_create_film_list_dataframe():
-    fp = FilmProcessor("test")
+    fp = FilmProcessor("test", "test")
     test_film_paths = [
         Path("C:\X: First Class (2100)"),
         Path("C:\Short term 12 2013\Short term 12 2013 film info.mkv"),
@@ -172,7 +173,7 @@ def test_create_film_list_dataframe():
 
 
 def test_convert_bytes_to_gb():
-    fp = FilmProcessor("test")
+    fp = FilmProcessor("test", "test")
     test_list = [1073741824, 1610612736, 1309965025]
     actual_list = [fp.convert_bytes_to_gb(num) for num in test_list]
     expected_list = [1, 1.5, 1.22]
@@ -198,7 +199,7 @@ def test_true_get_existing_film_list_if_exists(tmp_path, caplog):
             "Parsed film title": "test",
         }
     )
-    test_df.to_csv(tmp_path.joinpath("Film list.csv"),index=False)
+    test_df.to_csv(tmp_path.joinpath("Film list.csv"), index=False)
 
     fp = FilmProcessor(input_folder="", output_folder=tmp_path)
     actual_return_value = fp.get_existing_film_list_if_exists()

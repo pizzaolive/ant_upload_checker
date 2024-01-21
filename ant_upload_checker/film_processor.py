@@ -33,36 +33,33 @@ class FilmProcessor:
 
         return film_list_df
 
-    def filter_films_to_search_if_csv_already_exists(self, film_list_df):
+    def combine_with_existing_film_csv(self, film_list_df):
         existing_film_list_df = self.get_existing_film_list_if_exists()
 
         if isinstance(existing_film_list_df, pd.DataFrame):
             logging.info(
-                "Removing any films that already in the existing output file "
-                "to speed up the process..."
+                "Combining existing output file with current list of films "
+                "and dropping duplicate film titles..."
             )
-            filtered_film_list = (
+            combined_film_list = (
                 pd.concat([existing_film_list_df, film_list_df])
-                .drop_duplicates(
-                    subset=["Film size (GB)", "Parsed film title"], keep=False
-                )
+                .drop_duplicates(subset=["Parsed film title"], keep="first")
                 .reset_index(drop=True)
             )
 
-            self.stop_process_if_all_films_already_in_existing_csv(filtered_film_list)
+            self.stop_process_if_all_films_already_in_existing_csv(combined_film_list)
 
-            return filtered_film_list
+            return combined_film_list
 
         return film_list_df
 
-    def stop_process_if_all_films_already_in_existing_csv(self, film_list_df):
-        if film_list_df.empty:
+    def stop_process_if_all_films_already_in_existing_csv(self, combined_film_list_df):
+        if all(
+            combined_film_list_df["Already on ANT?"].str.contains("torrentid", na=False)
+        ):
             logging.info(
-                "----\n\n"
-                "After removing films that were already in the existing output file, "
-                "there are no more films to search.\n"
-                "Ending the process early.\n\n"
-                "----"
+                "All films have already been searched and found on ANT in the previous "
+                "output file.\n\nEnding the process early.\n\n----"
             )
             sys.exit(0)
 

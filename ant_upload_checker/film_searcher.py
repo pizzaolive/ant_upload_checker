@@ -12,15 +12,32 @@ class FilmSearcher:
         self.film_list_df = film_list_df
         self.api_key = api_key
 
+
     def check_if_films_exist_on_ant(self):
         """
-        Add a new column to the DataFrame, indicating whether
-        each film already exists on ANT or not.
+        Given pandas DataFrame of film list, if list contains
+        films that already contain a torrentid from previous output file,
+        then skip these films. For any not found, or new films in the list,
+        search for these on ANT, indicating whether they exist on ANT or not.
         """
-        films_checked_on_ant = self.film_list_df.copy()
-        films_checked_on_ant["Already on ANT?"] = films_checked_on_ant[
+        films_to_skip = self.film_list_df.loc[
+            self.film_list_df["Already on ANT?"].str.contains("torrentid", na=False)
+        ]
+        logging.info(
+            "Skipping %s films already found on ANT in the previous output file...",
+            len(films_to_skip),
+        )
+        films_to_process = self.film_list_df.drop(films_to_skip.index)
+
+        films_to_process["Already on ANT?"] = films_to_process[
             "Parsed film title"
         ].apply(self.check_if_film_exists_on_ant)
+
+        films_checked_on_ant = (
+            pd.concat([films_to_skip, films_to_process])
+            .sort_values(by="Parsed film title")
+            .reset_index(drop=True)
+        )
 
         return films_checked_on_ant
 
