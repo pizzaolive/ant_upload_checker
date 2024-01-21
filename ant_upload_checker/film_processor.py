@@ -4,13 +4,13 @@ import logging
 from guessit import guessit
 from pathlib import Path
 import re
-from ant_upload_checker.parameters import INPUT_FOLDER
+from ant_upload_checker.parameters import INPUT_FOLDERS
 import sys
 
 
 class FilmProcessor:
-    def __init__(self, input_folder, output_folder):
-        self.input_folder = input_folder
+    def __init__(self, input_folders, output_folder):
+        self.input_folders = input_folders
         self.output_folder = output_folder
         self.film_list_df_types = {
             "Full file path": str,
@@ -73,11 +73,12 @@ class FilmProcessor:
 
         paths = []
         for ext in file_extensions:
-            paths.extend(Path(self.input_folder).glob(f"**/*.{ext}"))
+            for folder in self.input_folders:
+                paths.extend(Path(folder).glob(f"**/*.{ext}"))
 
         if not paths:
             raise ValueError(
-                "No films were found, check the INPUT_FOLDER value in parameters.py"
+                "No films were found, check the INPUT_FOLDERS value in parameters.py"
             )
 
         paths.sort()
