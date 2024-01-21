@@ -73,7 +73,8 @@ class FilmProcessor:
 
         paths = []
         for ext in file_extensions:
-            paths.extend(Path(self.input_folders).glob(f"**/*.{ext}"))
+            for folder in self.input_folders:
+                paths.extend(Path(folder).glob(f"**/*.{ext}"))
 
         if not paths:
             raise ValueError(

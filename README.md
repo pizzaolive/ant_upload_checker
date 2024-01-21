@@ -38,7 +38,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 1. Git clone the respository, or download it as ZIP (click the green Code button -> Download ZIP) and extract it to wherever you like.
 2. Update the values in [parameters.py](ant_upload_checker\parameters.py). You can right click the file and open with Notepad to edit it.
     * API_KEY: Your API key from ANT. Go to the tracker to find out how to get this.
-    * INPUT_FOLDERS: the parent directory that contains films.
+    * INPUT_FOLDERS: the parent directory or multiple different directories that contain your films.
     * OUTPUT_FOLDER: the directory in which the output csv file containing the list of films should go.
 
 ## Running the script
