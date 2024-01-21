@@ -14,7 +14,7 @@ Example CSV output:
 
 ## How does it work?
 
-This script is intended to be used on a directory containing films. It searches through the given directory and sub-directories, and finds them by searching for common video file formats (currently:"mp4","avi","mkv","mpeg","m2ts"). Using an existing package called guessit and some additional tweaks, film titles are parsed from the file paths.
+This script is intended to be used on a directory containing films. It searches through the given directory and sub-directories, and finds them by searching for common video file formats (currently: mp4, avi, mkv, mpeg and m2ts). Using an existing package called guessit and some additional tweaks, film titles are parsed from the file paths.
 
 There may still be some edge cases where films are not parsed 100% correctly, and so are not found on ANT. If the film title looks incorrect or odd, double check it on ANT.
 Some examples:
@@ -23,6 +23,8 @@ Some examples:
 * Films containing & vs 'and' on ANT - this is in the pipeline to be fixed
 
 The script outputs a csv file containing a list of films it's found, with the link to the ANT torrent if it already exists, or "NOT FOUND" if not.
+
+As of version 1.4, if an existing film_list.csv is found in the output location specified, any films in this that have already been found on ANT will be skipped by the process. This means you can re-run the script without having to search through your whole film library again. It will not skip films that were not found on ANT, and any new films in your library.
 
 This is a work in progress - please feel free to give helpful feedback and report bugs.
 
