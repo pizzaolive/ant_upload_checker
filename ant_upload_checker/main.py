@@ -1,4 +1,5 @@
 import logging
+from ant_upload_checker.setup import setup_logging
 from ant_upload_checker.film_processor import FilmProcessor
 from ant_upload_checker.film_searcher import FilmSearcher
 from ant_upload_checker.output import write_film_list_to_csv
@@ -6,9 +7,8 @@ from ant_upload_checker.parameters import INPUT_FOLDER, API_KEY, OUTPUT_FOLDER
 
 
 def main():
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S"
-    )
+    setup_logging()
+    logging.info("Starting ANT upload checker...")
 
     films = FilmProcessor(INPUT_FOLDER, OUTPUT_FOLDER)
     film_file_paths = films.get_filtered_film_file_paths()

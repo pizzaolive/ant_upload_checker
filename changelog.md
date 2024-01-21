@@ -1,3 +1,7 @@
+Version 1.4
+* If an existing film_list.csv is found in the output location specified, any films in this csv that have already been found on ANT will be skipped by the process. This means you can re-run the script without having to search through your whole film library again. It will not skip films that were previously not found on ANT, and any new films in your library.
+* Code has been reformatted into classes, new functions relating to above added, more tests added
+
 Version 1.3.1
 * Output now provides the size of the film in GB
 * Reformatted some code, added test
