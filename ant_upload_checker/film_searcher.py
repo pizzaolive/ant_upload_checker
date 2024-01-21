@@ -12,7 +12,6 @@ class FilmSearcher:
         self.film_list_df = film_list_df
         self.api_key = api_key
 
-
     def check_if_films_exist_on_ant(self):
         """
         Given pandas DataFrame of film list, if list contains
@@ -27,8 +26,8 @@ class FilmSearcher:
             "Skipping %s films already found on ANT in the previous output file...",
             len(films_to_skip),
         )
-        films_to_process = self.film_list_df.drop(films_to_skip.index)
 
+        films_to_process = self.film_list_df.drop(films_to_skip.index)
         films_to_process["Already on ANT?"] = films_to_process[
             "Parsed film title"
         ].apply(self.check_if_film_exists_on_ant)
