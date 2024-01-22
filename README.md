@@ -20,7 +20,6 @@ There may still be some edge cases where films are not parsed 100% correctly, an
 Some examples:
 * Non-english films that might differ in spelling between ANT and the film path
 * Films with ellipsis - currently guessit automatically removes these e.g. Tick Tick... BOOM! -> Tick Tick Boom!
-* Films containing & vs 'and' on ANT - this is in the pipeline to be fixed
 
 The script outputs a csv file containing a list of films it's found, with the link to the ANT torrent if it already exists, or "NOT FOUND" if not.
 
@@ -51,7 +50,6 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 
 ## To do
-* Feature - get process to check if a csv already exists. If it does, ask if user wants to re-scan all films, or just any new films relative to the list
 * Fix outstanding issues
 
 ## Future ideas
