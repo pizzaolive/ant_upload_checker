@@ -25,7 +25,8 @@ jobs:
         python-version: "3.8"
     - name: Install dependencies
       run: |
-        pip install -r dev_requirements\dev-requirements.txt
+        pip install --upgrade pip
+        pip install -r dev_requirements/dev-requirements.txt
         pip install flake8 pytest
     - name: Lint with flake8
       run: |
