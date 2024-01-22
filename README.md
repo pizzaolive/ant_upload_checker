@@ -11,21 +11,22 @@ Example CSV output:
 | C:\Movies\A made up film (2023)\A made up film (2023).mp4  | 5.14           | A made up film    | NOT FOUND       |
 
 
-
 ## How does it work?
 
 This script is intended to be used on a directory containing films. It searches through the given directory and sub-directories, and finds them by searching for common video file formats (currently: mp4, avi, mkv, mpeg and m2ts). Using an existing package called guessit and some additional tweaks, film titles are parsed from the file paths.
-
-There may still be some edge cases where films are not parsed 100% correctly, and so are not found on ANT. If the film title looks incorrect or odd, double check it on ANT.
-Some examples:
-* Non-english films that might differ in spelling between ANT and the film path
-* Films with ellipsis - currently guessit automatically removes these e.g. Tick Tick... BOOM! -> Tick Tick Boom!
 
 The script outputs a csv file containing a list of films it's found, with the link to the ANT torrent if it already exists, or "NOT FOUND" if not.
 
 As of version 1.4, if an existing film_list.csv is found in the output location specified, any films in this that have already been found on ANT will be skipped by the process. This means you can re-run the script without having to search through your whole film library again. It will not skip films that were not found on ANT, and any new films in your library.
 
 This is a work in progress - please feel free to give helpful feedback and report bugs.
+
+## Known issues
+* Non-english films may not be found on ANT if their titles do not match
+* Films with ellipsis may not be found. Currently guessit automatically removes these e.g. Tick Tick... BOOM! -> Tick Tick Boom!
+* Films with alternate titles (Film X AKA Film Y) will not be found on ANT
+* Film titles that should contain symbols like "/" or ":" but don't in their file names aren't found on ANT
+
 
 ## Prerequisites
 * You must have Python installed: https://www.python.org/downloads/windows/
@@ -49,11 +50,12 @@ This is a work in progress - please feel free to give helpful feedback and repor
 5. Open the output csv file to see which films already exist on the tracker
 
 
-## To do
-* Fix outstanding issues
+## Future versions
+### Version 4.3.2
+- [] https://github.com/pizzaolive/ant_upload_checker/issues/5 
 
 ## Future ideas
 * Add ability to exclude TV shows if some are found within directory
 * Use enquirer or GUI to select folder paths?
-* Automatic torrent creation
-* Look into auto-upload missing torrents
+* Automatic torrent creation?
+* Look into auto-upload missing torrents?
