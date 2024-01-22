@@ -11,11 +11,11 @@ LOGGER = logging.getLogger(__name__)
 @pytest.fixture
 def test_extras_file_paths():
     test_paths = [
-        "C:/The Extras 2030/The Extras 2030.mkv",
-        "C:/The Extras 2030/Extras/Bloopers.mkv",
-        "C:/Godzilla: King of the Monsters (2019)/Godzilla: King of the Monsters (2019).mkv",
-        "C:/Godzilla: King of the Monsters (2019)/Extras/Godzilla extras (2019).mkv",
-        "C:/Godzilla: King of the Monsters (2019)/Extras/Godzilla: King of the Monsters (2019).mkv",
+        r"C:/The Extras 2030/The Extras 2030.mkv",
+        r"C:/The Extras 2030/Extras/Bloopers.mkv",
+        r"C:/Godzilla: King of the Monsters (2019)/Godzilla: King of the Monsters (2019).mkv",
+        r"C:/Godzilla: King of the Monsters (2019)/Extras/Godzilla extras (2019).mkv",
+        r"C:/Godzilla: King of the Monsters (2019)/Extras/Godzilla: King of the Monsters (2019).mkv",
     ]
     test_paths = [Path(x) for x in test_paths]
     return test_paths
@@ -26,8 +26,8 @@ def test_remove_paths_containing_extras_folder(test_extras_file_paths):
     actual_list = fp.remove_paths_containing_extras_folder(test_extras_file_paths)
 
     expected_list = [
-        "C:/The Extras 2030/The Extras 2030.mkv",
-        "C:/Godzilla: King of the Monsters (2019)/Godzilla: King of the Monsters (2019).mkv",
+        r"C:/The Extras 2030/The Extras 2030.mkv",
+        r"C:/Godzilla: King of the Monsters (2019)/Godzilla: King of the Monsters (2019).mkv",
     ]
     expected_list = [Path(x) for x in expected_list]
 
@@ -37,19 +37,19 @@ def test_remove_paths_containing_extras_folder(test_extras_file_paths):
 @pytest.fixture
 def test_film_paths():
     test_list = [
-        "C:/Atlantics (2019)/Atlantique.2019.mkv",
-        "C:/tick tick... BOOM! 2021 test.mkv",
-        "C:/Da.5.Bloods.2020.test.mkv",
-        "C:/Short term 12 2013/Short term 12 2013 film info.mkv",
-        "C:/X: First Class (2100)",
-        "C:/Nick Fury: Agent of S.H.I.E.L.D. (1998).mkv",
-        "C:/L.A. Confidential (1997) test.mkv",
-        "C:/A.I. Artificial Intelligence (2100)",
-        "C:/G.I. Jane (2100)",
-        "C:/E.T. the Extra-Terrestrial (2100)",
-        "C:/S.W.A.T. (2100)",
-        "C:/T.E.S. Test film (2010)",
-        "C:/T.E.S.T. Test film (2010)",
+        r"C:/Atlantics (2019)/Atlantique.2019.mkv",
+        r"C:/tick tick... BOOM! 2021 test.mkv",
+        r"C:/Da.5.Bloods.2020.test.mkv",
+        r"C:/Short term 12 2013/Short term 12 2013 film info.mkv",
+        r"C:/X: First Class (2100)",
+        r"C:/Nick Fury: Agent of S.H.I.E.L.D. (1998).mkv",
+        r"C:/L.A. Confidential (1997) test.mkv",
+        r"C:/A.I. Artificial Intelligence (2100)",
+        r"C:/G.I. Jane (2100)",
+        r"C:/E.T. the Extra-Terrestrial (2100)",
+        r"C:/S.W.A.T. (2100)",
+        r"C:/T.E.S. Test film (2010)",
+        r"C:/T.E.S.T. Test film (2010)",
     ]
     test_list = [Path(x) for x in test_list]
 
@@ -148,8 +148,8 @@ def test_get_formatted_titles_from_film_paths(test_film_paths):
 def test_create_film_list_dataframe():
     fp = FilmProcessor("test", "test")
     test_film_paths = [
-        Path("C:\X: First Class (2100)"),
-        Path("C:\Short term 12 2013\Short term 12 2013 film info.mkv"),
+        Path(r"C:\X: First Class (2100)"),
+        Path(r"C:\Short term 12 2013\Short term 12 2013 film info.mkv"),
     ]
     test_film_titles = ["X: First Class", "Short term 12"]
     test_film_sizes = [5.11, 2.14]
@@ -161,8 +161,8 @@ def test_create_film_list_dataframe():
     expected_df = pd.DataFrame(
         {
             "Full file path": [
-                "C:\Short term 12 2013\Short term 12 2013 film info.mkv",
-                "C:\X: First Class (2100)",
+                r"C:\Short term 12 2013\Short term 12 2013 film info.mkv",
+                r"C:\X: First Class (2100)",
             ],
             "Film size (GB)": [2.14, 5.11],
             "Parsed film title": ["Short term 12", "X: First Class"],
