@@ -52,7 +52,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 ## Future versions
 ### Version 4.3.2
-- [] https://github.com/pizzaolive/ant_upload_checker/issues/5 
+- [ ] https://github.com/pizzaolive/ant_upload_checker/issues/5 
 
 ## Future ideas
 * Add ability to exclude TV shows if some are found within directory
