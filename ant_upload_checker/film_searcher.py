@@ -66,6 +66,9 @@ class FilmSearcher:
         If film title contains and or &, replace with the oppposite
         and search for the new title on ANT. Else, return NOT FOUND.
         """
+        logging.info(
+            "Film contains 'and' or '&', re-searching to increase matching chance:"
+        )
         and_word_regex = r"(?i)\sand\s"
         and_symbol_regex = r"(?i)\s&\s"
 
@@ -75,6 +78,22 @@ class FilmSearcher:
             return self.replace_word_and_re_search(
                 film_title, and_symbol_regex, " and "
             )
+
+        return "NOT FOUND"
+
+    def search_for_film_if_contains_four_numbers(self, film_title):
+        """
+        If film title 4 numbers e.g. 1208 East of Bucharest,
+        add colon in middle, re-search title on ANT.
+        Else, return NOT FOUND.
+        """
+        numbers_regex = r"(?<=\b\d\d)(?=\d\d\b)"
+        if re.search(numbers_regex, film_title):
+            logging.info(
+                "Film contains 4 numbers. This sometimes indicates a time, so "
+                "re-searching to increasing matching chance:"
+            )
+            return self.replace_word_and_re_search(film_title, numbers_regex, ":")
 
         return "NOT FOUND"
 
@@ -111,7 +130,7 @@ class FilmSearcher:
             replacement,
             film_title,
         )
-        logging.info("Searching for %s as well, just in case...", cleaned_film_title)
+        logging.info("Searching for %s as well...", cleaned_film_title)
         film_check = self.search_for_film_title_on_ant(cleaned_film_title)
 
         return film_check

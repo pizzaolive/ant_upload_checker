@@ -11,7 +11,7 @@ venv\Scripts\Activate.ps1
 
 ### Install the requirements
 ```
-pip install -r dev_requirements\requirements.txt
+pip install -r dev_requirements\dev-requirements.txt
 ```
 
 ### Updating the packages used
