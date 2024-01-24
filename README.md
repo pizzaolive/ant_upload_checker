@@ -51,7 +51,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 
 ## Future versions
-### Version 4.3.2
+### Version 1.4.2
 - [ ] Fix for films that should contain "/" or ":" within times or dates in tiles https://github.com/pizzaolive/ant_upload_checker/issues/5 
 
 ## Future ideas
