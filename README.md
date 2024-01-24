@@ -1,6 +1,6 @@
 # ANT upload checker
 
-# What does this script do?
+## What does this script do?
 This script is intended to be used on a directory containing films. It scans for films, parses their film titles and checks whether each film already exists on ANT. The script outputs a csv file containing the film list along with info on whether it's been uploaded or not. The idea is to help find films in your library that could potentially be uploaded.
 
 Example CSV output:
@@ -11,7 +11,7 @@ Example CSV output:
 | C:\Movies\A made up film (2023)\A made up film (2023).mp4  | 5.14           | A made up film    | NOT FOUND       |
 
 
-## How does it work?
+## :grey_question: How does it work?
 
 The process searches through the given directory (or multiple directories), and finds all common video file formats (currently: mp4, avi, mkv, mpeg and m2ts). Using an existing package called [guessit](https://github.com/guessit-io/guessit) and some additional work, film titles are parsed from the file paths.
 
@@ -21,18 +21,18 @@ As of version 1.4, if an existing film_list.csv is found in the output location 
 
 This is a work in progress - please feel free to give helpful feedback and report bugs.
 
-## Known issues
+## :grey_exclamation: Known issues
 * Non-english films may not be found on ANT if their titles do not match
 * Films with ellipsis may not be found. Currently guessit automatically removes these e.g. Tick Tick... BOOM! -> Tick Tick Boom!
 * Films with alternate titles (Film X AKA Film Y) will not be found on ANT
 * Film titles that should contain symbols like "/" or ":" but don't in their file names aren't found on ANT
 
-## Prerequisites
+## :clipboard: Prerequisites
 * You must have Python v 3.8 or later installed: https://www.python.org/downloads/windows/
 * You must be a member of ANT
     * Please do not message me for an invite, or open issues requesting one, these will be ignored. ANT Staff is aware of and monitors this repo
 
-## Setting up the script
+## :page_with_curl: Setting up the script
 
 1. Git clone the respository, or download it as ZIP (click the green Code button -> Download ZIP) and extract it to wherever you like.
 2. Update the values in [parameters.py](ant_upload_checker\parameters.py). You can right click the file and open with Notepad to edit it.
@@ -40,7 +40,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
     * INPUT_FOLDERS: the parent directory or multiple different directories that contain your films.
     * OUTPUT_FOLDER: the directory in which the output csv file containing the list of films should go.
 
-## Running the script
+## :page_with_curl: Running the script
 1. Navigate into the root folder. You should be able to see the README and setup files.
 2. Open the terminal in the current folder. You can do this by clicking the directory bar at the top, typing in 'cmd', and pressing Enter.
 3. Type `pip install .` into the terminal and press Enter - this should automatically install the dependencies needed.
@@ -49,11 +49,12 @@ This is a work in progress - please feel free to give helpful feedback and repor
 5. Open the output csv file to see which films already exist on the tracker
 
 
-## Future versions
+## :rainbow: Future versions
 ### Version 1.4.2
 - [ ] Fix for films that should contain "/" or ":" within times or dates in tiles https://github.com/pizzaolive/ant_upload_checker/issues/5 
 
-## Future ideas
+
+## :bulb: Future ideas 
 * Add ability to exclude TV shows if some are found within directory
 * Use enquirer or GUI to select folder paths?
 * Automatic torrent creation?
