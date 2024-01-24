@@ -13,7 +13,7 @@ Example CSV output:
 
 ## How does it work?
 
-The process searches through the given directory (or multiple directories), and finds all common video file formats (currently: mp4, avi, mkv, mpeg and m2ts). Using an existing package called guessit and some additional work, film titles are parsed from the file paths.
+The process searches through the given directory (or multiple directories), and finds all common video file formats (currently: mp4, avi, mkv, mpeg and m2ts). Using an existing package called [guessit](https://github.com/guessit-io/guessit) and some additional work, film titles are parsed from the file paths.
 
 The script outputs a csv file containing a list of films it's found, with the link to the ANT torrent if it already exists, or "NOT FOUND" if not.
 
