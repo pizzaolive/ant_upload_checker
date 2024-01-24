@@ -13,7 +13,7 @@ Example CSV output:
 
 ## How does it work?
 
-This script is intended to be used on a directory containing films. It searches through the given directory and sub-directories, and finds them by searching for common video file formats (currently: mp4, avi, mkv, mpeg and m2ts). Using an existing package called guessit and some additional tweaks, film titles are parsed from the file paths.
+The process searches through the given directory (or multiple directories), and finds all common video file formats (currently: mp4, avi, mkv, mpeg and m2ts). Using an existing package called guessit and some additional work, film titles are parsed from the file paths.
 
 The script outputs a csv file containing a list of films it's found, with the link to the ANT torrent if it already exists, or "NOT FOUND" if not.
 
@@ -27,9 +27,8 @@ This is a work in progress - please feel free to give helpful feedback and repor
 * Films with alternate titles (Film X AKA Film Y) will not be found on ANT
 * Film titles that should contain symbols like "/" or ":" but don't in their file names aren't found on ANT
 
-
 ## Prerequisites
-* You must have Python installed: https://www.python.org/downloads/windows/
+* You must have Python v 3.8 or later installed: https://www.python.org/downloads/windows/
 * You must be a member of ANT
     * Please do not message me for an invite, or open issues requesting one, these will be ignored. ANT Staff is aware of and monitors this repo
 
