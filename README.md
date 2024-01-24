@@ -43,9 +43,9 @@ This is a work in progress - please feel free to give helpful feedback and repor
 ## Running the script
 1. Navigate into the root folder. You should be able to see the README and setup files.
 2. Open the terminal in the current folder. You can do this by clicking the directory bar at the top, typing in 'cmd', and pressing Enter.
-3. Type `pip install .` into the terminal and press Enter - this should use setup.py and install the packages required (pandas, requests, ratelimit, pytest).
+3. Type `pip install .` into the terminal and press Enter - this should automatically install the dependencies needed.
 4. Once the packages have finished installing, type `python -m ant_upload_checker.main` and press Enter.
-    * You should see some information being printed in the terminal, including a message once it's finished running.
+    * You should see information being printed in the terminal as the process runs
 5. Open the output csv file to see which films already exist on the tracker
 
 
