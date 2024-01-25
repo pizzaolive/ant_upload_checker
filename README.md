@@ -57,5 +57,5 @@ This is a work in progress - please feel free to give helpful feedback and repor
 ## :bulb: Future ideas 
 * Add ability to exclude TV shows if some are found within directory
 * Use enquirer or GUI to select folder paths?
-* Automatic torrent creation?
-* Look into auto-upload missing torrents?
+* Add (optional?) resolution dupe check
+
