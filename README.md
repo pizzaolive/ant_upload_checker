@@ -57,5 +57,5 @@ This is a work in progress - please feel free to give helpful feedback and repor
 ## :bulb: Future ideas 
 * Add ability to exclude TV shows if some are found within directory
 * Use enquirer or GUI to select folder paths?
-* Add (optional?) resolution dupe check
+* Add (optional?) resolution dupe check https://github.com/pizzaolive/ant_upload_checker/issues/16
 
