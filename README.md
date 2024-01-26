@@ -50,12 +50,16 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 
 ## :rainbow: Future versions
+### Version 1.4.3
+- [ ] Add (optional?) resolution dupe check https://github.com/pizzaolive/ant_upload_checker/issues/16
+
+
 ### Version 1.4.2
-- [ ] Fix for films that should contain "/" or ":" within times or dates in tiles https://github.com/pizzaolive/ant_upload_checker/issues/5 
+- [x] Fix for films that should contain "/" or ":" within times or dates in tiles https://github.com/pizzaolive/ant_upload_checker/issues/5 
 
 
 ## :bulb: Future ideas 
 * Add ability to exclude TV shows if some are found within directory
 * Use enquirer or GUI to select folder paths?
-* Add (optional?) resolution dupe check https://github.com/pizzaolive/ant_upload_checker/issues/16
+
 
