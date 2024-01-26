@@ -1,5 +1,5 @@
 Version 1.4.2 
-* Attempt fix for an issue where films with titles containing numbers (potential times or dates) wre not found. These are now re-searched if not found.
+* Attempt fix for an issue where films with titles containing numbers (potential times or dates) were not found. These are now re-searched if not found.
     * E.g. Fahrenheit 911 -> Fahrenheit 9/11. Test film 1008 -> Test film 10:08
 * Add error handling to API call
 * Add tests
