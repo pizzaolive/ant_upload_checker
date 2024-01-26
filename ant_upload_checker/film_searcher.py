@@ -50,50 +50,66 @@ class FilmSearcher:
         modified version of the film title if it meets certain conditions.
         """
         logging.info("Searching for %s...", film_title)
-        first_check = self.search_for_film_title_on_ant(film_title)
+        title_checks = [
+            (self.search_for_film_title_on_ant, ""),
+            (self.search_for_film_if_contains_and, ""),
+            (self.search_for_film_if_contains_potential_date_or_time, "time"),
+            (self.search_for_film_if_contains_potential_date_or_time, "date"),
+        ]
+        for search_function, optional_argument in title_checks:
+            if optional_argument:
+                search_result = search_function(film_title, optional_argument)
+            else:
+                search_result = search_function(film_title)
+            if search_result != "NOT FOUND":
+                return search_result
 
-        if first_check != "NOT FOUND":
-            return first_check
+        logging.info("--- Not found on ANT ---\n")
 
-        second_check = self.search_for_film_if_contains_and(film_title)
-        if second_check == "NOT FOUND":
-            logging.info("--- Not found on ANT ---\n")
-
-        return second_check
+        return search_result
 
     def search_for_film_if_contains_and(self, film_title):
         """
         If film title contains and or &, replace with the oppposite
         and search for the new title on ANT. Else, return NOT FOUND.
         """
-        logging.info(
-            "Film contains 'and' or '&', re-searching to increase matching chance:"
-        )
         and_word_regex = r"(?i)\sand\s"
         and_symbol_regex = r"(?i)\s&\s"
 
         if re.search(and_word_regex, film_title):
+            logging.info("Film contains 'and', substituing with '&' and re-searching")
             return self.replace_word_and_re_search(film_title, and_word_regex, " & ")
         elif re.search(and_symbol_regex, film_title):
+            logging.info("Film contains '&', substituing with 'and' and re-searching")
             return self.replace_word_and_re_search(
                 film_title, and_symbol_regex, " and "
             )
 
         return "NOT FOUND"
 
-    def search_for_film_if_contains_four_numbers(self, film_title):
+    def search_for_film_if_contains_potential_date_or_time(self, film_title, format):
         """
         If film title 4 numbers e.g. 1208 East of Bucharest,
         add colon in middle, re-search title on ANT.
         Else, return NOT FOUND.
         """
-        numbers_regex = r"(?<=\b\d\d)(?=\d\d\b)"
+        if format == "time":
+            numbers_regex = r"(?<=\b\d\d)(?=\d\d\b)"
+            replacement_value = ":"
+        elif format == "date":
+            numbers_regex = r"(?<=\b\d)(?=\d{1,2}\b)"
+            replacement_value = "/"
+        else:
+            raise ValueError("The format argument must be 'time' or 'date'")
+
         if re.search(numbers_regex, film_title):
             logging.info(
-                "Film contains 4 numbers. This sometimes indicates a time, so "
-                "re-searching to increasing matching chance:"
+                "Film title may contain a date or time without punctuation. "
+                "Re-searching with added punctuation just in case."
             )
-            return self.replace_word_and_re_search(film_title, numbers_regex, ":")
+            return self.replace_word_and_re_search(
+                film_title, numbers_regex, replacement_value
+            )
 
         return "NOT FOUND"
 

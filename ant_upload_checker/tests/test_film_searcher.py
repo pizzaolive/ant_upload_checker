@@ -141,24 +141,27 @@ films_four_numbers = {
 
 
 @pytest.mark.parametrize("test_film", films_four_numbers)
-def test_search_for_film_if_contains_four_numbers_true(
+def test_search_for_film_if_contains_potential_time_true(
     return_mock_search_for_film_on_ant_not_found, caplog, test_film
 ):
     caplog.set_level(logging.INFO)
     fs = FilmSearcher("test", "test_api_key")
 
-    actual_return = fs.search_for_film_if_contains_four_numbers(test_film)
+    actual_return = fs.search_for_film_if_contains_potential_date_or_time(
+        test_film, format="time"
+    )
 
     assert actual_return == "NOT FOUND"
     expected_log_info = films_four_numbers[test_film]
     assert expected_log_info in caplog.text
+    assert "Film title may contain a date or time" in caplog.text
 
 
 films_five_numbers = ["12345 test film", "Test film 12345", "Film 12345 test"]
 
 
 @pytest.mark.parametrize("test_film", films_five_numbers)
-def test_search_for_film_if_contains_four_numbers_false(
+def test_search_for_film_if_contains_potential_time_false(
     return_mock_search_for_film_on_ant_torrentid, caplog, test_film
 ):
     # Film search mock return is the torrentid. This should never be returned
@@ -167,7 +170,64 @@ def test_search_for_film_if_contains_four_numbers_false(
 
     fs = FilmSearcher("test", "test_api_key")
 
-    actual_return = fs.search_for_film_if_contains_four_numbers(test_film)
+    actual_return = fs.search_for_film_if_contains_potential_date_or_time(
+        test_film, format="time"
+    )
 
     assert actual_return == "NOT FOUND"
-    assert "Film contains 4 numbers" not in caplog.text
+    assert "Film title may contain a date or time" not in caplog.text
+
+
+films_with_dates_numbers = {
+    "77 One Day in London": "Searching for 7/7 One Day in London as well...",
+    "Test film 11": "Searching for Test film 1/1 as well...",
+    "Film 89 test": "Searching for Film 8/9 test as well...",
+    "911 film": "Searching for 9/11 film as well...",
+    "Fahrenheit 911": "Searching for Fahrenheit 9/11 as well...",
+    "Film 112 test": "Searching for Film 1/12 test as well...",
+}
+
+
+@pytest.mark.parametrize("test_film", films_with_dates_numbers)
+def test_search_for_film_if_contains_potential_date_true(
+    return_mock_search_for_film_on_ant_not_found, caplog, test_film
+):
+    caplog.set_level(logging.INFO)
+    fs = FilmSearcher("test", "test_api_key")
+
+    actual_return = fs.search_for_film_if_contains_potential_date_or_time(
+        test_film, format="date"
+    )
+
+    assert actual_return == "NOT FOUND"
+    expected_log_info = films_with_dates_numbers[test_film]
+    assert expected_log_info in caplog.text
+    assert "Film title may contain a date or time" in caplog.text
+
+
+films_with_numbers_not_dates = [
+    "7777 One Day in London",
+    "Test film 1112",
+    "Film 8910 test",
+    "9 film",
+    "Fahrenheit 91144",
+    "Film 112444 test",
+]
+
+
+@pytest.mark.parametrize("test_film", films_five_numbers)
+def test_search_for_film_if_contains_potential_date_false(
+    return_mock_search_for_film_on_ant_torrentid, caplog, test_film
+):
+    # Film search mock return is the torrentid. This should never be returned
+    # If the film does not contain 4 numbers, as the search is skipped.
+    caplog.set_level(logging.INFO)
+
+    fs = FilmSearcher("test", "test_api_key")
+
+    actual_return = fs.search_for_film_if_contains_potential_date_or_time(
+        test_film, format="date"
+    )
+
+    assert actual_return == "NOT FOUND"
+    assert "Film title may contain a date or time" not in caplog.text
