@@ -1,3 +1,10 @@
+Version 1.4.2 
+* Attempt fix for #5: films with titles containing numbers (potential times or dates) are now re-searched if not found.
+    * E.g. Fahrenheit 911 -> Fahrenheit 9/11. Test film 1008 -> Test film 10:08
+* Add error handling to API call
+* Add tests
+* Re-factor search for film func
+
 Version 1.4.1
 * Add ability to specify multiple input folders in parameters, so that several directories can be scanned for films at once
 
