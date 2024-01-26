@@ -161,19 +161,14 @@ class FilmProcessor:
         Add empty ANT check column before we attempt to combine an existing
         film list csv, in case one does not exist.
         """
-        films_df = (
-            pd.DataFrame(
-                {
-                    "Full file path": film_file_paths,
-                    "Film size (GB)": film_sizes,
-                    "Parsed film title": film_titles,
-                    "Already on ANT?": np.repeat(np.nan, len(film_file_paths)),
-                }
-            )
-            .astype(self.film_list_df_types)
-            .sort_values(by="Parsed film title")
-            .reset_index(drop=True)
-        )
+        films_df = pd.DataFrame(
+            {
+                "Full file path": film_file_paths,
+                "Film size (GB)": film_sizes,
+                "Parsed film title": film_titles,
+                "Already on ANT?": np.repeat(np.nan, len(film_file_paths)),
+            }
+        ).astype(self.film_list_df_types)
 
         return films_df
 
