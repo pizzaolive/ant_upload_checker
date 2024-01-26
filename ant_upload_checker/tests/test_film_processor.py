@@ -161,11 +161,12 @@ def test_create_film_list_dataframe():
     expected_df = pd.DataFrame(
         {
             "Full file path": [
-                r"C:\Short term 12 2013\Short term 12 2013 film info.mkv",
                 r"C:\X: First Class (2100)",
+                r"C:\Short term 12 2013\Short term 12 2013 film info.mkv",
+
             ],
-            "Film size (GB)": [2.14, 5.11],
-            "Parsed film title": ["Short term 12", "X: First Class"],
+            "Film size (GB)": [5.11,2.14],
+            "Parsed film title": ["X: First Class","Short term 12"],
             "Already on ANT?": [np.nan, np.nan],
         }
     )

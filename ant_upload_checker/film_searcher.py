@@ -3,14 +3,20 @@ import requests
 import logging
 from ratelimit import limits, sleep_and_retry
 from ant_upload_checker.parameters import API_KEY
-from ant_upload_checker.parameters import INPUT_FOLDERS
 import re
+from requests.adapters import HTTPAdapter, Retry
 
 
 class FilmSearcher:
     def __init__(self, film_list_df, api_key):
         self.film_list_df = film_list_df
         self.api_key = api_key
+        self.session = requests.Session()
+
+        retries = Retry(
+            total=3, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504]
+        )
+        self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
     def check_if_films_exist_on_ant(self):
         """
@@ -30,7 +36,11 @@ class FilmSearcher:
                 len(films_to_skip),
             )
 
-        films_to_process = self.film_list_df.drop(films_to_skip.index)
+        films_to_process = (
+            self.film_list_df.drop(films_to_skip.index)
+            .sort_values(by="Parsed film title")
+            .reset_index(drop=True)
+        )
         films_to_process["Already on ANT?"] = films_to_process[
             "Parsed film title"
         ].apply(self.check_if_film_exists_on_ant)
@@ -50,16 +60,23 @@ class FilmSearcher:
         modified version of the film title if it meets certain conditions.
         """
         logging.info("Searching for %s...", film_title)
-        first_check = self.search_for_film_title_on_ant(film_title)
+        title_checks = [
+            (self.search_for_film_title_on_ant, ""),
+            (self.search_for_film_if_contains_and, ""),
+            (self.search_for_film_if_contains_potential_date_or_time, "time"),
+            (self.search_for_film_if_contains_potential_date_or_time, "date"),
+        ]
+        for search_function, optional_argument in title_checks:
+            if optional_argument:
+                search_result = search_function(film_title, optional_argument)
+            else:
+                search_result = search_function(film_title)
+            if search_result != "NOT FOUND":
+                return search_result
 
-        if first_check != "NOT FOUND":
-            return first_check
+        logging.info("--- Not found on ANT ---\n")
 
-        second_check = self.search_for_film_if_contains_and(film_title)
-        if second_check == "NOT FOUND":
-            logging.info("--- Not found on ANT ---\n")
-
-        return second_check
+        return search_result
 
     def search_for_film_if_contains_and(self, film_title):
         """
@@ -70,10 +87,37 @@ class FilmSearcher:
         and_symbol_regex = r"(?i)\s&\s"
 
         if re.search(and_word_regex, film_title):
+            logging.info("-- Film contains 'and'.")
             return self.replace_word_and_re_search(film_title, and_word_regex, " & ")
         elif re.search(and_symbol_regex, film_title):
+            logging.info("-- Film contains '&'.")
             return self.replace_word_and_re_search(
                 film_title, and_symbol_regex, " and "
+            )
+
+        return "NOT FOUND"
+
+    def search_for_film_if_contains_potential_date_or_time(self, film_title, format):
+        """
+        If film title 4 numbers e.g. 1208 East of Bucharest,
+        add colon in middle, re-search title on ANT.
+        Else, return NOT FOUND.
+        """
+        if format == "time":
+            numbers_regex = r"(?<=\b\d\d)(?=\d\d\b)"
+            replacement_value = ":"
+        elif format == "date":
+            numbers_regex = r"(?<=\b\d)(?=\d{1,2}\b)"
+            replacement_value = "/"
+        else:
+            raise ValueError("The format argument must be 'time' or 'date'")
+
+        if re.search(numbers_regex, film_title):
+            logging.info(
+                "-- Film title may contain a date or time without punctuation."
+            )
+            return self.replace_word_and_re_search(
+                film_title, numbers_regex, replacement_value
             )
 
         return "NOT FOUND"
@@ -97,12 +141,30 @@ class FilmSearcher:
             "o": "json",
             "limit": 1,
         }
-        response = requests.get(url, payload).json()
 
-        if response["response"]["total"] == 0:
+        try:
+            response = self.session.get(url, params=payload)
+            response.raise_for_status()
+            response_json = response.json()
+        except requests.exceptions.HTTPError as err:
+            logging.error(
+                "Connection error: this could be caused by an incorrect API key\n"
+            )
+            raise SystemExit(err)
+        except requests.exceptions.ConnectionError as err:
+            logging.error("Connection error despite retries, exiting process\n")
+            raise SystemExit(err)
+        except requests.exceptions.Timeout as err:
+            logging.error("Timeout error despite retires, exiting process\n")
+            raise SystemExit(err)
+        except requests.exceptions.RequestException as err:
+            logging.error("The following error occured: %s", err)
+            raise SystemExit(err)
+
+        if response_json["response"]["total"] == 0:
             return "NOT FOUND"
         else:
-            torrent_link = response["item"][0]["guid"]
+            torrent_link = response_json["item"][0]["guid"]
             return torrent_link
 
     def replace_word_and_re_search(self, film_title, regex_pattern, replacement):
@@ -111,7 +173,7 @@ class FilmSearcher:
             replacement,
             film_title,
         )
-        logging.info("Searching for %s as well, just in case...", cleaned_film_title)
+        logging.info("-- Searching for %s as well...", cleaned_film_title)
         film_check = self.search_for_film_title_on_ant(cleaned_film_title)
 
         return film_check
