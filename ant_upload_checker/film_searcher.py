@@ -26,9 +26,11 @@ class FilmSearcher:
         search for these on ANT, indicating whether they exist on ANT or not.
         """
         films_to_skip = self.film_list_df.loc[
-            self.film_list_df["Already on ANT?"]
-            .astype(str)
-            .str.contains("torrentid", na=False)
+            ~(
+                self.film_list_df["Already on ANT?"]
+                .astype(str)
+                .str.contains(r"(?i)NOT FOUND|nan", regex=True)
+            )
         ]
         if not films_to_skip.empty:
             logging.info(
@@ -41,17 +43,45 @@ class FilmSearcher:
             .sort_values(by="Parsed film title")
             .reset_index(drop=True)
         )
-        films_to_process["Already on ANT?"] = films_to_process[
-            "Parsed film title"
-        ].apply(self.check_if_film_exists_on_ant)
+        films_to_process["API response"] = films_to_process["Parsed film title"].apply(
+            self.check_if_film_exists_on_ant
+        )
+
+        processed_films = self.process_api_responses(films_to_process).drop(
+            "API response", axis=1
+        )
 
         films_checked_on_ant = (
-            pd.concat([films_to_skip, films_to_process])
+            pd.concat([films_to_skip, processed_films])
             .sort_values(by="Parsed film title")
             .reset_index(drop=True)
         )
 
         return films_checked_on_ant
+
+    def process_api_responses(self, films_to_process_with_api_responses):
+        processed_films = films_to_process_with_api_responses.copy()
+        processed_films["Already on ANT?"] = processed_films.apply(
+            lambda x: self.check_if_resolution_exists_on_ant(
+                x["Resolution"], x["API response"]
+            ),
+            axis=1,
+        )
+
+        return processed_films
+
+    def check_if_resolution_exists_on_ant(self, film_resolution, api_response):
+        if api_response == "NOT FOUND":
+            return api_response
+
+        if film_resolution == "":
+            return "On ANT, but could not get resolution from file name"
+
+        for match in api_response:
+            if match["resolution"] == film_resolution:
+                return f"Resolution already uploaded: {match['guid']}"
+
+        return f"On ANT, but this resolution is missing from ANT"
 
     def check_if_film_exists_on_ant(self, film_title):
         """
@@ -164,7 +194,6 @@ class FilmSearcher:
             return "NOT FOUND"
         else:
             return response_json["item"]
-            # return torrent id and resolution?
 
     def replace_word_and_re_search(self, film_title, regex_pattern, replacement):
         cleaned_film_title = re.sub(

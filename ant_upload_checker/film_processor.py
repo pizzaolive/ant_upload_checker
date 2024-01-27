@@ -16,7 +16,7 @@ class FilmProcessor:
             "Full file path": str,
             "Film size (GB)": float,
             "Parsed film title": str,
-            "Film resolution": str,
+            "Resolution": str,
         }
 
     def get_filtered_film_file_paths(self):
@@ -47,11 +47,20 @@ class FilmProcessor:
                 "and dropping duplicate film titles..."
             )
 
-            # If keeping first, then won't have resolution
-            # If keeping last, won't have Already on ANT filled
+            if "Resolution" not in existing_film_list_df.columns:
+                logging.warning(
+                    "Warning: existing file was created using an old version of ANT upload checker.\n"
+                    "---- Any duplicates between your input folder and the existing file will be "
+                    "re-searched again, this time checking if the film's resolution "
+                    "is missing from ANT."
+                )
+                keep_method = "last"
+            else:
+                keep_method = "first"
+
             combined_film_list = (
                 pd.concat([existing_film_list_df, film_list_df])
-                .drop_duplicates(subset=["Parsed film title"], keep="first")
+                .drop_duplicates(subset=["Parsed film title"], keep=keep_method)
                 .reset_index(drop=True)
             )
 
@@ -62,9 +71,7 @@ class FilmProcessor:
         return film_list_df
 
     def stop_process_if_all_films_already_in_existing_csv(self, combined_film_list_df):
-        if all(
-            combined_film_list_df["Already on ANT?"].str.contains("torrentid", na=False)
-        ):
+        if all(combined_film_list_df["Already on ANT?"] != "NOT FOUND"):
             logging.info(
                 "All films have already been searched and found on ANT in the previous "
                 "output file.\n\nEnding the process early.\n\n----"
@@ -201,7 +208,7 @@ class FilmProcessor:
                 "Full file path": film_file_paths,
                 "Film size (GB)": film_sizes,
                 "Parsed film title": film_titles,
-                "Film resolution": film_resolutions,
+                "Resolution": film_resolutions,
                 "Already on ANT?": np.repeat(np.nan, len(film_file_paths)),
             }
         ).astype(self.film_list_df_types)
@@ -220,8 +227,11 @@ class FilmProcessor:
         logging.info("An existing output file '%s' was found.", output_file_path)
 
         existing_film_list = pd.read_csv(output_file_path)
+
         dtypes = {
-            k: v for k, v in self.film_list_df_types.items() if k in existing_film_list.columns
+            col_name: dtype
+            for col_name, dtype in self.film_list_df_types.items()
+            if col_name in existing_film_list.columns
         }
         existing_film_list = existing_film_list.astype(dtypes)
 
