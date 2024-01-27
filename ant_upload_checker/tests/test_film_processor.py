@@ -56,13 +56,13 @@ def test_film_paths():
     return test_list
 
 
-def test_get_film_title_from_path(test_film_paths):
+def test_get_film_title_from_guessed_film(test_film_paths):
     # Note the issues with some acronyms with guessit
     # Note path parent folder is taken e.g. Atlantics instead of Atlantique
     # Where the year is in brackets ()
     fp = FilmProcessor("test", "test")
 
-    actual_list = [fp.get_film_title_from_path(x) for x in test_film_paths]
+    actual_list = [fp.get_film_title_from_guessed_film(x) for x in test_film_paths]
     expected_list = [
         "Atlantics",
         "tick tick BOOM!",
@@ -122,9 +122,9 @@ def test_fix_title_if_contains_acronym():
     assert actual_list == expected_list
 
 
-def test_get_formatted_titles_from_film_paths(test_film_paths):
+def test_get_formatted_titles_from_guessed_films(test_film_paths):
     fp = FilmProcessor("test", "test")
-    actual_list = fp.get_formatted_titles_from_film_paths(test_film_paths)
+    actual_list = fp.get_formatted_titles_from_guessed_films(test_film_paths)
 
     expected_list = [
         "Atlantics",

@@ -139,7 +139,6 @@ class FilmSearcher:
             "q": film_title,
             "t": "movie",
             "o": "json",
-            "limit": 1,
         }
 
         try:
@@ -164,8 +163,8 @@ class FilmSearcher:
         if response_json["response"]["total"] == 0:
             return "NOT FOUND"
         else:
-            torrent_link = response_json["item"][0]["guid"]
-            return torrent_link
+            return response_json["item"]
+            # return torrent id and resolution?
 
     def replace_word_and_re_search(self, film_title, regex_pattern, replacement):
         cleaned_film_title = re.sub(

@@ -16,6 +16,7 @@ class FilmProcessor:
             "Full file path": str,
             "Film size (GB)": float,
             "Parsed film title": str,
+            "Film resolution": str,
         }
 
     def get_filtered_film_file_paths(self):
@@ -26,10 +27,13 @@ class FilmProcessor:
 
     def get_film_info_from_file_paths(self, film_file_paths):
         film_sizes = self.get_film_sizes_from_film_paths(film_file_paths)
-        film_titles = self.get_formatted_titles_from_film_paths(film_file_paths)
+
+        guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
+        film_titles = self.get_formatted_titles_from_guessed_films(guessed_films)
+        film_resolutions = self.get_film_resolutions_from_guessed_films(guessed_films)
 
         film_list_df = self.create_film_list_dataframe(
-            film_file_paths, film_sizes, film_titles
+            film_file_paths, film_sizes, film_titles, film_resolutions
         )
 
         return film_list_df
@@ -42,6 +46,9 @@ class FilmProcessor:
                 "Combining existing output file with current list of films "
                 "and dropping duplicate film titles..."
             )
+
+            # If keeping first, then won't have resolution
+            # If keeping last, won't have Already on ANT filled
             combined_film_list = (
                 pd.concat([existing_film_list_df, film_list_df])
                 .drop_duplicates(subset=["Parsed film title"], keep="first")
@@ -112,24 +119,50 @@ class FilmProcessor:
 
         return num_in_gb
 
-    def get_formatted_titles_from_film_paths(self, film_paths):
+    def get_guessit_info_from_film_paths(self, film_paths):
         """
-        Use guessit to get film titles, then fix titles missing
+        Use guessit package to extract film information
+        into ordered dictionary.
+        """
+        guessed_films = [guessit(path) for path in film_paths]
+
+        return guessed_films
+
+    def get_formatted_titles_from_guessed_films(self, guessed_films):
+        """
+        Get film titles from guessit objects, then fix titles missing
         full stops within acronyms
         """
-        titles = [self.get_film_title_from_path(path) for path in film_paths]
+        titles = [self.get_film_title_from_guessed_film(film) for film in guessed_films]
         cleaned_titles = [self.fix_title_if_contains_acronym(title) for title in titles]
 
         return cleaned_titles
 
-    def get_film_title_from_path(self, path):
+    def get_film_title_from_guessed_film(self, guessed_film):
         """
-        Use the guessit package to extract the film title from
-        a given file path
+        Extract the film title from a given film guessit object.
         """
-        film_title = guessit(path)["title"]
+        film_title = guessed_film["title"]
 
         return film_title
+
+    def get_film_resolution_from_guessed_film(self, guessed_film):
+        """
+        Extract the film resolution from a given film guessit object.
+        """
+        try:
+            film_resolution = guessed_film["screen_size"]
+        except:
+            film_resolution = ""
+
+        return film_resolution
+
+    def get_film_resolutions_from_guessed_films(self, guessed_films):
+        film_resolutions = [
+            self.get_film_resolution_from_guessed_film(film) for film in guessed_films
+        ]
+
+        return film_resolutions
 
     def fix_title_if_contains_acronym(self, film_title):
         """
@@ -154,7 +187,9 @@ class FilmProcessor:
 
         return acronym_at_end_of_title_suffixed_with_full_stop
 
-    def create_film_list_dataframe(self, film_file_paths, film_sizes, film_titles):
+    def create_film_list_dataframe(
+        self, film_file_paths, film_sizes, film_titles, film_resolutions
+    ):
         """
         Combine the full file paths and film titles into a
         pandas DataFrame.
@@ -166,6 +201,7 @@ class FilmProcessor:
                 "Full file path": film_file_paths,
                 "Film size (GB)": film_sizes,
                 "Parsed film title": film_titles,
+                "Film resolution": film_resolutions,
                 "Already on ANT?": np.repeat(np.nan, len(film_file_paths)),
             }
         ).astype(self.film_list_df_types)
@@ -182,8 +218,11 @@ class FilmProcessor:
             )
             return False
         logging.info("An existing output file '%s' was found.", output_file_path)
-        existing_film_list = pd.read_csv(output_file_path).astype(
-            self.film_list_df_types
-        )
+
+        existing_film_list = pd.read_csv(output_file_path)
+        dtypes = {
+            k: v for k, v in self.film_list_df_types.items() if k in existing_film_list.columns
+        }
+        existing_film_list = existing_film_list.astype(dtypes)
 
         return existing_film_list
