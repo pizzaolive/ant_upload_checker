@@ -26,11 +26,9 @@ class FilmSearcher:
         search for these on ANT, indicating whether they exist on ANT or not.
         """
         films_to_skip = self.film_list_df.loc[
-            ~(
-                self.film_list_df["Already on ANT?"]
-                .astype(str)
-                .str.contains(r"(?i)NOT FOUND|nan", regex=True)
-            )
+            self.film_list_df["Already on ANT?"]
+            .astype(str)
+            .str.contains("torrentid", regex=True)
         ]
         if not films_to_skip.empty:
             logging.info(
@@ -75,7 +73,10 @@ class FilmSearcher:
             return api_response
 
         if film_resolution == "":
-            return "On ANT, but could not get resolution from file name"
+            return (
+                "On ANT, but could not get resolution from file name: "
+                f"{api_response[0]['guid']}"
+            )
 
         for match in api_response:
             if match["resolution"] == film_resolution:
@@ -171,14 +172,23 @@ class FilmSearcher:
             "o": "json",
         }
 
+        response = self.session.get(url, params=payload)
         try:
-            response = self.session.get(url, params=payload)
             response.raise_for_status()
             response_json = response.json()
         except requests.exceptions.HTTPError as err:
             logging.error(
-                "Connection error: this could be caused by an incorrect API key\n"
+                "HTTP Error: %s",
+                err,
             )
+            if response.status_code == 429:
+                logging.error(
+                    "Try increasing the API search period limit to greater than 2"
+                )
+            elif response.status_code == 403:
+                logging.error(
+                    "Your API key may be invalid. Check the key in parameters.py"
+                )
             raise SystemExit(err)
         except requests.exceptions.ConnectionError as err:
             logging.error("Connection error despite retries, exiting process\n")
@@ -201,7 +211,7 @@ class FilmSearcher:
             replacement,
             film_title,
         )
-        logging.info("-- Searching for %s as well...", cleaned_film_title)
+        logging.info("-- Searching for %s as well...\n", cleaned_film_title)
         film_check = self.search_for_film_title_on_ant(cleaned_film_title)
 
         return film_check

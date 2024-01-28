@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 from ant_upload_checker.parameters import INPUT_FOLDERS
 import sys
+import shutil
 
 
 class FilmProcessor:
@@ -47,20 +48,9 @@ class FilmProcessor:
                 "and dropping duplicate film titles..."
             )
 
-            if "Resolution" not in existing_film_list_df.columns:
-                logging.warning(
-                    "Warning: existing file was created using an old version of ANT upload checker.\n"
-                    "---- Any duplicates between your input folder and the existing file will be "
-                    "re-searched again, this time checking if the film's resolution "
-                    "is missing from ANT."
-                )
-                keep_method = "last"
-            else:
-                keep_method = "first"
-
             combined_film_list = (
-                pd.concat([existing_film_list_df, film_list_df])
-                .drop_duplicates(subset=["Parsed film title"], keep=keep_method)
+                pd.concat([film_list_df, existing_film_list_df])
+                .drop_duplicates(subset=["Parsed film title"], keep="last")
                 .reset_index(drop=True)
             )
 
@@ -71,7 +61,7 @@ class FilmProcessor:
         return film_list_df
 
     def stop_process_if_all_films_already_in_existing_csv(self, combined_film_list_df):
-        if all(combined_film_list_df["Already on ANT?"] != "NOT FOUND"):
+        if all(combined_film_list_df["Already on ANT?"].str.contains("torrentid")):
             logging.info(
                 "All films have already been searched and found on ANT in the previous "
                 "output file.\n\nEnding the process early.\n\n----"
@@ -206,8 +196,8 @@ class FilmProcessor:
         films_df = pd.DataFrame(
             {
                 "Full file path": film_file_paths,
-                "Film size (GB)": film_sizes,
                 "Parsed film title": film_titles,
+                "Film size (GB)": film_sizes,
                 "Resolution": film_resolutions,
                 "Already on ANT?": np.repeat(np.nan, len(film_file_paths)),
             }
@@ -223,16 +213,27 @@ class FilmProcessor:
                 "from scratch...",
                 output_file_path,
             )
-            return False
-        logging.info("An existing output file '%s' was found.", output_file_path)
+            return None
 
+        logging.info("An existing output file '%s' was found.", output_file_path)
         existing_film_list = pd.read_csv(output_file_path)
 
-        dtypes = {
-            col_name: dtype
-            for col_name, dtype in self.film_list_df_types.items()
-            if col_name in existing_film_list.columns
-        }
-        existing_film_list = existing_film_list.astype(dtypes)
+        if "Resolution" not in existing_film_list.columns:
+            backup_path = Path(self.output_folder).joinpath(
+                "Film list old version backup.csv"
+            )
+            logging.warning(
+                "Warning: existing file was created using an old version of ANT upload checker.\n"
+                "-------- Existing file is being skipped as it doesn't contain resolution info.\n"
+                "-------- Creating a backup film list from the previous version (%s).\n"
+                "-------- This can be deleted if you don't need it.\n",
+                backup_path,
+            )
+
+            shutil.copy(output_file_path, backup_path)
+
+            return None
+
+        existing_film_list = existing_film_list.astype(self.film_list_df_types)
 
         return existing_film_list
