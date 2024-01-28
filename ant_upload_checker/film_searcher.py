@@ -28,7 +28,7 @@ class FilmSearcher:
         films_to_skip = self.film_list_df.loc[
             self.film_list_df["Already on ANT?"]
             .astype(str)
-            .str.contains("torrentid", na=False)
+            .str.contains("torrentid", regex=True)
         ]
         if not films_to_skip.empty:
             logging.info(
@@ -41,17 +41,48 @@ class FilmSearcher:
             .sort_values(by="Parsed film title")
             .reset_index(drop=True)
         )
-        films_to_process["Already on ANT?"] = films_to_process[
-            "Parsed film title"
-        ].apply(self.check_if_film_exists_on_ant)
+        films_to_process["API response"] = films_to_process["Parsed film title"].apply(
+            self.check_if_film_exists_on_ant
+        )
+
+        processed_films = self.process_api_responses(films_to_process).drop(
+            "API response", axis=1
+        )
 
         films_checked_on_ant = (
-            pd.concat([films_to_skip, films_to_process])
+            pd.concat([films_to_skip, processed_films])
             .sort_values(by="Parsed film title")
             .reset_index(drop=True)
         )
 
         return films_checked_on_ant
+
+    def process_api_responses(self, films_to_process_with_api_responses):
+        processed_films = films_to_process_with_api_responses.copy()
+        processed_films["Already on ANT?"] = processed_films.apply(
+            lambda x: self.check_if_resolution_exists_on_ant(
+                x["Resolution"], x["API response"]
+            ),
+            axis=1,
+        )
+
+        return processed_films
+
+    def check_if_resolution_exists_on_ant(self, film_resolution, api_response):
+        if api_response == "NOT FOUND":
+            return api_response
+
+        if film_resolution == "":
+            return (
+                "On ANT, but could not get resolution from file name: "
+                f"{api_response[0]['guid']}"
+            )
+
+        for match in api_response:
+            if match["resolution"] == film_resolution:
+                return f"Resolution already uploaded: {match['guid']}"
+
+        return f"On ANT, but this resolution is missing from ANT"
 
     def check_if_film_exists_on_ant(self, film_title):
         """
@@ -139,17 +170,25 @@ class FilmSearcher:
             "q": film_title,
             "t": "movie",
             "o": "json",
-            "limit": 1,
         }
 
+        response = self.session.get(url, params=payload)
         try:
-            response = self.session.get(url, params=payload)
             response.raise_for_status()
             response_json = response.json()
         except requests.exceptions.HTTPError as err:
             logging.error(
-                "Connection error: this could be caused by an incorrect API key\n"
+                "HTTP Error: %s",
+                err,
             )
+            if response.status_code == 429:
+                logging.error(
+                    "Try increasing the API search period limit to greater than 2"
+                )
+            elif response.status_code == 403:
+                logging.error(
+                    "Your API key may be invalid. Check the key in parameters.py"
+                )
             raise SystemExit(err)
         except requests.exceptions.ConnectionError as err:
             logging.error("Connection error despite retries, exiting process\n")
@@ -164,8 +203,7 @@ class FilmSearcher:
         if response_json["response"]["total"] == 0:
             return "NOT FOUND"
         else:
-            torrent_link = response_json["item"][0]["guid"]
-            return torrent_link
+            return response_json["item"]
 
     def replace_word_and_re_search(self, film_title, regex_pattern, replacement):
         cleaned_film_title = re.sub(
@@ -173,7 +211,7 @@ class FilmSearcher:
             replacement,
             film_title,
         )
-        logging.info("-- Searching for %s as well...", cleaned_film_title)
+        logging.info("-- Searching for %s as well...\n", cleaned_film_title)
         film_check = self.search_for_film_title_on_ant(cleaned_film_title)
 
         return film_check

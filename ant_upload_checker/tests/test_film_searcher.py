@@ -42,6 +42,7 @@ def test_check_if_films_exist_on_ant(
             ],
             "Film size (GB)": [1.11, 1.22, 1.33, 1.44],
             "Parsed film title": ["Test", "Another film", "test film", "New film"],
+            "Resolution": ["1080p", "1080p", "1080p", "1080p"],
             "Already on ANT?": ["link/torrentid=1", "NOT FOUND", np.nan, np.nan],
         }
     )
@@ -68,6 +69,7 @@ def test_check_if_films_exist_on_ant(
                 "Test",
                 "test film",
             ],
+            "Resolution": ["1080p", "1080p", "1080p", "1080p"],
             "Already on ANT?": [
                 "NOT FOUND",
                 "NOT FOUND",
