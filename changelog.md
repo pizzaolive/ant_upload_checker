@@ -1,3 +1,8 @@
+Version 1.4.3
+* Process now checks if a film's specific resolution is already uploaded to ANT as well. If the resolution is missing then it can likely be uploaded even if the film exists on ANT. If the resolution can't be extracted from the file name, then it will just check if it exists on ANT.
+* If a film_list.csv is found from previous versions, this won't be compatible with this new update, so if a file is found, this is backed up in case users want this to be kept.
+* Fixed error handling logging messages and added messages for specific status codes user might encounter.
+
 Version 1.4.2 
 * Attempt fix for an issue where films with titles containing numbers (potential times or dates) were not found. These are now re-searched if not found.
     * E.g. Fahrenheit 911 -> Fahrenheit 9/11. Test film 1008 -> Test film 10:08
