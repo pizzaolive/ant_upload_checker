@@ -51,7 +51,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 ## :rainbow: Future versions
 ### Version 1.4.3
-- [ ] Add (optional?) resolution dupe check https://github.com/pizzaolive/ant_upload_checker/issues/16
+- [ ] Add resolution dupe check https://github.com/pizzaolive/ant_upload_checker/issues/16. Process will check if the specific resolution of your films are on ANT already or not.
 
 
 ### Version 1.4.2
