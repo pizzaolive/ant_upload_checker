@@ -1,7 +1,7 @@
 # ANT upload checker
 
 ## What does this script do?
-This script is intended to be used on a directory containing films. It scans for films, parses their film titles and resolutions, and checks whether a given film and its resolution already exists on ANT. The script outputs a csv file containing the film list along with information on whether it's been uploaded or not. The idea is to help find films in your library that could potentially be uploaded.
+This script is intended to be used on a directory containing films. It scans for films, parses their title and resolution, and checks whether a given film and its resolution already exists on ANT. The script outputs a csv file containing the film list along with information on whether it's been uploaded or not. The idea is to help find films in your library that could potentially be uploaded.
 
 Example CSV output:
 
@@ -16,7 +16,7 @@ Example CSV output:
 
 ## :grey_question: How does it work?
 
-The process searches through the given directory (or multiple directories), and finds all common video file formats (currently: mp4, avi, mkv, mpeg and m2ts). Using an existing package called [guessit](https://github.com/guessit-io/guessit) and some additional processing, film titles and their resolutions are parsed from the file paths.
+The process searches through the given directory (or multiple directories), and finds all common video file formats (currently: mp4, avi, mkv, mpeg and m2ts). Using an existing package called [guessit](https://github.com/guessit-io/guessit) and some additional processing, film titles and their resolutions are parsed from the file paths. For each film, a get request is sent to ANT's API, to check whether it can be found already. For certain titles, if an initial match is not found, the title is tweaked and re-searched. For example, films containing "and" could be spelt with "and" or "&", so both titles are checked.
 
 The script outputs a csv file containing a list of films it's found and whether they've been found on ANT or not.
 
