@@ -51,7 +51,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 ## :rainbow: Future versions
 ### Version 1.4.3
-- [ ] Add (optional?) resolution dupe check https://github.com/pizzaolive/ant_upload_checker/issues/16
+- [ ] Add resolution dupe check https://github.com/pizzaolive/ant_upload_checker/issues/16. Process will check if the specific resolution of your films are on ANT already or not.
 
 
 ### Version 1.4.2
@@ -59,6 +59,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 
 ## :bulb: Future ideas 
+* Look into using tmdb or imdb to match films first, if that fails, rely on title
 * Add ability to exclude TV shows if some are found within directory
 * Use enquirer or GUI to select folder paths?
 
