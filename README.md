@@ -52,10 +52,13 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 
 ## :rainbow: Future versions
-### Version 1.4.4
-- [ ] Look into fix for films with alternate titles (x AKA y)
+### Version 1.4.5
+- [ ] Add check for parameters file, start to introduce enquirer e.g. clear existing film csv if exists, option to put in file paths, api key into terminal
 
 #### Recent versions
+#### Version 1.4.4
+- [x] Look into fix for films with alternate titles (x AKA y)
+
 ##### Version 1.4.3
 - [x] Add resolution dupe check https://github.com/pizzaolive/ant_upload_checker/issues/16. Process will check if the specific resolution of your films are on ANT already or not.
 
