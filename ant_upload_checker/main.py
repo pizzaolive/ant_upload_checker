@@ -20,7 +20,7 @@ def main():
 
     write_film_list_to_csv(films_checked_on_ant)
 
-    logging.info("Script has ended")
+    logging.info("\nScript has ended")
 
 
 if __name__ == "__main__":

@@ -233,3 +233,56 @@ def test_search_for_film_if_contains_potential_date_false(
 
     assert actual_return == "NOT FOUND"
     assert "Film title may contain a date or time" not in caplog.text
+
+
+films_with_alternate_titles = {
+    "Alphaville une etrange aventure de Lemmy Caution AKA Alphaville": (
+        "Alphaville une etrange aventure de Lemmy Caution",
+        "Alphaville",
+    ),
+    "Title 1 aka Title 2": ("Title 1", "Title 2"),
+}
+
+
+@pytest.mark.parametrize("test_film", films_with_alternate_titles)
+def test_search_for_film_if_contains_aka_true(
+    return_mock_search_for_film_on_ant_not_found, caplog, test_film
+):
+    caplog.set_level(logging.INFO)
+
+    fs = FilmSearcher("test", "test_api_key")
+    actual_return = fs.search_for_film_if_contains_aka(test_film)
+
+    assert actual_return == "NOT FOUND"
+    assert "Film title may contain an alternate title" in caplog.text
+    assert (
+        f"Searching for {films_with_alternate_titles[test_film][0]} as well"
+        in caplog.text
+    )
+    assert (
+        f"Searching for {films_with_alternate_titles[test_film][1]} as well"
+        in caplog.text
+    )
+
+
+films_with_no_alternate_title = [
+    "Aka Test film",
+    "Test film aka",
+    "Film with baka in it"
+]
+
+
+@pytest.mark.parametrize("test_film", films_with_no_alternate_title)
+def test_search_for_film_if_contains_aka_false(
+    return_mock_search_for_film_on_ant_not_found, caplog, test_film
+):
+    caplog.set_level(logging.INFO)
+
+    fs = FilmSearcher("test", "test_api_key")
+    actual_return = fs.search_for_film_if_contains_aka(test_film)
+
+    assert actual_return == "NOT FOUND"
+    assert "Film title may contain an alternate title" not in caplog.text
+    assert (
+        f"Searching for Test film as well" not in caplog.text
+    )
