@@ -1,3 +1,7 @@
+Version 1.4.4
+* Films with potential alternate titles (e.g. Film 1 AKA Film 2) are now split apart and re-searched if not initially found (closes Issue #4).
+* Tidier logging formatting.
+
 Version 1.4.3
 * Process now checks if a film's specific resolution is already uploaded to ANT as well. If the resolution is missing then it can likely be uploaded even if the film exists on ANT. If the resolution can't be extracted from the file name, then it will just check if it exists on ANT.
 * If a film_list.csv is found from previous versions, this won't be compatible with this new update, so if a file is found, this is backed up in case users want this to be kept.

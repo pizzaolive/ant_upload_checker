@@ -12,6 +12,7 @@ class FilmSearcher:
         self.film_list_df = film_list_df
         self.api_key = api_key
         self.session = requests.Session()
+        self.not_found_value = "NOT FOUND"
 
         retries = Retry(
             total=3, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504]
@@ -69,7 +70,7 @@ class FilmSearcher:
         return processed_films
 
     def check_if_resolution_exists_on_ant(self, film_resolution, api_response):
-        if api_response == "NOT FOUND":
+        if api_response == self.not_found_value:
             return api_response
 
         if film_resolution == "":
@@ -90,22 +91,23 @@ class FilmSearcher:
         If an initial match is not found, re-search for a
         modified version of the film title if it meets certain conditions.
         """
-        logging.info("Searching for %s...", film_title)
+        logging.info("\nSearching for %s...", film_title)
         title_checks = [
             (self.search_for_film_title_on_ant, ""),
             (self.search_for_film_if_contains_and, ""),
             (self.search_for_film_if_contains_potential_date_or_time, "time"),
             (self.search_for_film_if_contains_potential_date_or_time, "date"),
+            (self.search_for_film_if_contains_aka, ""),
         ]
         for search_function, optional_argument in title_checks:
             if optional_argument:
                 search_result = search_function(film_title, optional_argument)
             else:
                 search_result = search_function(film_title)
-            if search_result != "NOT FOUND":
+            if search_result != self.not_found_value:
                 return search_result
 
-        logging.info("--- Not found on ANT ---\n")
+        logging.info("--- Not found on ANT ---")
 
         return search_result
 
@@ -126,7 +128,7 @@ class FilmSearcher:
                 film_title, and_symbol_regex, " and "
             )
 
-        return "NOT FOUND"
+        return self.not_found_value
 
     def search_for_film_if_contains_potential_date_or_time(self, film_title, format):
         """
@@ -151,7 +153,23 @@ class FilmSearcher:
                 film_title, numbers_regex, replacement_value
             )
 
-        return "NOT FOUND"
+        return self.not_found_value
+
+    def search_for_film_if_contains_aka(self, film_title):
+        aka_regex = r"(?i)\saka\s"
+
+        if re.search(aka_regex, film_title):
+            logging.info("-- Film title may contain an alternate title")
+
+            split_titles = re.split(aka_regex, film_title)
+
+            for title in split_titles:
+                logging.info("-- Searching for %s as well...", title)
+                film_search = self.search_for_film_title_on_ant(title)
+                if film_search != self.not_found_value:
+                    return film_search
+
+        return self.not_found_value
 
     @sleep_and_retry
     @limits(calls=1, period=2)
@@ -201,7 +219,7 @@ class FilmSearcher:
             raise SystemExit(err)
 
         if response_json["response"]["total"] == 0:
-            return "NOT FOUND"
+            return self.not_found_value
         else:
             return response_json["item"]
 
@@ -211,7 +229,7 @@ class FilmSearcher:
             replacement,
             film_title,
         )
-        logging.info("-- Searching for %s as well...\n", cleaned_film_title)
+        logging.info("-- Searching for %s as well...", cleaned_film_title)
         film_check = self.search_for_film_title_on_ant(cleaned_film_title)
 
         return film_check
