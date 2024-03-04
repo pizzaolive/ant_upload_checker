@@ -1,3 +1,6 @@
+Versopn 1.4.5
+* Placeholder
+
 Version 1.4.4
 * Films with potential alternate titles (e.g. Film 1 AKA Film 2) are now split apart and re-searched if not initially found (closes Issue #4).
 * Tidier logging formatting.
