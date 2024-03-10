@@ -14,6 +14,8 @@ colorama==0.4.6
     # via pytest
 exceptiongroup==1.2.0
     # via pytest
+flatbencode==0.2.1
+    # via torf
 guessit==3.8.0
     # via ANT_upload_checker (pyproject.toml)
 idna==3.6
@@ -46,6 +48,8 @@ six==1.16.0
     # via python-dateutil
 tomli==2.0.1
     # via pytest
+torf==4.2.5
+    # via ANT_upload_checker (pyproject.toml)
 tzdata==2023.4
     # via pandas
 urllib3==2.1.0

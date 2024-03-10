@@ -10,6 +10,13 @@
             "request": "launch",
             "module": "ant_upload_checker.main",
             "justMyCode": true
+        },
+        {
+            "name": "torrent_creator",
+            "type": "python",
+            "request": "launch",
+            "module": "ant_upload_checker.torrent_creator",
+            "justMyCode": true
         }
     ]
 }

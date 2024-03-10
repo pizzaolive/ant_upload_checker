@@ -4,6 +4,7 @@ from ant_upload_checker.film_processor import FilmProcessor
 from ant_upload_checker.film_searcher import FilmSearcher
 from ant_upload_checker.output import write_film_list_to_csv
 from ant_upload_checker.parameters import INPUT_FOLDERS, API_KEY, OUTPUT_FOLDER
+from ant_upload_checker.film_uploader import FilmUploader
 
 
 def main():
@@ -17,6 +18,12 @@ def main():
 
     film_searcher = FilmSearcher(film_list_combined, API_KEY)
     films_checked_on_ant = film_searcher.check_if_films_exist_on_ant()
+
+    films_for_upload = films_checked_on_ant.loc[
+        ~films_checked_on_ant["Already on ANT?"].str.contains("torrentid")
+    ]
+    uploads = FilmUploader(films_for_upload, API_KEY)
+    uploads.create_all_torrent_files()
 
     write_film_list_to_csv(films_checked_on_ant)
 
