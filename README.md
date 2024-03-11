@@ -53,7 +53,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 ## :rainbow: Future versions
 ### Version 1.4.5
-- [ ] Add check for parameters file, start to introduce enquirer e.g. clear existing film csv if exists, option to put in file paths, api key into terminal
+- [ ] Add automatic torrent creator using Torf
 
 #### Recent versions
 #### Version 1.4.4
