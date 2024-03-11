@@ -87,10 +87,10 @@ def test_get_guessit_info_from_film_paths(test_film_paths):
     assert all([isinstance(x, expected_type) for x in actual_guessit_films])
 
 
-def test_get_film_title_from_guessed_film(test_guessit_films):
+def test_get_film_attribitue_from_guessed_film(test_guessit_films):
     fp = FilmProcessor("test", "test")
 
-    actual_list = [fp.get_film_title_from_guessed_film(x) for x in test_guessit_films]
+    actual_list = [fp.get_film_attribute_from_guessed_film(x,"title") for x in test_guessit_films]
     expected_list = [
         "Atlantics",
         "tick tick BOOM!",
@@ -204,9 +204,10 @@ def test_create_film_list_dataframe():
     test_film_titles = ["X: First Class", "Short term 12"]
     test_film_sizes = [5.11, 2.14]
     test_film_resolutions = ["1080p", "1080p"]
+    test_release_groups = ["",""]
 
     actual_df = fp.create_film_list_dataframe(
-        test_film_paths, test_film_sizes, test_film_titles, test_film_resolutions
+        test_film_paths, test_film_sizes, test_film_titles, test_film_resolutions,test_release_groups
     )
 
     expected_df = pd.DataFrame(
@@ -218,6 +219,7 @@ def test_create_film_list_dataframe():
             "Parsed film title": ["X: First Class", "Short term 12"],
             "Film size (GB)": [5.11, 2.14],
             "Resolution": ["1080p", "1080p"],
+            "Release group": ["",""],
             "Already on ANT?": [np.nan, np.nan],
         }
     )
@@ -274,6 +276,7 @@ def test_true_get_existing_film_list_if_exists(tmp_path, caplog):
             "Parsed film title": ["test", "test"],
             "Film size (GB)": [10.11, 5.22],
             "Resolution": ["1080p", "1080p"],
+            "Release group": ["test","test"],
             "Already on ANT?": ["test", "test"],
         }
     )
@@ -288,6 +291,7 @@ def test_true_get_existing_film_list_if_exists(tmp_path, caplog):
             "Parsed film title": ["test", "test"],
             "Film size (GB)": [10.11, 5.22],
             "Resolution": ["1080p", "1080p"],
+            "Release group": ["test","test"],
             "Already on ANT?": ["test", "test"],
         }
     )

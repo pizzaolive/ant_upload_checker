@@ -18,6 +18,7 @@ class FilmProcessor:
             "Film size (GB)": float,
             "Parsed film title": str,
             "Resolution": str,
+            "Release group": str,
         }
 
     def get_filtered_film_file_paths(self):
@@ -32,9 +33,14 @@ class FilmProcessor:
         guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
         film_titles = self.get_formatted_titles_from_guessed_films(guessed_films)
         film_resolutions = self.get_film_resolutions_from_guessed_films(guessed_films)
+        release_groups = self.get_release_groups_from_guessed_films(guessed_films)
 
         film_list_df = self.create_film_list_dataframe(
-            film_file_paths, film_sizes, film_titles, film_resolutions
+            film_file_paths,
+            film_sizes,
+            film_titles,
+            film_resolutions,
+            release_groups,
         )
 
         return film_list_df
@@ -130,36 +136,40 @@ class FilmProcessor:
         Get film titles from guessit objects, then fix titles missing
         full stops within acronyms
         """
-        titles = [self.get_film_title_from_guessed_film(film) for film in guessed_films]
+        titles = [
+            self.get_film_attribute_from_guessed_film(film, "title")
+            for film in guessed_films
+        ]
         cleaned_titles = [self.fix_title_if_contains_acronym(title) for title in titles]
 
         return cleaned_titles
 
-    def get_film_title_from_guessed_film(self, guessed_film):
+    def get_film_attribute_from_guessed_film(self, guessed_film, attribute):
         """
-        Extract the film title from a given film guessit object.
-        """
-        film_title = guessed_film["title"]
-
-        return film_title
-
-    def get_film_resolution_from_guessed_film(self, guessed_film):
-        """
-        Extract the film resolution from a given film guessit object.
+        Extract the given guessit attribute from a given guessit object.
         """
         try:
-            film_resolution = guessed_film["screen_size"]
+            film_attribute = guessed_film[attribute]
         except:
-            film_resolution = ""
+            film_attribute = ""
 
-        return film_resolution
+        return film_attribute
 
     def get_film_resolutions_from_guessed_films(self, guessed_films):
         film_resolutions = [
-            self.get_film_resolution_from_guessed_film(film) for film in guessed_films
+            self.get_film_attribute_from_guessed_film(film, "screen_size")
+            for film in guessed_films
         ]
 
         return film_resolutions
+
+    def get_release_groups_from_guessed_films(self, guessed_films):
+        release_groups = [
+            self.get_film_attribute_from_guessed_film(film, "release_group")
+            for film in guessed_films
+        ]
+
+        return release_groups
 
     def fix_title_if_contains_acronym(self, film_title):
         """
@@ -185,7 +195,12 @@ class FilmProcessor:
         return acronym_at_end_of_title_suffixed_with_full_stop
 
     def create_film_list_dataframe(
-        self, film_file_paths, film_sizes, film_titles, film_resolutions
+        self,
+        film_file_paths,
+        film_sizes,
+        film_titles,
+        film_resolutions,
+        film_release_groups,
     ):
         """
         Combine the full file paths and film titles into a
@@ -199,6 +214,7 @@ class FilmProcessor:
                 "Parsed film title": film_titles,
                 "Film size (GB)": film_sizes,
                 "Resolution": film_resolutions,
+                "Release group": film_release_groups,
                 "Already on ANT?": np.repeat(np.nan, len(film_file_paths)),
             }
         ).astype(self.film_list_df_types)
@@ -218,7 +234,11 @@ class FilmProcessor:
         logging.info("An existing output file '%s' was found.", output_file_path)
         existing_film_list = pd.read_csv(output_file_path)
 
-        if "Resolution" not in existing_film_list.columns:
+        existing_columns = existing_film_list.columns
+        if (
+            "Resolution" not in existing_columns
+            or "Release group" not in existing_columns
+        ):
             backup_path = Path(self.output_folder).joinpath(
                 "Film list old version backup.csv"
             )
