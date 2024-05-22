@@ -52,8 +52,11 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 
 ## :rainbow: Future versions
-### Version 1.4.5
+### Version 1.5
 - [ ] Add automatic torrent creator using Torf
+
+### Version 1.4.5
+- [ ] Add additional film info (codec, format e.g. remux, encode, Web-dl etc.)
 
 #### Recent versions
 #### Version 1.4.4
