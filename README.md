@@ -5,15 +5,11 @@ This script is intended to be used on a directory containing films. It scans for
 
 Example CSV output:
 
-| Full file path                                                  | Parsed film title | Film size (GB) | Resolution | Already on ANT?                                                     |
-|-----------------------------------------------------------------|-------------------|----------------|------------|---------------------------------------------------------------------|
-| C:\Movies\Asteroid City (2023)\Asteroid.City.2023.1080p.mkv     | Asteroid City     | 10.62          | 1080p      | Resolution already uploaded: (link to film)                         |
-| C:\Movies\Cold War (2018)\Cold.War.2018.mkv                     | Cold War          | 5.01           |            | On ANT, but could not get resolution from file name: (link to film) |
-| C:\Movies\A made up film (2023)\A made up film (2023) 2160p.mp4 | A made up film    | 5.14           | 2160p      | NOT FOUND                                                           |
-
-
-
-
+| Full file path                                                                                                                     | Parsed film title  | Film size (GB) | Resolution | Codec | Source  | Release group | Already on ANT?                   |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------- | ---------- | ----- | ------- | ------------- | --------------------------------- |
+| C:\Movies\25th Hour 2002 1080p BluRay DTS x264-GrapeHD.mkv                                                     | 25th Hour          | 18.9           | 1080p      | H.264 | Blu-ray | GrapeHD       | Resolution already uploaded: link |
+| C:\Movies\A Clockwork Orange (1971) [imdbid-tt0066921] - [Bluray-1080p][HDR10][Opus 1.0][x265]-ZQ.mkv | A Clockwork Orange | 23.21          | 1080p      | H.265 | Blu-ray | ZQ            | Resolution already uploaded: link |
+| C:\Movies\A Man Called Otto (2022) [imdbid-tt7405458] - [Bluray-1080p][EAC3 5.1][x264]-playHD.mkv      | A Man Called Otto  | 16.83          | 1080p      | H.264 | Blu-ray | playHD        | Resolution already uploaded: link |
 ## :grey_question: How does it work?
 
 The process searches through the given directory (or multiple directories), and finds all common video file formats (currently: mp4, avi, mkv, mpeg and m2ts). Using an existing package called [guessit](https://github.com/guessit-io/guessit) and some additional processing, film titles and their resolutions are parsed from the file paths. For each film, a get request is sent to ANT's API, to check whether it can be found already. For certain titles, if an initial match is not found, the title is tweaked and re-searched. For example, films containing "and" could be spelt with "and" or "&", so both titles are checked.
@@ -52,10 +48,17 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 
 ## :rainbow: Future versions
-### Version 1.4.5
+### Version 1.5
 - [ ] Add automatic torrent creator using Torf
 
+### Version 1.4.6
+- [ ] Update check on ANT to include extra info from 1.4.5 including codec and source
+
 #### Recent versions
+
+#### Version 1.4.5
+- [x] Add additional film info (codec and source), output directory is now automatically created if it does not exist
+
 #### Version 1.4.4
 - [x] Look into fix for films with alternate titles (x AKA y)
 

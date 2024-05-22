@@ -1,3 +1,8 @@
+Version 1.4.5
+* Add additional film info to output CSV (codec and source, release group)
+* If output directory doesn't exist, it is now automatically created
+* Minor code refactors
+
 Version 1.4.4
 * Films with potential alternate titles (e.g. Film 1 AKA Film 2) are now split apart and re-searched if not initially found (closes Issue #4).
 * Tidier logging formatting.
