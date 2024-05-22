@@ -54,10 +54,11 @@ This is a work in progress - please feel free to give helpful feedback and repor
 ### Version 1.4.6
 - [ ] Update check on ANT to include extra info from 1.4.5 including codec and source
 
-### Version 1.4.5
-- [x] Add additional film info (codec and source)
-
 #### Recent versions
+
+#### Version 1.4.5
+- [x] Add additional film info (codec and source), output directory is now automatically created if it does not exist
+
 #### Version 1.4.4
 - [x] Look into fix for films with alternate titles (x AKA y)
 
