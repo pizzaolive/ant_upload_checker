@@ -120,10 +120,10 @@ class FilmSearcher:
         and_symbol_regex = r"(?i)\s&\s"
 
         if re.search(and_word_regex, film_title):
-            logging.info("-- Film contains 'and'.")
+            logging.info("-- Film contains 'and'")
             return self.replace_word_and_re_search(film_title, and_word_regex, " & ")
         elif re.search(and_symbol_regex, film_title):
-            logging.info("-- Film contains '&'.")
+            logging.info("-- Film contains '&'")
             return self.replace_word_and_re_search(
                 film_title, and_symbol_regex, " and "
             )

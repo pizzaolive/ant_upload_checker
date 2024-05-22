@@ -15,10 +15,13 @@ class FilmProcessor:
         self.output_folder = output_folder
         self.film_list_df_types = {
             "Full file path": str,
-            "Film size (GB)": float,
             "Parsed film title": str,
+            "Film size (GB)": float,
             "Resolution": str,
+            "Codec": str,
+            "Source": str,
             "Release group": str,
+            "Already on ANT?": "string",
         }
 
     def get_filtered_film_file_paths(self):
@@ -31,8 +34,11 @@ class FilmProcessor:
         film_sizes = self.get_film_sizes_from_film_paths(film_file_paths)
 
         guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
+
         film_titles = self.get_formatted_titles_from_guessed_films(guessed_films)
         film_resolutions = self.get_film_resolutions_from_guessed_films(guessed_films)
+        film_codecs = self.get_codecs_from_guessed_films(guessed_films)
+        film_sources = self.get_source_from_guessed_films(guessed_films)
         release_groups = self.get_release_groups_from_guessed_films(guessed_films)
 
         film_list_df = self.create_film_list_dataframe(
@@ -40,6 +46,8 @@ class FilmProcessor:
             film_sizes,
             film_titles,
             film_resolutions,
+            film_codecs,
+            film_sources,
             release_groups,
         )
 
@@ -163,6 +171,26 @@ class FilmProcessor:
 
         return film_resolutions
 
+    def get_codecs_from_guessed_films(self, guessed_films):
+        film_codecs = [
+            self.get_film_attribute_from_guessed_film(film, "video_codec")
+            for film in guessed_films
+        ]
+
+        return film_codecs
+
+    def get_source_from_guessed_films(self, guessed_films):
+        film_sources = [
+            self.get_film_attribute_from_guessed_film(film, "source")
+            for film in guessed_films
+        ]
+
+        film_sources_cleaned = [
+            source.replace("Ultra HD Blu-ray", "Blu-ray") for source in film_sources
+        ]
+
+        return film_sources_cleaned
+
     def get_release_groups_from_guessed_films(self, guessed_films):
         release_groups = [
             self.get_film_attribute_from_guessed_film(film, "release_group")
@@ -200,6 +228,8 @@ class FilmProcessor:
         film_sizes,
         film_titles,
         film_resolutions,
+        film_codecs,
+        film_sources,
         film_release_groups,
     ):
         """
@@ -214,6 +244,8 @@ class FilmProcessor:
                 "Parsed film title": film_titles,
                 "Film size (GB)": film_sizes,
                 "Resolution": film_resolutions,
+                "Codec": film_codecs,
+                "Source": film_sources,
                 "Release group": film_release_groups,
                 "Already on ANT?": np.repeat(np.nan, len(film_file_paths)),
             }
@@ -234,17 +266,14 @@ class FilmProcessor:
         logging.info("An existing output file '%s' was found.", output_file_path)
         existing_film_list = pd.read_csv(output_file_path)
 
-        existing_columns = existing_film_list.columns
-        if (
-            "Resolution" not in existing_columns
-            or "Release group" not in existing_columns
-        ):
+        existing_columns = list(existing_film_list.columns)
+        if existing_columns != list(self.film_list_df_types.keys()):
             backup_path = Path(self.output_folder).joinpath(
                 "Film list old version backup.csv"
             )
             logging.warning(
                 "Warning: existing file was created using an old version of ANT upload checker.\n"
-                "-------- Existing file is being skipped as it doesn't contain resolution info.\n"
+                "-------- Existing file is being skipped as it doesn't contain all the required columns.\n"
                 "-------- Creating a backup film list from the previous version (%s).\n"
                 "-------- This can be deleted if you don't need it.\n",
                 backup_path,
