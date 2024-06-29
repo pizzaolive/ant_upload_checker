@@ -1,3 +1,7 @@
+Version 1.4.6
+* Attempt bug fix for [#21](https://github.com/pizzaolive/ant_upload_checker/issues/21)
+* [x] Fix parent directory displaying warning even if directory exists
+
 Version 1.4.5
 * Add additional film info to output CSV (codec and source, release group)
 * If output directory doesn't exist, it is now automatically created

@@ -49,12 +49,13 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 ## :rainbow: Future versions
 ### Version 1.5
-- [ ] Add automatic torrent creator using Torf
-
-### Version 1.4.6
-- [ ] Update check on ANT to include extra info from 1.4.5 including codec and source
+- [ ] Add automatic torrent creator using Torf?
 
 #### Recent versions
+
+#### Version 1.4.6
+- [x] Attempt bug fix for [#21](https://github.com/pizzaolive/ant_upload_checker/issues/21)
+- [x] Fix parent directory displaying warning even if directory exists
 
 #### Version 1.4.5
 - [x] Add additional film info (codec and source), output directory is now automatically created if it does not exist

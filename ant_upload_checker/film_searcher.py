@@ -74,10 +74,15 @@ class FilmSearcher:
             return api_response
 
         if film_resolution == "":
-            return (
-                "On ANT, but could not get resolution from file name: "
-                f"{api_response[0]['guid']}"
-            )
+            ant_url_suffix = "On ANT, but could not get resolution from file name: "
+            try:
+                ant_url_info = ant_url_suffix + f"{api_response[0]['guid']}"
+            except (IndexError, KeyError, TypeError) as e:
+                ant_url_info = (
+                    ant_url_suffix + "(Failed to extract URL from API response)"
+                )
+
+            return ant_url_info
 
         for match in api_response:
             if match["resolution"] == film_resolution:
