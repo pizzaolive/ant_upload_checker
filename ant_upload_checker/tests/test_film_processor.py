@@ -232,9 +232,20 @@ def test_create_film_list_dataframe():
             "Codec": ["", ""],
             "Source": ["Blu-ray", "Web"],
             "Release group": ["", ""],
-            "Already on ANT?": [pd.NA,pd.NA],
+            "Already on ANT?": [pd.NA, pd.NA],
         }
-    ).astype({"Already on ANT?": "string"})
+    ).astype(
+        {
+            "Full file path": "string",
+            "Parsed film title": "string",
+            "Film size (GB)": "float64",
+            "Resolution": "string",
+            "Codec": "string",
+            "Source": "string",
+            "Release group": "string",
+            "Already on ANT?": "string",
+        }
+    )
 
     pd.testing.assert_frame_equal(actual_df, expected_df)
 
@@ -310,6 +321,17 @@ def test_true_get_existing_film_list_if_exists(tmp_path, caplog):
             "Release group": ["test", "test"],
             "Already on ANT?": ["test", "test"],
         }
-    ).astype({"Already on ANT?":"string"})
+    ).astype(
+        {
+            "Full file path": "string",
+            "Parsed film title": "string",
+            "Film size (GB)": "float64",
+            "Resolution": "string",
+            "Codec": "string",
+            "Source": "string",
+            "Release group": "string",
+            "Already on ANT?": "string",
+        }
+    )
 
     pd.testing.assert_frame_equal(actual_return_value, expected_df)

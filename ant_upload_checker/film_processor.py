@@ -4,7 +4,6 @@ import logging
 from guessit import guessit
 from pathlib import Path
 import re
-from ant_upload_checker.parameters import INPUT_FOLDERS
 import sys
 import shutil
 
@@ -14,13 +13,13 @@ class FilmProcessor:
         self.input_folders = input_folders
         self.output_folder = output_folder
         self.film_list_df_types = {
-            "Full file path": str,
-            "Parsed film title": str,
-            "Film size (GB)": float,
-            "Resolution": str,
-            "Codec": str,
-            "Source": str,
-            "Release group": str,
+            "Full file path": "string",
+            "Parsed film title": "string",
+            "Film size (GB)": "float64",
+            "Resolution": "string",
+            "Codec": "string",
+            "Source": "string",
+            "Release group": "string",
             "Already on ANT?": "string",
         }
 
@@ -75,7 +74,9 @@ class FilmProcessor:
         return film_list_df
 
     def stop_process_if_all_films_already_in_existing_csv(self, combined_film_list_df):
-        if all(combined_film_list_df["Already on ANT?"].str.contains("torrentid")):
+        if all(
+            combined_film_list_df["Already on ANT?"].str.contains("torrentid", na=False)
+        ):
             logging.info(
                 "All films have already been searched and found on ANT in the previous "
                 "output file.\n\nEnding the process early.\n\n----"

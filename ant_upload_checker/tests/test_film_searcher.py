@@ -268,7 +268,7 @@ def test_search_for_film_if_contains_aka_true(
 films_with_no_alternate_title = [
     "Aka Test film",
     "Test film aka",
-    "Film with baka in it"
+    "Film with baka in it",
 ]
 
 
@@ -283,6 +283,28 @@ def test_search_for_film_if_contains_aka_false(
 
     assert actual_return == "NOT FOUND"
     assert "Film title may contain an alternate title" not in caplog.text
-    assert (
-        f"Searching for Test film as well" not in caplog.text
-    )
+    assert f"Searching for Test film as well" not in caplog.text
+
+
+test_resolution_values = [
+    ("", [{"guid": "test_link"}]),
+    ("", []),
+    ("1080p", "NOT FOUND"),
+]
+expected_resolution_values = [
+    "On ANT, but could not get resolution from file name: test_link",
+    "On ANT, but could not get resolution from file name: (Failed to extract URL from API response)",
+    "NOT FOUND",
+]
+
+
+@pytest.mark.parametrize(
+    ("test_input", "test_output"),
+    zip(test_resolution_values, expected_resolution_values),
+)
+def test_check_if_film_resolution_exists_on_ant(test_input, test_output):
+    fs = FilmSearcher("test", "test_api_key")
+
+    actual_return = fs.check_if_resolution_exists_on_ant(test_input[0], test_input[1])
+
+    assert actual_return == test_output
