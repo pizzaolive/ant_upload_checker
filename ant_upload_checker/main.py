@@ -11,7 +11,7 @@ def main():
     logging.info("Starting ANT upload checker...")
 
     films = FilmProcessor(INPUT_FOLDERS, OUTPUT_FOLDER)
-    film_file_paths = films.get_filtered_film_file_paths()
+    film_file_paths = films.get_film_file_paths()
     film_list_df = films.get_film_info_from_file_paths(film_file_paths)
     film_list_combined = films.combine_with_existing_film_csv(film_list_df)
 

@@ -9,6 +9,14 @@ from collections import OrderedDict
 LOGGER = logging.getLogger(__name__)
 
 
+# def test_get_film_file_paths(tmp_path):
+#     temp_directory = tmp_path / "test_directory/test.txt"
+#     temp_directory.parent.mkdir()
+
+#     expected_dir = tmp_path / "test_directory"
+#     assert expected_dir.is_dir()
+
+
 @pytest.fixture
 def test_extras_file_paths():
     test_paths = [

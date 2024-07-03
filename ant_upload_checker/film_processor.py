@@ -6,13 +6,15 @@ from pathlib import Path
 import re
 import sys
 import shutil
+from typing import List, Dict
 
 
 class FilmProcessor:
-    def __init__(self, input_folders, output_folder):
-        self.input_folders = input_folders
-        self.output_folder = output_folder
-        self.film_list_df_types = {
+    def __init__(self, input_folders: List[str], output_folder: str):
+        self.file_extensions: List[str] = ["mp4", "avi", "mkv", "mpeg", "m2ts"]
+        self.input_folders: List[str] = input_folders
+        self.output_folder: str = output_folder
+        self.film_list_df_types: Dict[str, str] = {
             "Full file path": "string",
             "Parsed film title": "string",
             "Film size (GB)": "float64",
@@ -23,11 +25,26 @@ class FilmProcessor:
             "Already on ANT?": "string",
         }
 
-    def get_filtered_film_file_paths(self):
-        film_paths = self.get_film_file_paths()
-        filtered_film_paths = self.remove_paths_containing_extras_folder(film_paths)
+    def get_film_file_paths(self) -> List[Path]:
+        """
+        Scan the input folder from parameters for the given file extensions,
+        adding any files to a list.
+        """
+        paths = []
+        for ext in self.file_extensions:
+            for folder in self.input_folders:
+                paths.extend(Path(folder).glob(f"**/*.{ext}"))
 
-        return filtered_film_paths
+        filtered_paths = self.remove_paths_containing_extras_folder(paths)
+
+        if not filtered_paths:
+            raise ValueError(
+                "No films were found, check the INPUT_FOLDERS value in parameters.py"
+            )
+
+        filtered_paths.sort()
+
+        return filtered_paths
 
     def get_film_info_from_file_paths(self, film_file_paths):
         film_sizes = self.get_film_sizes_from_film_paths(film_file_paths)
@@ -82,27 +99,6 @@ class FilmProcessor:
                 "output file.\n\nEnding the process early.\n\n----"
             )
             sys.exit(0)
-
-    def get_film_file_paths(self):
-        """
-        Scan the input folder from parameters for the given file extensions,
-        adding any files to a list.
-        """
-        file_extensions = ["mp4", "avi", "mkv", "mpeg", "m2ts"]
-
-        paths = []
-        for ext in file_extensions:
-            for folder in self.input_folders:
-                paths.extend(Path(folder).glob(f"**/*.{ext}"))
-
-        if not paths:
-            raise ValueError(
-                "No films were found, check the INPUT_FOLDERS value in parameters.py"
-            )
-
-        paths.sort()
-
-        return paths
 
     def remove_paths_containing_extras_folder(self, paths):
         """
