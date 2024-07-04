@@ -9,12 +9,21 @@ from collections import OrderedDict
 LOGGER = logging.getLogger(__name__)
 
 
-# def test_get_film_file_paths(tmp_path):
-#     temp_directory = tmp_path / "test_directory/test.txt"
-#     temp_directory.parent.mkdir()
+def test_get_film_file_paths(tmp_path):
+    temp_mp4_file = tmp_path / "test.mp4"
+    temp_mp4_file.write_text("Test")
 
-#     expected_dir = tmp_path / "test_directory"
-#     assert expected_dir.is_dir()
+    temp_extras_directory = tmp_path / "Extras"
+    temp_extras_directory.mkdir()
+    temp_mp4_file_to_be_removed = tmp_path / "Extras" / "test_2.mp4"
+    temp_mp4_file_to_be_removed.write_text("Test")
+
+    fp = FilmProcessor(input_folders=[tmp_path.parent], output_folder="")
+
+    actual_output = fp.get_film_file_paths()
+    expected_output = [temp_mp4_file]
+
+    assert actual_output == expected_output
 
 
 @pytest.fixture
