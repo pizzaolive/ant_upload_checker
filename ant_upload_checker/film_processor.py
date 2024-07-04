@@ -46,8 +46,10 @@ class FilmProcessor:
 
         return filtered_paths
 
-    def get_film_info_from_file_paths(self, film_file_paths):
-        film_sizes = self.get_film_sizes_from_film_paths(film_file_paths)
+    def get_film_info_from_file_paths(
+        self, film_file_paths: List[Path]
+    ) -> pd.DataFrame:
+        film_sizes = self.get_film_sizes_from_file_paths(film_file_paths)
 
         guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
 
@@ -69,7 +71,9 @@ class FilmProcessor:
 
         return film_list_df
 
-    def combine_with_existing_film_csv(self, film_list_df):
+    def combine_with_existing_film_csv(
+        self, film_list_df: pd.DataFrame
+    ) -> pd.DataFrame:
         existing_film_list_df = self.get_existing_film_list_if_exists()
 
         if isinstance(existing_film_list_df, pd.DataFrame):
@@ -90,7 +94,9 @@ class FilmProcessor:
 
         return film_list_df
 
-    def stop_process_if_all_films_already_in_existing_csv(self, combined_film_list_df):
+    def stop_process_if_all_films_already_in_existing_csv(
+        self, combined_film_list_df: pd.DataFrame
+    ) -> None:
         if all(
             combined_film_list_df["Already on ANT?"].str.contains("torrentid", na=False)
         ):
@@ -100,26 +106,28 @@ class FilmProcessor:
             )
             sys.exit(0)
 
-    def remove_paths_containing_extras_folder(self, paths):
+    def remove_paths_containing_extras_folder(
+        self, file_paths: List[Path]
+    ) -> List[Path]:
         """
-        Remove any file paths containing Extras as their parent folder.
+        Remove any file file paths containing Extras as their parent folder.
         """
-        cleaned_paths = [path for path in paths if path.parent.name != "Extras"]
+        cleaned_paths = [path for path in file_paths if path.parent.name != "Extras"]
 
         return cleaned_paths
 
-    def get_film_sizes_from_film_paths(self, film_paths):
-        film_sizes = [self.get_file_size_from_path(path) for path in film_paths]
+    def get_film_sizes_from_file_paths(self, file_paths: List[Path]) -> List[float]:
+        film_sizes = [self.get_file_size_from_path(path) for path in file_paths]
 
         return film_sizes
 
-    def get_file_size_from_path(self, path):
-        file_size_in_bytes = path.stat().st_size
+    def get_file_size_from_path(self, file_path: Path) -> float:
+        file_size_in_bytes = file_path.stat().st_size
         file_size = self.convert_bytes_to_gb(file_size_in_bytes)
 
         return file_size
 
-    def convert_bytes_to_gb(self, num_in_bytes):
+    def convert_bytes_to_gb(self, num_in_bytes: int) -> float:
         """
         Convert bytes to correct unit of measurement as a string
         """
@@ -127,12 +135,12 @@ class FilmProcessor:
 
         return num_in_gb
 
-    def get_guessit_info_from_film_paths(self, film_paths):
+    def get_guessit_info_from_film_paths(self, file_paths: List[Path]):
         """
         Use guessit package to extract film information
         into ordered dictionary.
         """
-        guessed_films = [guessit(path) for path in film_paths]
+        guessed_films = [guessit(path) for path in file_paths]
 
         return guessed_films
 
