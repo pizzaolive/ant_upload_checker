@@ -144,7 +144,7 @@ class FilmProcessor:
 
         return guessed_films
 
-    def get_formatted_titles_from_guessed_films(self, guessed_films):
+    def get_formatted_titles_from_guessed_films(self, guessed_films) -> List[str]:
         """
         Get film titles from guessit objects, then fix titles missing
         full stops within acronyms
@@ -204,7 +204,7 @@ class FilmProcessor:
 
         return release_groups
 
-    def fix_title_if_contains_acronym(self, film_title):
+    def fix_title_if_contains_acronym(self, film_title: str) -> str:
         """
         After guessit has extracted film title, fix instances where
         consecutive single letter words contain spaces instead of full stops.
