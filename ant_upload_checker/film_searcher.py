@@ -8,18 +8,18 @@ from requests.adapters import HTTPAdapter, Retry
 
 
 class FilmSearcher:
-    def __init__(self, film_list_df, api_key):
-        self.film_list_df = film_list_df
-        self.api_key = api_key
-        self.session = requests.Session()
-        self.not_found_value = "NOT FOUND"
+    def __init__(self, film_list_df: pd.DataFrame, api_key: str):
+        self.film_list_df: pd.DataFrame = film_list_df
+        self.api_key: str = api_key
+        self.session: requests.Session = requests.Session()
+        self.not_found_value: str = "NOT FOUND"
 
         retries = Retry(
             total=3, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504]
         )
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
-    def check_if_films_exist_on_ant(self):
+    def check_if_films_exist_on_ant(self) -> pd.DataFrame:
         """
         Given pandas DataFrame of film list, if list contains
         films that already contain a torrentid from previous output file,
@@ -58,7 +58,9 @@ class FilmSearcher:
 
         return films_checked_on_ant
 
-    def process_api_responses(self, films_to_process_with_api_responses):
+    def process_api_responses(
+        self, films_to_process_with_api_responses: pd.DataFrame
+    ) -> pd.DataFrame:
         processed_films = films_to_process_with_api_responses.copy()
         processed_films["Already on ANT?"] = processed_films.apply(
             lambda x: self.check_if_resolution_exists_on_ant(
@@ -69,7 +71,9 @@ class FilmSearcher:
 
         return processed_films
 
-    def check_if_resolution_exists_on_ant(self, film_resolution, api_response):
+    def check_if_resolution_exists_on_ant(
+        self, film_resolution: str, api_response
+    ) -> str:
         if api_response == self.not_found_value:
             return api_response
 
@@ -90,7 +94,7 @@ class FilmSearcher:
 
         return f"On ANT, but this resolution is missing from ANT"
 
-    def check_if_film_exists_on_ant(self, film_title):
+    def check_if_film_exists_on_ant(self, film_title: str):
         """
         Take a film title, and search for it using the ANT API.
         If an initial match is not found, re-search for a
