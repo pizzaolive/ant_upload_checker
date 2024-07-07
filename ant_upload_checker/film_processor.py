@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from rebulk.match import MatchesDict
 import logging
 from guessit import guessit
 from pathlib import Path
@@ -13,7 +14,7 @@ class FilmProcessor:
     def __init__(self, input_folders: List[str], output_folder: str):
         self.file_extensions: List[str] = ["mp4", "avi", "mkv", "mpeg", "m2ts"]
         self.input_folders: List[str] = input_folders
-        self.output_folder: str = output_folder
+        self.output_folder: Path = Path(output_folder)
         self.film_list_df_types: Dict[str, str] = {
             "Full file path": "string",
             "Parsed film title": "string",
@@ -24,6 +25,10 @@ class FilmProcessor:
             "Release group": "string",
             "Already on ANT?": "string",
         }
+        self.csv_file_path = self.output_folder / "Film list.csv"
+        self.backup_csv_file_path = (
+            self.output_folder / "Film list old version backup.csv"
+        )
 
     def get_film_file_paths(self) -> List[Path]:
         """
@@ -74,25 +79,47 @@ class FilmProcessor:
     def combine_with_existing_film_csv(
         self, film_list_df: pd.DataFrame
     ) -> pd.DataFrame:
-        existing_film_list_df = self.get_existing_film_list_if_exists()
+        should_read_csv = self.check_if_existing_film_csv_exists()
 
-        if isinstance(existing_film_list_df, pd.DataFrame):
-            logging.info(
-                "Combining existing output file with current list of films "
-                "and dropping duplicate film titles..."
+        if not should_read_csv:
+            return film_list_df
+
+        existing_film_list = pd.read_csv(self.csv_file_path)
+
+        should_combine_film_lists = self.check_if_existing_csv_is_compatible(
+            existing_film_list
+        )
+
+        if should_combine_film_lists:
+            combined_film_list = self.combine_current_film_list_with_existing_csv(
+                existing_film_list, film_list_df
             )
-
-            combined_film_list = (
-                pd.concat([film_list_df, existing_film_list_df])
-                .drop_duplicates(subset=["Parsed film title"], keep="last")
-                .reset_index(drop=True)
-            )
-
-            self.stop_process_if_all_films_already_in_existing_csv(combined_film_list)
 
             return combined_film_list
 
         return film_list_df
+
+    def combine_current_film_list_with_existing_csv(
+        self, existing_film_list: pd.DataFrame, current_film_list: pd.DataFrame
+    ) -> pd.DataFrame:
+
+        logging.info(
+            "Combining existing output file with current list of films "
+            "and dropping duplicate film titles..."
+        )
+        existing_film_list_formatted = existing_film_list.astype(
+            self.film_list_df_types
+        )
+
+        combined_film_list = (
+            pd.concat([current_film_list, existing_film_list_formatted])
+            .drop_duplicates(subset=["Parsed film title"], keep="last")
+            .reset_index(drop=True)
+        )
+
+        self.stop_process_if_all_films_already_in_existing_csv(combined_film_list)
+
+        return combined_film_list
 
     def stop_process_if_all_films_already_in_existing_csv(
         self, combined_film_list_df: pd.DataFrame
@@ -135,7 +162,9 @@ class FilmProcessor:
 
         return num_in_gb
 
-    def get_guessit_info_from_film_paths(self, file_paths: List[Path]):
+    def get_guessit_info_from_film_paths(
+        self, file_paths: List[Path]
+    ) -> List[MatchesDict]:
         """
         Use guessit package to extract film information
         into ordered dictionary.
@@ -144,7 +173,9 @@ class FilmProcessor:
 
         return guessed_films
 
-    def get_formatted_titles_from_guessed_films(self, guessed_films) -> List[str]:
+    def get_formatted_titles_from_guessed_films(
+        self, guessed_films: List[MatchesDict]
+    ) -> List[str]:
         """
         Get film titles from guessit objects, then fix titles missing
         full stops within acronyms
@@ -157,7 +188,9 @@ class FilmProcessor:
 
         return cleaned_titles
 
-    def get_film_attribute_from_guessed_film(self, guessed_film, attribute):
+    def get_film_attribute_from_guessed_film(
+        self, guessed_film: MatchesDict, attribute: str
+    ) -> str:
         """
         Extract the given guessit attribute from a given guessit object.
         """
@@ -168,7 +201,9 @@ class FilmProcessor:
 
         return film_attribute
 
-    def get_film_resolutions_from_guessed_films(self, guessed_films):
+    def get_film_resolutions_from_guessed_films(
+        self, guessed_films: List[MatchesDict]
+    ) -> List[str]:
         film_resolutions = [
             self.get_film_attribute_from_guessed_film(film, "screen_size")
             for film in guessed_films
@@ -176,7 +211,9 @@ class FilmProcessor:
 
         return film_resolutions
 
-    def get_codecs_from_guessed_films(self, guessed_films):
+    def get_codecs_from_guessed_films(
+        self, guessed_films: List[MatchesDict]
+    ) -> List[str]:
         film_codecs = [
             self.get_film_attribute_from_guessed_film(film, "video_codec")
             for film in guessed_films
@@ -184,7 +221,9 @@ class FilmProcessor:
 
         return film_codecs
 
-    def get_source_from_guessed_films(self, guessed_films):
+    def get_source_from_guessed_films(
+        self, guessed_films: List[MatchesDict]
+    ) -> List[str]:
         film_sources = [
             self.get_film_attribute_from_guessed_film(film, "source")
             for film in guessed_films
@@ -196,7 +235,9 @@ class FilmProcessor:
 
         return film_sources_cleaned
 
-    def get_release_groups_from_guessed_films(self, guessed_films):
+    def get_release_groups_from_guessed_films(
+        self, guessed_films: List[MatchesDict]
+    ) -> List[str]:
         release_groups = [
             self.get_film_attribute_from_guessed_film(film, "release_group")
             for film in guessed_films
@@ -229,14 +270,14 @@ class FilmProcessor:
 
     def create_film_list_dataframe(
         self,
-        film_file_paths,
-        film_sizes,
-        film_titles,
-        film_resolutions,
-        film_codecs,
-        film_sources,
-        film_release_groups,
-    ):
+        film_file_paths: List[Path],
+        film_sizes: List[float],
+        film_titles: List[str],
+        film_resolutions: List[str],
+        film_codecs: List[str],
+        film_sources: List[str],
+        film_release_groups: List[str],
+    ) -> pd.DataFrame:
         """
         Combine the full file paths and film titles into a
         pandas DataFrame.
@@ -252,42 +293,41 @@ class FilmProcessor:
                 "Codec": film_codecs,
                 "Source": film_sources,
                 "Release group": film_release_groups,
-                "Already on ANT?": np.repeat(np.nan, len(film_file_paths)),
+                "Already on ANT?": np.repeat(pd.NA, len(film_file_paths)),
             }
         ).astype(self.film_list_df_types)
 
         return films_df
 
-    def get_existing_film_list_if_exists(self):
-        output_file_path = Path(self.output_folder).joinpath("Film list.csv")
-        if not output_file_path.is_file():
+    def check_if_existing_film_csv_exists(self) -> bool:
+        if not self.csv_file_path.is_file():
             logging.info(
-                "An existing output file at %s was not found, processing films "
+                "An existing output file (%s) was not found, processing films "
                 "from scratch...",
-                output_file_path,
+                self.csv_file_path,
             )
-            return None
+            return False
 
-        logging.info("An existing output file '%s' was found.", output_file_path)
-        existing_film_list = pd.read_csv(output_file_path)
+        logging.info("An existing output file (%s) was found.", self.csv_file_path)
 
-        existing_columns = list(existing_film_list.columns)
+        return True
+
+    def check_if_existing_csv_is_compatible(
+        self, existing_film_df: pd.DataFrame
+    ) -> bool:
+        existing_columns = list(existing_film_df.columns)
+
         if existing_columns != list(self.film_list_df_types.keys()):
-            backup_path = Path(self.output_folder).joinpath(
-                "Film list old version backup.csv"
-            )
             logging.warning(
                 "Warning: existing file was created using an old version of ANT upload checker.\n"
                 "-------- Existing file is being skipped as it doesn't contain all the required columns.\n"
                 "-------- Creating a backup film list from the previous version (%s).\n"
                 "-------- This can be deleted if you don't need it.\n",
-                backup_path,
+                self.backup_csv_file_path,
             )
 
-            shutil.copy(output_file_path, backup_path)
+            shutil.copy(self.csv_file_path, self.backup_csv_file_path)
 
-            return None
+            return False
 
-        existing_film_list = existing_film_list.astype(self.film_list_df_types)
-
-        return existing_film_list
+        return True
