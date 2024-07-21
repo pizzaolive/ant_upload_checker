@@ -180,6 +180,8 @@ class FilmProcessor:
         """
         try:
             film_attribute = guessed_film[attribute]
+            if isinstance(film_attribute, list):
+                film_attribute = ", ".join(film_attribute)
         except:
             film_attribute = ""
 
@@ -208,7 +210,7 @@ class FilmProcessor:
         ]
 
         film_sources_cleaned = [
-            source.replace("Ultra HD Blu-ray", "Blu-ray") for source in film_sources
+            re.sub("Ultra HD Blu-ray", "Blu-ray", source) for source in film_sources
         ]
 
         return film_sources_cleaned

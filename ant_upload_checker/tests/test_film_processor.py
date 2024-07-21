@@ -60,19 +60,32 @@ def test_film_paths():
 @pytest.fixture
 def test_guessit_films():
     test_guessit_films = [
-        {"title": "Atlantics", "screen_size": "2160p"},
-        {"title": "tick tick BOOM!", "screen_size": "720p"},
-        {"title": "Da 5 Bloods", "screen_size": "1080p"},
-        {"title": "Short term 12", "screen_size": "1080p"},
-        {"title": "X: First Class", "screen_size": "1080p"},
-        {"title": "Nick Fury: Agent of S.H.I.E.L.D.", "screen_size": "1080p"},
-        {"title": "L A Confidential", "screen_size": "1080p"},
-        {"title": "A I Artificial Intelligence", "screen_size": "1080p"},
-        {"title": "G I Jane"},
-        {"title": "E T the Extra-Terrestrial", "screen_size": "1080p"},
-        {"title": "S.W.A.T.", "screen_size": "1080p"},
-        {"title": "T E S Test film", "screen_size": "1080p"},
-        {"title": "T E.S.T Test film", "screen_size": "1080p"},
+        {"title": "Atlantics", "screen_size": "2160p", "source": "Ultra HD Blu-ray"},
+        {"title": "tick tick BOOM!", "screen_size": "720p", "source": "DVD"},
+        {"title": "Da 5 Bloods", "screen_size": "1080p", "source": "Blu-ray"},
+        {"title": "Short term 12", "screen_size": "1080p", "source": "Blu-ray"},
+        {"title": "X: First Class", "screen_size": "1080p", "source": "Blu-ray"},
+        {
+            "title": "Nick Fury: Agent of S.H.I.E.L.D.",
+            "screen_size": "1080p",
+            "source": "Blu-ray",
+        },
+        {"title": "L A Confidential", "screen_size": "1080p", "source": "Blu-ray"},
+        {
+            "title": "A I Artificial Intelligence",
+            "screen_size": "1080p",
+            "source": "Blu-ray",
+        },
+        {"title": "G I Jane", "source": "Blu-ray"},
+        {
+            "title": "E T the Extra-Terrestrial",
+            "screen_size": "1080p",
+            "source": "Blu-ray",
+        },
+        {"title": "S.W.A.T.", "screen_size": "1080p", "source": "Blu-ray"},
+        {"title": "T E S Test film", "screen_size": "1080p", "source": "Blu-ray"},
+        {"title": "T E.S.T Test film", "screen_size": "1080p", "source": "Blu-ray"},
+        {"title": "Test film", "screen_size": "1080p", "source": ["Blu-ray", "DVD"]},
     ]
     ordered_dict_guessit_films = [OrderedDict(x) for x in test_guessit_films]
 
@@ -87,7 +100,7 @@ def test_get_guessit_info_from_film_paths(test_film_paths):
     assert all([isinstance(x, expected_type) for x in actual_guessit_films])
 
 
-def test_get_film_attribitue_from_guessed_film(test_guessit_films):
+def test_get_film_attribute_from_guessed_film(test_guessit_films):
     fp = FilmProcessor("test", "test")
 
     actual_list = [
@@ -107,6 +120,32 @@ def test_get_film_attribitue_from_guessed_film(test_guessit_films):
         "S.W.A.T.",
         "T E S Test film",
         "T E.S.T Test film",
+        "Test film",
+    ]
+
+    assert actual_list == expected_list
+
+
+def test_get_source_film_attribute_from_guessed_film(test_guessit_films):
+    fp = FilmProcessor("test", "test")
+
+    actual_list = fp.get_source_from_guessed_films(test_guessit_films)
+
+    expected_list = [
+        "Blu-ray",  # Ultra-HD blu ray gets converted into blu-ray
+        "DVD",
+        "Blu-ray",
+        "Blu-ray",
+        "Blu-ray",
+        "Blu-ray",
+        "Blu-ray",
+        "Blu-ray",
+        "Blu-ray",
+        "Blu-ray",
+        "Blu-ray",
+        "Blu-ray",
+        "Blu-ray",
+        "Blu-ray, DVD",  # list of sources gets put into string
     ]
 
     assert actual_list == expected_list
@@ -170,6 +209,7 @@ def test_get_formatted_titles_from_guessed_films(test_guessit_films):
         "S.W.A.T.",
         "T.E.S. Test film",
         "T.E.S.T. Test film",
+        "Test film",
     ]
 
     assert actual_list == expected_list
@@ -188,6 +228,7 @@ def test_get_film_resolutions_from_guessed_film(test_guessit_films):
         "1080p",
         "1080p",
         "",  # File name for G.I. Jane has no resolution - expect ""
+        "1080p",
         "1080p",
         "1080p",
         "1080p",
