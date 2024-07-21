@@ -41,15 +41,16 @@ class FilmProcessor:
                 paths.extend(Path(folder).glob(f"**/*.{ext}"))
 
         filtered_paths = self.remove_paths_containing_extras_folder(paths)
+        cleaned_paths = self.remove_paths_if_unopenable(filtered_paths)
 
-        if not filtered_paths:
+        if not cleaned_paths:
             raise ValueError(
                 "No films were found, check the INPUT_FOLDERS value in parameters.py"
             )
 
-        filtered_paths.sort()
+        cleaned_paths.sort()
 
-        return filtered_paths
+        return cleaned_paths
 
     def get_film_info_from_file_paths(
         self, film_file_paths: List[Path]
@@ -145,6 +146,29 @@ class FilmProcessor:
 
     def get_film_sizes_from_file_paths(self, file_paths: List[Path]) -> List[float]:
         film_sizes = [self.get_file_size_from_path(path) for path in file_paths]
+
+    def remove_paths_if_unopenable(self, paths):
+        """
+        If file does not exist or is not openable, remove from paths.
+        Warn user if path exceeds 260 characters.
+        """
+        cleaned_paths = []
+        for path in paths:
+            if not path.is_file():
+                file_name = path.stem
+                warning_message = (
+                    f"{file_name} could not be opened or does not exist, skipping."
+                )
+                if len(str(path)) < 260:
+                    warning_message += " This may be caused by a file path exceeding 260 characters. Try shortening the folder or file name."
+                logging.warning(warning_message)
+            else:
+                cleaned_paths.append(path)
+
+        return cleaned_paths
+
+    def get_film_sizes_from_film_paths(self, film_paths):
+        film_sizes = [self.get_file_size_from_path(path) for path in film_paths]
 
         return film_sizes
 

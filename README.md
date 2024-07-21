@@ -48,13 +48,18 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 
 ## :rainbow: Future versions
-### Version 1.5
-- [ ] Add automatic torrent creator using Torf?
+#### Version 1.4.8
+- [ ] Add GUI for user to input API key and folder paths on initial setup
+- [ ] Code refactor including adding type hints
+- [ ] Enhance film check to include other attributes (codec, source info etc.)
 
 #### Recent versions
 
+#### Version 1.4.7
+- [x] Attempt bug fix for [#24](https://github.com/pizzaolive/ant_upload_checker/issues/24)
+
 #### Version 1.4.6
-- [x] Attempt bug fix for [#21](https://github.com/pizzaolive/ant_upload_checker/issues/21)
+- [x] Bug fix for [#21](https://github.com/pizzaolive/ant_upload_checker/issues/21)
 - [x] Fix parent directory displaying warning even if directory exists
 
 #### Version 1.4.5
