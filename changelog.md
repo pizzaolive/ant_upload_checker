@@ -1,6 +1,10 @@
+#### Version 1.4.7
+* Attempt bug fix for [#24](https://github.com/pizzaolive/ant_upload_checker/issues/24)
+* Add additional skip if film Path.is_file() returns False to prevent future crashes due to unknown errors
+
 Version 1.4.6
 * Attempt bug fix for [#21](https://github.com/pizzaolive/ant_upload_checker/issues/21)
-* [x] Fix parent directory displaying warning even if directory exists
+* Fix parent directory displaying warning even if directory exists
 
 Version 1.4.5
 * Add additional film info to output CSV (codec and source, release group)
