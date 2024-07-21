@@ -125,7 +125,7 @@ class FilmProcessor:
                 warning_message = (
                     f"{file_name} could not be opened or does not exist, skipping."
                 )
-                if len(str(path)) < 260:
+                if len(str(path)) > 260:
                     warning_message += " This may be caused by a file path exceeding 260 characters. Try shortening the folder or file name."
                 logging.warning(warning_message)
             else:
