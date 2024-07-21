@@ -159,7 +159,7 @@ class FilmProcessor:
                 warning_message = (
                     f"{file_name} could not be opened or does not exist, skipping."
                 )
-                if len(str(path)) < 260:
+                if len(str(path)) > 260:
                     warning_message += " This may be caused by a file path exceeding 260 characters. Try shortening the folder or file name."
                 logging.warning(warning_message)
             else:
@@ -220,6 +220,8 @@ class FilmProcessor:
         """
         try:
             film_attribute = guessed_film[attribute]
+            if isinstance(film_attribute, list):
+                film_attribute = ", ".join(film_attribute)
         except:
             film_attribute = ""
 
@@ -254,7 +256,7 @@ class FilmProcessor:
         ]
 
         film_sources_cleaned = [
-            source.replace("Ultra HD Blu-ray", "Blu-ray") for source in film_sources
+            re.sub("Ultra HD Blu-ray", "Blu-ray", source) for source in film_sources
         ]
 
         return film_sources_cleaned
