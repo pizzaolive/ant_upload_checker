@@ -1,10 +1,13 @@
 import logging
+import os
 import inquirer
 from pathlib import Path
-from dotenv import set_key
+from dotenv import set_key, load_dotenv
 import tkinter
 import tkfilebrowser
 from typing import List, Tuple
+
+ENV_FILE_PATH = Path(".env").resolve()
 
 
 def setup_logging():
@@ -28,9 +31,8 @@ def check_if_user_wants_to_override_env_file():
 
 
 def get_user_information() -> List[str]:
-    env_file_path = Path(".env")
-    if not env_file_path.is_file() or check_if_user_wants_to_override_env_file():
-        get_user_input_api_key()
+    if not ENV_FILE_PATH.is_file() or check_if_user_wants_to_override_env_file():
+        get_user_input_api_key(ENV_FILE_PATH)
 
     get_input_folders()
 
@@ -38,13 +40,21 @@ def get_user_information() -> List[str]:
 def get_input_folders() -> Tuple[str]:
     root = tkinter.Tk()
     root.withdraw()
-    logging.info("Please select the directory containing your films in the dialog box")
+    logging.info(
+        "In the dialog box, please select one or more directories containing your films"
+    )
     directories = tkfilebrowser.askopendirnames(
-        title="Please select where your films are stored"
+        title="Select one or more directories containing your films"
     )
     root.destroy()
 
-    return directories
+    directories_str = ",".join(directories)
+
+    set_key(
+        dotenv_path=ENV_FILE_PATH,
+        key_to_set="INPUT_FOLDERS",
+        value_to_set=directories_str,
+    )
 
 
 def get_user_input_api_key() -> List[str]:
@@ -56,10 +66,20 @@ def get_user_input_api_key() -> List[str]:
 
 
 def save_user_info_to_dot_env(user_info: List[str]) -> None:
-    env_file_path = Path(".env").resolve()
-    env_file_path.touch()
+    ENV_FILE_PATH.touch()
     set_key(
-        dotenv_path=env_file_path,
+        dotenv_path=ENV_FILE_PATH,
         key_to_set="API_KEY",
         value_to_set=user_info["api_key"],
     )
+
+
+def load_existing_env_file():
+    load_dotenv(ENV_FILE_PATH)
+
+    api_key = os.getenv("API_KEY")
+
+    input_folders = os.getenv("INPUT_FOLDERS").split(",")
+    input_folders = [Path(folder) for folder in input_folders]
+
+    return api_key, input_folders

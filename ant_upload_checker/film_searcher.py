@@ -2,7 +2,6 @@ import pandas as pd
 import requests
 import logging
 from ratelimit import limits, sleep_and_retry
-from ant_upload_checker.parameters import API_KEY
 import re
 from requests.adapters import HTTPAdapter, Retry
 
@@ -189,11 +188,13 @@ class FilmSearcher:
         """
         url = "https://anthelion.me/api.php"
 
-        if API_KEY == "":
-            raise ValueError("The API_KEY must be set in parameters.py")
+        if self.api_key == "":
+            raise ValueError(
+                "The API key entered is blank, please re-run and enter a valid API key"
+            )
 
         payload = {
-            "api_key": API_KEY,
+            "api_key": self.api_key,
             "q": film_title,
             "t": "movie",
             "o": "json",
