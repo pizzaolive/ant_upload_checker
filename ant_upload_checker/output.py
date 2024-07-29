@@ -1,11 +1,11 @@
-from ant_upload_checker.parameters import OUTPUT_FOLDER
 from pathlib import Path
 import logging
+import pandas as pd
 
 
-def write_film_list_to_csv(output_df):
+def write_film_list_to_csv(output_df: pd.DataFrame, output_folder: Path) -> None:
     if not output_df.empty:
-        output_file_path = Path(OUTPUT_FOLDER).joinpath("Film list.csv")
+        output_file_path = Path(output_folder).joinpath("Film list.csv")
 
         parent_directory = output_file_path.parents[0]
         if not parent_directory.is_dir():
