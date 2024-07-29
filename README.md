@@ -48,12 +48,14 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 
 ## :rainbow: Future versions
-#### Version 1.4.8
-- [ ] Add GUI for user to input API key and folder paths on initial setup
-- [ ] Code refactor including adding type hints
+#### Version 1.4.9
 - [ ] Enhance film check to include other attributes (codec, source info etc.)
+- [ ] Continue code refactor, finish adding type hints
 
 #### Recent versions
+#### Version 1.4.8
+- [x] Add GUI for user to input API key and folder paths on initial setup
+- [x] Code refactor including adding type hints
 
 #### Version 1.4.7
 - [x] Attempt bug fix for [#24](https://github.com/pizzaolive/ant_upload_checker/issues/24)

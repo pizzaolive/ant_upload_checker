@@ -50,8 +50,6 @@ python-dotenv==1.0.1
     # via ANT_upload_checker (pyproject.toml)
 pytz==2023.3.post1
     # via pandas
-pywin32==v306
-    # manual add for tkfilebrowser
 ratelimit==2.2.1
     # via ANT_upload_checker (pyproject.toml)
 readchar==4.1.0
