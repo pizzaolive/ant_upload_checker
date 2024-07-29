@@ -9,6 +9,23 @@ from collections import OrderedDict
 LOGGER = logging.getLogger(__name__)
 
 
+def test_get_film_file_paths(tmp_path):
+    temp_mp4_file = tmp_path / "test.mp4"
+    temp_mp4_file.write_text("Test")
+
+    temp_extras_directory = tmp_path / "Extras"
+    temp_extras_directory.mkdir()
+    temp_mp4_file_to_be_removed = tmp_path / "Extras" / "test_2.mp4"
+    temp_mp4_file_to_be_removed.write_text("Test")
+
+    fp = FilmProcessor(input_folders=[tmp_path.parent], output_folder="")
+
+    actual_output = fp.get_film_file_paths()
+    expected_output = [temp_mp4_file]
+
+    assert actual_output == expected_output
+
+
 @pytest.fixture
 def test_extras_file_paths():
     test_paths = [
@@ -300,67 +317,33 @@ def test_convert_bytes_to_gb():
     assert actual_list == expected_list
 
 
-def test_false_get_existing_film_list_if_exists(tmp_path, caplog):
+def test_combine_current_film_list_with_existing_csv(tmp_path, caplog):
     caplog.set_level(logging.INFO)
 
-    fp = FilmProcessor(input_folders="", output_folder=tmp_path)
-
-    assert fp.get_existing_film_list_if_exists() == None
-    assert "An existing output file" in caplog.text
-
-
-def test_get_existing_film_list_if_exists_previous_version(tmp_path, caplog):
-    caplog.set_level(logging.INFO)
-    test_df = pd.DataFrame(
+    test_existing_film_df = pd.DataFrame(
         {
-            "Full file path": ["test", "test"],
-            "Parsed film title": ["test", "test"],
-            "Film size (GB)": ["test", "test"],
-            "Already on ANT?": ["test", "test"],
+            "Full file path": ["test_path"],
+            "Parsed film title": ["test"],
+            "Film size (GB)": [10.4],
+            "Resolution": ["test"],
+            "Codec": ["test"],
+            "Source": ["test"],
+            "Release group": ["test"],
+            "Already on ANT?": ["NOT FOUND"],
         }
     )
-    test_df.to_csv(tmp_path.joinpath("Film list.csv"), index=False)
+    test_existing_film_df.to_csv(tmp_path.joinpath("Film list.csv"), index=False)
 
-    fp = FilmProcessor(input_folders="", output_folder=tmp_path)
-    actual_return_value = fp.get_existing_film_list_if_exists()
-
-    assert Path.is_file(tmp_path.joinpath("Film list old version backup.csv"))
-    assert (
-        "Warning: existing file was created using an old version of ANT upload checker"
-        in caplog.text
-    )
-    assert actual_return_value == None
-
-
-def test_true_get_existing_film_list_if_exists(tmp_path, caplog):
-    caplog.set_level(logging.INFO)
-    test_df = pd.DataFrame(
+    test_current_film_list = pd.DataFrame(
         {
-            "Full file path": ["test", "test"],
-            "Parsed film title": ["test", "test"],
-            "Film size (GB)": [10.11, 5.22],
-            "Resolution": ["1080p", "1080p"],
+            "Full file path": ["test_path", "New film"],
+            "Parsed film title": ["test", "New film"],
+            "Film size (GB)": [10.4, 9.9],
+            "Resolution": ["test", "test"],
             "Codec": ["test", "test"],
             "Source": ["test", "test"],
             "Release group": ["test", "test"],
-            "Already on ANT?": ["test", "test"],
-        }
-    )
-    test_df.to_csv(tmp_path.joinpath("Film list.csv"), index=False)
-
-    fp = FilmProcessor(input_folders="", output_folder=tmp_path)
-    actual_return_value = fp.get_existing_film_list_if_exists()
-
-    expected_df = pd.DataFrame(
-        {
-            "Full file path": ["test", "test"],
-            "Parsed film title": ["test", "test"],
-            "Film size (GB)": [10.11, 5.22],
-            "Resolution": ["1080p", "1080p"],
-            "Codec": ["test", "test"],
-            "Source": ["test", "test"],
-            "Release group": ["test", "test"],
-            "Already on ANT?": ["test", "test"],
+            "Already on ANT?": [pd.NA, pd.NA],
         }
     ).astype(
         {
@@ -375,4 +358,122 @@ def test_true_get_existing_film_list_if_exists(tmp_path, caplog):
         }
     )
 
-    pd.testing.assert_frame_equal(actual_return_value, expected_df)
+    fp = FilmProcessor(input_folders="", output_folder=tmp_path)
+
+    actual_df = fp.combine_current_film_list_with_existing_csv(
+        test_existing_film_df, test_current_film_list
+    )
+
+    expected_df = pd.DataFrame(
+        {
+            "Full file path": [
+                "New film",
+                "test_path",
+            ],
+            "Parsed film title": ["New film", "test"],
+            "Film size (GB)": [9.9, 10.4],
+            "Resolution": ["test", "test"],
+            "Codec": ["test", "test"],
+            "Source": ["test", "test"],
+            "Release group": ["test", "test"],
+            "Already on ANT?": [pd.NA, "NOT FOUND"],
+        }
+    ).astype(
+        {
+            "Full file path": "string",
+            "Parsed film title": "string",
+            "Film size (GB)": "float64",
+            "Resolution": "string",
+            "Codec": "string",
+            "Source": "string",
+            "Release group": "string",
+            "Already on ANT?": "string",
+        }
+    )
+
+    pd.testing.assert_frame_equal(actual_df, expected_df)
+
+
+def test_check_if_existing_film_csv_exists(tmp_path, caplog):
+    caplog.set_level(logging.INFO)
+
+    fp = FilmProcessor(input_folders="", output_folder=tmp_path)
+
+    test_existing_film_df = pd.DataFrame(
+        {
+            "Full file path": [pd.NA],
+            "Parsed film title": [pd.NA],
+            "Film size (GB)": [pd.NA],
+            "Codec": [pd.NA],
+            "Source": [pd.NA],
+            "Release group": [pd.NA],
+            "Already on ANT?": [pd.NA],
+        }
+    )
+    path_name = tmp_path.joinpath("Film list.csv")
+    test_existing_film_df.to_csv(path_name, index=False)
+
+    assert fp.check_if_existing_film_csv_exists() is True
+    assert f"An existing output file ({path_name}) was found" in caplog.text
+
+
+def test_false_check_if_existing_film_csv_exists(tmp_path, caplog):
+    caplog.set_level(logging.INFO)
+
+    fp = FilmProcessor(input_folders="", output_folder=tmp_path)
+    path_name = tmp_path.joinpath("Film list.csv")
+
+    assert fp.check_if_existing_film_csv_exists() is False
+    assert (
+        f"An existing output file ({path_name}) was not found, processing films from scratch..."
+        in caplog.text
+    )
+
+
+def test_false_check_if_existing_csv_is_compatible(tmp_path, caplog):
+    caplog.set_level(logging.INFO)
+
+    fp = FilmProcessor(input_folders="", output_folder=tmp_path)
+
+    # Resolution is missing from existing film list
+    test_existing_film_df = pd.DataFrame(
+        {
+            "Full file path": [pd.NA],
+            "Parsed film title": [pd.NA],
+            "Film size (GB)": [pd.NA],
+            "Codec": [pd.NA],
+            "Source": [pd.NA],
+            "Release group": [pd.NA],
+            "Already on ANT?": [pd.NA],
+        }
+    )
+    test_existing_film_df.to_csv(tmp_path.joinpath("Film list.csv"), index=False)
+
+    assert fp.check_if_existing_csv_is_compatible(test_existing_film_df) is False
+    assert (
+        "Warning: existing file was created using an old version of ANT upload checker"
+        in caplog.text
+    )
+    assert Path.is_file(tmp_path.joinpath("Film list old version backup.csv"))
+
+
+def test_true_check_if_existing_csv_is_compatible(tmp_path, caplog):
+    caplog.set_level(logging.INFO)
+    test_existing_film_df = pd.DataFrame(
+        {
+            "Full file path": [pd.NA],
+            "Parsed film title": [pd.NA],
+            "Film size (GB)": [pd.NA],
+            "Resolution": [pd.NA],
+            "Codec": [pd.NA],
+            "Source": [pd.NA],
+            "Release group": [pd.NA],
+            "Already on ANT?": [pd.NA],
+        }
+    )
+    test_existing_film_df.to_csv(tmp_path.joinpath("Film list.csv"), index=False)
+
+    fp = FilmProcessor(input_folders="", output_folder=tmp_path)
+
+    assert fp.check_if_existing_csv_is_compatible(test_existing_film_df) is True
+    assert not Path.is_file(tmp_path.joinpath("Film list old version backup.csv"))

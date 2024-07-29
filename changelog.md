@@ -1,3 +1,7 @@
+#### Version 1.4.8
+* Add GUI for user to input API key and folder paths on initial setup
+* Code refactor including adding type hints (work in progress)
+
 #### Version 1.4.7
 * Attempt bug fix for [#24](https://github.com/pizzaolive/ant_upload_checker/issues/24)
 * Add additional skip if film Path.is_file() returns False to prevent future crashes due to unknown errors

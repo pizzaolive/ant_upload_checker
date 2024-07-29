@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ANT_upload_checker"
-version = "1.4.7"
+version = "1.4.8"
 authors = [
     { name = "pizzaolive"}
 ]
@@ -12,7 +12,14 @@ description = "Check if local films have already been uploaded to ANT"
 readme = "README.md"
 requires-python=">=3.8"
 dependencies = [
-    "pandas>2.0","requests>2.0.0","ratelimit>2.0.0","guessit>=3.8.0",
+    "pandas>2.0",
+    "requests>2.0.0",
+    "ratelimit>2.0.0",
+    "guessit>=3.8.0",
+    "inquirer>=3.3.0",
+    "python-dotenv>=1.0.1",
+    "tkfilebrowser>=2.3.2",
+    "pywin32>=306"
 ]
 [project.optional-dependencies]
 test = [
