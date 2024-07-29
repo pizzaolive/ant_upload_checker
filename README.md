@@ -33,17 +33,16 @@ This is a work in progress - please feel free to give helpful feedback and repor
 ## :page_with_curl: Setting up the script
 
 1. Git clone the respository, or download it as ZIP (click the green Code button -> Download ZIP) and extract it to wherever you like.
-2. Update the values in [parameters.py](ant_upload_checker\parameters.py). You can right click the file and open with Notepad to edit it.
-    * API_KEY: Your API key from ANT. Go to the tracker to find out how to get this.
-    * INPUT_FOLDERS: the parent directory or multiple different directories that contain your films.
-    * OUTPUT_FOLDER: the directory in which the output csv file containing the list of films should go.
 
 ## :page_with_curl: Running the script
 1. Navigate into the root folder. You should be able to see the README and setup files.
-2. Open the terminal in the current folder. You can do this by clicking the directory bar at the top, typing in 'cmd', and pressing Enter.
+2. Open a terminal in the current folder. You can do this by clicking the directory bar at the top, typing in 'cmd', and pressing Enter.
 3. Type `pip install .` into the terminal and press Enter - this should automatically install the dependencies needed.
 4. Once the packages have finished installing, type `python -m ant_upload_checker.main` and press Enter.
-    * You should see information being printed in the terminal as the process runs
+    * You should be asked for your ANT API key - you can paste this in after copying it from ANT
+    * A dialog box should then open asking for your input folders (where your films are stored)
+    * Finally, another dialog box should ask you to specify your output folder (where the film list CSV should be written)
+    * When you run it for a second time, you can skip this stage by selecting "No" when asked whether you want to overwrite your existing settings
 5. Open the output csv file to see which films already exist on the tracker
 
 
