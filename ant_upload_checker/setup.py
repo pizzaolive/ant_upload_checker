@@ -114,6 +114,6 @@ def load_env_file() -> Tuple[str, List[Path], Path]:
 
     output_folder = Path(settings["OUTPUT_FOLDER"])
 
-    logging.info("User settings loaded from '.env' file")
+    logging.info("User settings loaded from '.env' file\n")
 
     return api_key, input_folders, output_folder
