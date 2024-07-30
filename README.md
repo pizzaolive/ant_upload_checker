@@ -52,7 +52,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 - [ ] Continue code refactor, finish adding type hints
 
 #### Recent versions
-### Version 1.4.8.1
+#### Version 1.4.8.1
 - [x] Patch to address dependabot warnings in dev requirements
 
 #### Version 1.4.8
