@@ -1,3 +1,6 @@
+#### Version 1.4.8.1
+* Patch to address dependabot warnings in dev requirements
+
 #### Version 1.4.8
 * Add GUI for user to input API key and folder paths on initial setup
 * Code refactor including adding type hints (work in progress)
