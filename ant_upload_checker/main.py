@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 from ant_upload_checker import setup
 from ant_upload_checker.film_processor import FilmProcessor
 from ant_upload_checker.film_searcher import FilmSearcher

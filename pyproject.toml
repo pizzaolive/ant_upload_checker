@@ -3,14 +3,19 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ANT_upload_checker"
-version = "1.4.8"
+name = "ant_upload_checker"
+version = "1.5.0"
 authors = [
     { name = "pizzaolive"}
 ]
 description = "Check if local films have already been uploaded to ANT"
 readme = "README.md"
 requires-python=">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
 dependencies = [
     "pandas>2.0",
     "requests>2.0.0",
@@ -19,9 +24,9 @@ dependencies = [
     "inquirer>=3.3.0",
     "python-dotenv>=1.0.1",
     "tkfilebrowser>=2.3.2",
-    "pywin32>=306"
+    "pywin32>=306 ; platform_system == 'Windows'"
 ]
-[project.optional-dependencies]
+[project.optional-dependencies] 
 test = [
     "pytest>7.0.0"
 ]
@@ -32,3 +37,6 @@ Issues = "https://github.com/pizzaolive/ant_upload_checker/issues"
 
 [tool.setuptools]
 py-modules = [] # (see https://github.com/pypa/setuptools/issues/3197#issuecomment-1078770109)
+
+[project.scripts]
+ant_upload_checker = "ant_upload_checker.main:main"

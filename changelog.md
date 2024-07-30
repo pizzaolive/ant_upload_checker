@@ -1,3 +1,6 @@
+#### Version 1.5
+* Update project to allow upload to PyPi for easier installation
+
 #### Version 1.4.8
 * Add GUI for user to input API key and folder paths on initial setup
 * Code refactor including adding type hints (work in progress)

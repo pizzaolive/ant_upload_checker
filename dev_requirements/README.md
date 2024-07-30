@@ -5,8 +5,8 @@ See here for more details: https://docs.python.org/3/library/venv.html
 
 On Windows:
 ```
-python -m venv venv
-venv\Scripts\Activate.ps1   
+python -m .venv venv
+.venv\Scripts\Activate.ps1   
 ```
 
 ### Install the requirements
