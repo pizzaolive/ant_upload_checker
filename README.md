@@ -50,6 +50,9 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 
 #### Recent versions
+#### Version 1.4.8.1
+- [x] Patch to address dependabot warnings in dev requirements
+
 #### Version 1.4.8
 - [x] Add GUI for user to input API key and folder paths on initial setup
 - [x] Code refactor including adding type hints
