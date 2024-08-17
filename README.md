@@ -77,7 +77,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 - [x] Fix for films that should contain "/" or ":" within times or dates in tiles https://github.com/pizzaolive/ant_upload_checker/issues/5 
 
 
-## :bulb: Future ideas 
+## Future ideas 
 * Look into using tmdb or imdb to match films first, if that fails, rely on title
 * Add ability to exclude TV shows if some are found within directory
 * Use enquirer or GUI to select folder paths
