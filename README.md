@@ -30,14 +30,27 @@ This is a work in progress - please feel free to give helpful feedback and repor
 * You must be a member of ANT
     * Please do not message me for an invite, or open issues requesting one, these will be ignored. ANT Staff is aware of and monitors this repo
 
-## Setting up the script
-1. From the command line (e.g., open up Command Prompt) type `pip install ant_upload_checker`
-2. Once installed, run `ant_upload_checker`. 
+## How to setup and run ant_upload_checker
+1. **Optional step: setup a virtual environment** (recomended but not required)
+    * A virtual environment lets you install a package and its dependencies in a contained area, keeping it seperate from other Python projects on your system. It's good practise to use a virtual environment, but if you're not fussed about running other Python projects, or if you want to install it globally instead, feel free to skip this step (see https://docs.python.org/3/tutorial/venv.html for more info)
+    * Navigate to where you want to store the package
+    * From the command line (e.g. Command Prompt) type `python -m venv .venv`. This should create a folder called .venv containing the virtual environment.
+    * Then type `.venv/Scripts/Activate.ps1` (on Windows) to activate the virtual environment. For Linux, type `source .venv/bin/activate`
+2. **Install the package**
+    * From the command line (e.g. Command Prompt) type `pip install ant_upload_checker`. This should install the package from PyPI.org.
+3. **Run the package**
+    * Once installed, type `ant-upload-checker` to run the package (note the hyphens, not underscores!)
     * You should be asked for your ANT API key - you can paste this in after copying it from ANT
     * A dialog box should then open asking for your input folders (where your films are stored)
     * Finally, another dialog box should ask you to specify your output folder (where the film list CSV should be written)
     * When you run it for a second time, you can skip this stage by selecting "No" when asked whether you want to overwrite your existing settings
-3. Open the output csv file to see which films already exist on the tracker
+4. Open the output csv file to see which films already exist on the tracker
+
+### How to update to the latest version
+Assuming you've already installed ant_upload_checker, type `pip install --upgrade ant_upload_checker`. If there's a new version available, it should update the version you have installed. 
+
+Remember that if you originally installed the package into a virtual environment, you will need to first activate the virtual environment again (navigate to the folder, type `.venv/Scripts/Activate.ps1` for Windows or `source .venv/bin/activate` for Linux)
+
 
 
 ## Future versions
