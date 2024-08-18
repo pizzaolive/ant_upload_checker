@@ -1,11 +1,18 @@
 import logging
-import os
 import inquirer
 from pathlib import Path
 from dotenv import set_key, dotenv_values
-import tkinter
-import tkfilebrowser
 from typing import List, Tuple
+
+try:
+    import tkinter
+except ModuleNotFoundError:
+    logging.info(
+        "The package 'tkinter' was not found. On some Linux systems, this is not installed by default. "
+        "For Debian-based systems, try 'apt-get install python3-tk'"
+    )
+
+import tkfilebrowser
 
 ENV_FILE_PATH = Path(".env").resolve()
 
