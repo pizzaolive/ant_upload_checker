@@ -1,16 +1,16 @@
 import logging
-from ant_upload_checker import setup
+from ant_upload_checker import setup_functions
 from ant_upload_checker.film_processor import FilmProcessor
 from ant_upload_checker.film_searcher import FilmSearcher
 from ant_upload_checker.output import write_film_list_to_csv
 
 
 def main():
-    setup.setup_logging()
+    setup_functions.setup_logging()
     logging.info("Starting ANT upload checker...")
 
-    setup.save_user_info_to_env()
-    api_key, input_folders, output_folder = setup.load_env_file()
+    setup_functions.save_user_info_to_env()
+    api_key, input_folders, output_folder = setup_functions.load_env_file()
 
     films = FilmProcessor(input_folders, output_folder)
     film_file_paths = films.get_film_file_paths()

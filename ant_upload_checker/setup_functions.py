@@ -3,16 +3,9 @@ import inquirer
 from pathlib import Path
 from dotenv import set_key, dotenv_values
 from typing import List, Tuple
+import wx
+import wx.lib.agw.multidirdialog as md
 
-try:
-    import tkinter
-except ModuleNotFoundError:
-    logging.info(
-        "The package 'tkinter' was not found. On some Linux systems, this is not installed by default. "
-        "For Debian-based systems, try 'apt-get install python3-tk'"
-    )
-
-import tkfilebrowser
 
 ENV_FILE_PATH = Path(".env").resolve()
 
@@ -38,51 +31,50 @@ def check_if_user_wants_to_override_env_file() -> bool:
 def save_user_info_to_env() -> None:
     if not ENV_FILE_PATH.is_file() or check_if_user_wants_to_override_env_file():
         get_user_info_api_key()
-        get_user_info_input_folders()
-        get_user_info_output_folder()
+        get_user_info_directories()
         logging.info("User setting saved to '.env' file")
 
 
-def get_user_info_input_folders() -> None:
-    root = tkinter.Tk()
-    root.withdraw()
+def get_user_info_directories() -> None:
+    app = wx.App(False)
+
     logging.info(
         "In the dialog box, please select one or more directories containing your films"
     )
-    directories = tkfilebrowser.askopendirnames(
-        title="Select one or more directories containing your films"
-    )
-    root.destroy()
+    frame = wx.Frame(None, title="Choose input directories", size=(1, 1))
 
-    if directories:
-        directories_str = ",".join(directories)
-        set_key(
-            dotenv_path=ENV_FILE_PATH,
-            key_to_set="INPUT_FOLDERS",
-            value_to_set=directories_str,
-        )
-    else:
+    multi_dir_dialog = md.MultiDirDialog(
+        frame,
+        "Select one or more directories containing your films",
+        style=wx.DD_MULTIPLE | wx.DD_DEFAULT_STYLE,
+    )
+    if multi_dir_dialog.ShowModal() == wx.ID_CANCEL:
         raise ValueError("No input directories were selected - please restart")
 
-
-def get_user_info_output_folder() -> None:
-    root = tkinter.Tk()
-    root.withdraw()
     logging.info(
         "In the dialog box, please select your output directory (where the film list will be saved)"
     )
+    single_dir_dialog = wx.DirDialog(
+        None, "Choose an output directory", "", wx.DD_DEFAULT_STYLE
+    )
+    if single_dir_dialog.ShowModal() == wx.ID_CANCEL:
+        raise ValueError("No output directory was selected selected - please restart")
 
-    directory = tkfilebrowser.askopendirname(title="Select an output directory")
-    root.destroy()
+    input_directories = multi_dir_dialog.GetPaths()
+    output_directory = single_dir_dialog.GetPath()
+    multi_dir_dialog.Destroy()
 
-    if directory:
-        set_key(
-            dotenv_path=ENV_FILE_PATH,
-            key_to_set="OUTPUT_FOLDER",
-            value_to_set=directory,
-        )
-    else:
-        raise ValueError("No output directory was selected - please restart")
+    input_directories_str = ",".join(input_directories)
+    set_key(
+        dotenv_path=ENV_FILE_PATH,
+        key_to_set="INPUT_FOLDERS",
+        value_to_set=input_directories_str,
+    )
+    set_key(
+        dotenv_path=ENV_FILE_PATH,
+        key_to_set="OUTPUT_FOLDER",
+        value_to_set=output_directory,
+    )
 
 
 def get_user_info_api_key() -> None:
