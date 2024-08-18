@@ -37,32 +37,37 @@ This is a work in progress - please feel free to give helpful feedback and repor
     * From the command line (e.g. Command Prompt) type `python -m venv .venv`. This should create a folder called .venv containing the virtual environment.
     * Then type `.venv/Scripts/Activate.ps1` (on Windows) to activate the virtual environment. For Linux, type `source .venv/bin/activate`
 2. **Install the package**
-    * From the command line (e.g. Command Prompt) type `pip install ant_upload_checker`. This should install the package from PyPI.org.
+    * From the command line (e.g. Command Prompt) type `pip install ant-upload-checker`. This should install the package from [PyPI](https://pypi.org/project/ant-upload-checker/)
 3. **Run the package**
-    * Once installed, type `ant-upload-checker` to run the package (note the hyphens, not underscores!)
+    * Once installed, type `ant-upload-checker` to run the package
     * You should be asked for your ANT API key - you can paste this in after copying it from ANT
     * A dialog box should then open asking for your input folders (where your films are stored)
     * Finally, another dialog box should ask you to specify your output folder (where the film list CSV should be written)
     * When you run it for a second time, you can skip this stage by selecting "No" when asked whether you want to overwrite your existing settings
-4. Open the output csv file to see which films already exist on the tracker
+4. **Check the output file**
+    * Open the output csv file to see which films already exist on the tracker
+    * Please remember this is a work in progress - feel free to report any issues you come across!
 
 ### How to update to the latest version
-Assuming you've already installed ant_upload_checker, type `pip install --upgrade ant_upload_checker`. If there's a new version available, it should update the version you have installed. 
+Assuming you've already installed ant_upload_checker, type `pip install --upgrade ant-upload-checker`. If there's a new version available, it should update the version you have installed. 
 
 Remember that if you originally installed the package into a virtual environment, you will need to first activate the virtual environment again (navigate to the folder, type `.venv/Scripts/Activate.ps1` for Windows or `source .venv/bin/activate` for Linux)
 
+### How to work on the code
+If you want to do any development work, don't install from PyPi. Instead:
+1. Git clone the repository
+2. Setup a virtual environment in the root directory (see step 1 of 'How to setup and run ant_upload_checker'). 
+3. In the command line type `pip install -e .[test]`. This should install the package and the optional test dependencies.
 
 
-## Future versions
-#### Version 1.5.1
+### Planned improvements
 - [ ] Enhance film check to include other attributes (codec, source info etc.)
 - [ ] Continue code refactor, finish adding type hints
 
-#### Version 1.5.0
-- [ ] Update project to allow upload to PyPi for easier installation
-
-
 #### Recent versions
+#### Version 1.5.0
+- [x] Package project into PyPI for easier installation
+
 #### Version 1.4.8.1
 - [x] Patch to address dependabot warnings in dev requirements
 
