@@ -1,11 +1,12 @@
 import logging
 import inquirer
+import sys
 from pathlib import Path
 from dotenv import set_key, dotenv_values
 from typing import List, Tuple
-import wx
-import wx.lib.agw.multidirdialog as md
+from PyQt6.QtWidgets import QApplication
 
+from ant_upload_checker.directory_selector import DirectorySelector
 
 ENV_FILE_PATH = Path(".env").resolve()
 
@@ -35,46 +36,22 @@ def save_user_info_to_env() -> None:
         logging.info("User setting saved to '.env' file")
 
 
-def get_user_info_directories() -> None:
-    app = wx.App(False)
+def get_user_info_directories():
+    app = QApplication(sys.argv)
+    selector = DirectorySelector()
+    input_folders = selector.get_input_directories()
+    input_directories_str = ",".join(input_folders)
 
-    logging.info(
-        "In the dialog box, please select one or more directories containing your films"
-    )
-    frame = wx.Frame(None, title="Choose input directories", size=(1, 1))
-
-    multi_dir_dialog = md.MultiDirDialog(
-        frame,
-        "Select one or more directories containing your films",
-        style=wx.DD_MULTIPLE | wx.DD_DEFAULT_STYLE,
-    )
-    if multi_dir_dialog.ShowModal() == wx.ID_CANCEL:
-        raise ValueError("No input directories were selected - please restart")
-
-    logging.info(
-        "In the dialog box, please select your output directory (where the film list will be saved)"
-    )
-    single_dir_dialog = wx.DirDialog(
-        None, "Choose an output directory", "", wx.DD_DEFAULT_STYLE
-    )
-    if single_dir_dialog.ShowModal() == wx.ID_CANCEL:
-        raise ValueError("No output directory was selected selected - please restart")
-
-    input_directories = multi_dir_dialog.GetPaths()
-    output_directory = single_dir_dialog.GetPath()
-    multi_dir_dialog.Destroy()
-
-    input_directories_str = ",".join(input_directories)
     set_key(
         dotenv_path=ENV_FILE_PATH,
         key_to_set="INPUT_FOLDERS",
         value_to_set=input_directories_str,
     )
-    set_key(
-        dotenv_path=ENV_FILE_PATH,
-        key_to_set="OUTPUT_FOLDER",
-        value_to_set=output_directory,
-    )
+    # set_key(
+    #     dotenv_path=ENV_FILE_PATH,
+    #     key_to_set="OUTPUT_FOLDER",
+    #     value_to_set=output_directory,
+    # )
 
 
 def get_user_info_api_key() -> None:
