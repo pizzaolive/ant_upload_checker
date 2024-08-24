@@ -36,7 +36,7 @@ def save_user_info_to_env() -> None:
 
 def get_user_info_directories():
     selector = DirectorySelector()
-    input_folders = selector.select_multiple_folders()
+    input_folders, output_folder = selector.run_directory_selector()
     input_directories_str = ",".join(input_folders)
 
     set_key(
@@ -44,11 +44,11 @@ def get_user_info_directories():
         key_to_set="INPUT_FOLDERS",
         value_to_set=input_directories_str,
     )
-    # set_key(
-    #     dotenv_path=ENV_FILE_PATH,
-    #     key_to_set="OUTPUT_FOLDER",
-    #     value_to_set=output_directory,
-    # )
+    set_key(
+        dotenv_path=ENV_FILE_PATH,
+        key_to_set="OUTPUT_FOLDER",
+        value_to_set=output_folder,
+    )
 
 
 def get_user_info_api_key() -> None:

@@ -1,28 +1,38 @@
 import tkinter as tk
 from tkinter import filedialog
 from pathlib import Path
+import logging
 
 
 class DirectorySelector:
-    def __init__(self):
+    def __init__(self) -> None:
         self.root = tk.Tk()
-        self.folder_listbox = tk.Listbox(
-            self.root, selectmode=tk.SINGLE, width=60, height=15
-        )
 
     def add_folder(self) -> None:
+        """
+        Open a dialog to select a given directory, add it to the listbox
+        """
         folder = filedialog.askdirectory(title="Select Folder")
         if folder:
             self.folder_listbox.insert(tk.END, folder)
 
-    def get_selected_folders(self) -> list[str]:
-        folders = self.folder_listbox.get(0, tk.END)
-        self.root.destroy()  # Close the window after selection
+    def select_input_directories(self) -> list[str]:
+        """
+        Provide a UI for the user to select multiple input directories to be scanned
+        """
+        logging.info(
+            "In the dialog box, please select one or more directories containing your films"
+        )
 
-        return list(folders)
+        self.root.deiconify()
+        self.folder_listbox = tk.Listbox(
+            self.root,
+            selectmode=tk.SINGLE,
+            width=60,
+            height=15,
+        )
 
-    def select_multiple_folders(self) -> list[str]:
-        self.root.title("Select Multiple Folders")
+        self.root.title("Select one or more input directories containing your films")
         self.folder_listbox.pack(pady=20)
 
         add_button = tk.Button(self.root, text="Add Folder", command=self.add_folder)
@@ -32,5 +42,37 @@ class DirectorySelector:
         save_button.pack(pady=10)
 
         self.root.mainloop()
+        input_directories = list(self.folder_listbox.get(0, tk.END))
 
-        return self.get_selected_folders()
+        # Hide but don't close
+        self.root.withdraw()
+
+        return input_directories
+
+    def select_output_directory(self) -> str:
+        """
+        Provide a UI for the user to select a single output directory
+        where the film list csv will later be saved.
+        """
+        self.root.withdraw()
+        logging.info("In the dialog box, please select your output directory")
+        output_directory = filedialog.askdirectory(
+            title="Please select your output directory",
+        )
+
+        # Hide but don't close
+        self.root.withdraw()
+
+        return output_directory
+
+    def run_directory_selector(self) -> tuple[list[str], str]:
+        """
+        Prompt user to select multiple input directories, then a single output directory,
+        then close the Tkinter root window
+        """
+        input_directories = self.select_input_directories()
+        output_directory = self.select_output_directory()
+
+        self.root.destroy()
+
+        return input_directories, output_directory
