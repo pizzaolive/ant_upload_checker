@@ -1,3 +1,6 @@
+#### Version 1.6.1
+* Patch - update README with correct venv instructions for Windows users
+
 #### Version 1.6.0
 * Rework GUI: remove tkfilebrowser attempted fix for https://github.com/pizzaolive/ant_upload_checker/issues/34
 

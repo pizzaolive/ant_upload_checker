@@ -43,7 +43,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
     * Navigate to where you want to store the package
     * From the command line (e.g. Command Prompt) type `python -m venv .venv`. This should create a folder called .venv containing the virtual environment.
     * Then activate the virtual environment
-        * Windows: `.venv/Scripts/Activate.ps1`
+        * Windows: If in a Command Prompt, type `.venv/Scripts/activate`. If using PowerShell, type `.venv/Scripts/Activate.ps1`
         * Linux: `source .venv/bin/activate`
 2. **Install the package**
     * From the command line (e.g. Command Prompt) type `pip install ant-upload-checker`. This should install the package from [PyPI](https://pypi.org/project/ant-upload-checker/)
@@ -74,6 +74,9 @@ If you want to do any development work, don't install from PyPi. Instead:
 - [ ] Continue code refactor, finish adding type hints
 
 #### Recent versions
+#### Version 1.6.1
+- [x] Patch - update README with correct venv instructions for Windows users
+
 #### Version 1.6.0
 - [x] Rework GUI: remove tkfilebrowser attempted fix for https://github.com/pizzaolive/ant_upload_checker/issues/34
 
