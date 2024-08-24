@@ -1,12 +1,10 @@
 import logging
 import inquirer
-import sys
 from pathlib import Path
 from dotenv import set_key, dotenv_values
 from typing import List, Tuple
-from PyQt6.QtWidgets import QApplication
-
 from ant_upload_checker.directory_selector import DirectorySelector
+
 
 ENV_FILE_PATH = Path(".env").resolve()
 
@@ -37,9 +35,8 @@ def save_user_info_to_env() -> None:
 
 
 def get_user_info_directories():
-    app = QApplication(sys.argv)
     selector = DirectorySelector()
-    input_folders = selector.get_input_directories()
+    input_folders = selector.select_multiple_folders()
     input_directories_str = ",".join(input_folders)
 
     set_key(
