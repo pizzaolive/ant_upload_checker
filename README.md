@@ -75,7 +75,7 @@ If you want to do any development work, don't install from PyPi. Instead:
 
 #### Recent versions
 #### Version 1.6.0
-- [x] Remove tkinter and tkfilebrowser in favour of wxPython - attempted fix for https://github.com/pizzaolive/ant_upload_checker/issues/34
+- [x] Rework GUI: remove tkfilebrowser attempted fix for https://github.com/pizzaolive/ant_upload_checker/issues/34
 
 #### Version 1.5.0
 - [x] Package project into PyPI for easier installation

@@ -1,5 +1,5 @@
 #### Version 1.6.0
-* Remove tkinter and tkfilebrowser in favour of wxPython - attempted fix for https://github.com/pizzaolive/ant_upload_checker/issues/34
+* Rework GUI: remove tkfilebrowser attempted fix for https://github.com/pizzaolive/ant_upload_checker/issues/34
 
 #### Version 1.5.0
 * Package project into PyPI for easier installation
