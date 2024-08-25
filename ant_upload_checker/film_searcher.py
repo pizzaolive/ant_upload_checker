@@ -1,6 +1,8 @@
 import pandas as pd
 import requests
 import logging
+from pathlib import Path
+from typing import Any, Union
 from ratelimit import limits, sleep_and_retry
 import re
 from requests.adapters import HTTPAdapter, Retry
@@ -60,38 +62,64 @@ class FilmSearcher:
     def process_api_responses(
         self, films_to_process_with_api_responses: pd.DataFrame
     ) -> pd.DataFrame:
-        processed_films = films_to_process_with_api_responses.copy()
+
+        processed_films = self.check_if_films_can_be_uploaded(
+            films_to_process_with_api_responses
+        )
+
+        return processed_films
+
+    def check_if_resolution_exists_on_ant(
+        self, film_resolution: str, api_response: list[dict[str, Any]]
+    ) -> str:
+        failed_message = "(Failed to extract URL from API response)"
+
+        if not film_resolution:
+            ant_url_suffix = "On ANT, but could not get resolution from file name:"
+
+            if api_response:
+                ant_url_info = (
+                    f"{ant_url_suffix} {api_response[0].get('guid',failed_message)}"
+                )
+            else:
+                ant_url_info = f"{ant_url_suffix} {failed_message}"
+
+            return ant_url_info
+
+        for existing_upload in api_response:
+            if existing_upload.get("resolution") == film_resolution:
+                return f"Resolution already uploaded: {existing_upload.get('guid',failed_message)}"
+
+        return f"On ANT, but this resolution is missing from ANT"
+
+    def check_if_films_can_be_uploaded(self, processed_films: pd.DataFrame):
+        processed_films = processed_films.copy()
         processed_films["Already on ANT?"] = processed_films.apply(
-            lambda x: self.check_if_resolution_exists_on_ant(
-                x["Resolution"], x["API response"]
+            lambda x: self.check_if_film_is_duplicate(
+                x["Full file path"], x["Resolution"], x["API response"]
             ),
             axis=1,
         )
 
         return processed_films
 
-    def check_if_resolution_exists_on_ant(
-        self, film_resolution: str, api_response
-    ) -> str:
+    def check_if_film_is_duplicate(
+        self,
+        full_file_path: str,
+        resolution: str,
+        api_response: Union[list[dict[str, Any], str]],
+    ):
         if api_response == self.not_found_value:
             return api_response
 
-        if film_resolution == "":
-            ant_url_suffix = "On ANT, but could not get resolution from file name: "
-            try:
-                ant_url_info = ant_url_suffix + f"{api_response[0]['guid']}"
-            except (IndexError, KeyError, TypeError) as e:
-                ant_url_info = (
-                    ant_url_suffix + "(Failed to extract URL from API response)"
-                )
+        file_name = Path(full_file_path).name
 
-            return ant_url_info
+        for existing_upload in api_response:
+            uploaded_files = existing_upload.get("files", [])
+            if uploaded_files and file_name == uploaded_files[0].get("name"):
+                return f"Exact filename already exists on ANT: {existing_upload.get('guid')}"
 
-        for match in api_response:
-            if match["resolution"] == film_resolution:
-                return f"Resolution already uploaded: {match['guid']}"
-
-        return f"On ANT, but this resolution is missing from ANT"
+        return self.check_if_resolution_exists_on_ant(resolution, api_response)
 
     def check_if_film_exists_on_ant(self, film_title: str):
         """
