@@ -72,6 +72,8 @@ If you want to do any development work, don't install from PyPi. Instead:
 ### Planned improvements
 - [ ] Enhance film check to include other attributes (codec, source info etc.)
 - [ ] Continue code refactor, finish adding type hints
+- [ ] Add a --help response to aid setup
+- [ ] Increase max file path length
 
 #### Recent versions
 #### Version 1.6.1
