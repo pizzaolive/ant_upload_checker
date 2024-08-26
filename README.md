@@ -70,51 +70,11 @@ If you want to do any development work, don't install from PyPi. Instead:
 
 
 ### Planned improvements
-- [ ] Enhance film check to include other attributes (codec, source info etc.)
+- [ ] Enhance film check to include other attributes (exact filename check, codec, source info etc.)
 - [ ] Continue code refactor, finish adding type hints
-- [ ] Add a --help response to aid setup
+- [ ] Add a CLI for those unable to use GUI
 - [ ] Increase max file path length
+- [ ] Add automatic torrent creator using torf
 
-#### Recent versions
-#### Version 1.6.1
-- [x] Patch - update README with correct venv instructions for Windows users
-
-#### Version 1.6.0
-- [x] Rework GUI: remove tkfilebrowser attempted fix for https://github.com/pizzaolive/ant_upload_checker/issues/34
-
-#### Version 1.5.0
-- [x] Package project into PyPI for easier installation
-
-#### Version 1.4.8.1
-- [x] Patch to address dependabot warnings in dev requirements
-
-#### Version 1.4.8
-- [x] Add GUI for user to input API key and folder paths on initial setup
-- [x] Code refactor including adding type hints
-
-#### Version 1.4.7
-- [x] Attempt bug fix for [#24](https://github.com/pizzaolive/ant_upload_checker/issues/24)
-
-#### Version 1.4.6
-- [x] Bug fix for [#21](https://github.com/pizzaolive/ant_upload_checker/issues/21)
-- [x] Fix parent directory displaying warning even if directory exists
-
-#### Version 1.4.5
-- [x] Add additional film info (codec and source), output directory is now automatically created if it does not exist
-
-#### Version 1.4.4
-- [x] Look into fix for films with alternate titles (x AKA y)
-
-##### Version 1.4.3
-- [x] Add resolution dupe check https://github.com/pizzaolive/ant_upload_checker/issues/16. Process will check if the specific resolution of your films are on ANT already or not.
-
-##### Version 1.4.2
-- [x] Fix for films that should contain "/" or ":" within times or dates in tiles https://github.com/pizzaolive/ant_upload_checker/issues/5 
-
-
-## Future ideas 
-* Look into using tmdb or imdb to match films first, if that fails, rely on title
-* Add ability to exclude TV shows if some are found within directory
-* Use enquirer or GUI to select folder paths
-
+See the [changelog](changelog.md) for recent changes.
 
