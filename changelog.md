@@ -1,3 +1,6 @@
+#### Version 1.6.2
+* Patch - bug fix missing film sizes in the output csv
+
 #### Version 1.6.1
 * Patch - update README with correct venv instructions for Windows users
 
