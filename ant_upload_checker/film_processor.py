@@ -11,11 +11,11 @@ from typing import List, Dict
 
 
 class FilmProcessor:
-    def __init__(self, input_folders: List[str], output_folder: str):
-        self.file_extensions: List[str] = ["mp4", "avi", "mkv", "mpeg", "m2ts"]
-        self.input_folders: List[str] = input_folders
+    def __init__(self, input_folders: list[str], output_folder: str):
+        self.file_extensions: list[str] = ["mp4", "avi", "mkv", "mpeg", "m2ts"]
+        self.input_folders: list[str] = input_folders
         self.output_folder: Path = Path(output_folder)
-        self.film_list_df_types: Dict[str, str] = {
+        self.film_list_df_types: dict[str, str] = {
             "Full file path": "string",
             "Parsed film title": "string",
             "Film size (GB)": "float64",
@@ -30,7 +30,7 @@ class FilmProcessor:
             self.output_folder / "Film list old version backup.csv"
         )
 
-    def get_film_file_paths(self) -> List[Path]:
+    def get_film_file_paths(self) -> list[Path]:
         """
         Scan the input folder from parameters for the given file extensions,
         adding any files to a list.
@@ -53,12 +53,10 @@ class FilmProcessor:
         return cleaned_paths
 
     def get_film_info_from_file_paths(
-        self, film_file_paths: List[Path]
+        self, film_file_paths: list[Path]
     ) -> pd.DataFrame:
         film_sizes = self.get_film_sizes_from_file_paths(film_file_paths)
-
         guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
-
         film_titles = self.get_formatted_titles_from_guessed_films(guessed_films)
         film_resolutions = self.get_film_resolutions_from_guessed_films(guessed_films)
         film_codecs = self.get_codecs_from_guessed_films(guessed_films)
@@ -135,8 +133,8 @@ class FilmProcessor:
             sys.exit(0)
 
     def remove_paths_containing_extras_folder(
-        self, file_paths: List[Path]
-    ) -> List[Path]:
+        self, file_paths: list[Path]
+    ) -> list[Path]:
         """
         Remove any file file paths containing Extras as their parent folder.
         """
@@ -144,8 +142,10 @@ class FilmProcessor:
 
         return cleaned_paths
 
-    def get_film_sizes_from_file_paths(self, file_paths: List[Path]) -> List[float]:
+    def get_film_sizes_from_file_paths(self, file_paths: list[Path]) -> list[float]:
         film_sizes = [self.get_file_size_from_path(path) for path in file_paths]
+
+        return film_sizes
 
     def remove_paths_if_unopenable(self, paths):
         """
@@ -167,11 +167,6 @@ class FilmProcessor:
 
         return cleaned_paths
 
-    def get_film_sizes_from_film_paths(self, film_paths):
-        film_sizes = [self.get_file_size_from_path(path) for path in film_paths]
-
-        return film_sizes
-
     def get_file_size_from_path(self, file_path: Path) -> float:
         file_size_in_bytes = file_path.stat().st_size
         file_size = self.convert_bytes_to_gb(file_size_in_bytes)
@@ -187,8 +182,8 @@ class FilmProcessor:
         return num_in_gb
 
     def get_guessit_info_from_film_paths(
-        self, file_paths: List[Path]
-    ) -> List[MatchesDict]:
+        self, file_paths: list[Path]
+    ) -> list[MatchesDict]:
         """
         Use guessit package to extract film information
         into ordered dictionary.
@@ -198,8 +193,8 @@ class FilmProcessor:
         return guessed_films
 
     def get_formatted_titles_from_guessed_films(
-        self, guessed_films: List[MatchesDict]
-    ) -> List[str]:
+        self, guessed_films: list[MatchesDict]
+    ) -> list[str]:
         """
         Get film titles from guessit objects, then fix titles missing
         full stops within acronyms
@@ -228,8 +223,8 @@ class FilmProcessor:
         return film_attribute
 
     def get_film_resolutions_from_guessed_films(
-        self, guessed_films: List[MatchesDict]
-    ) -> List[str]:
+        self, guessed_films: list[MatchesDict]
+    ) -> list[str]:
         film_resolutions = [
             self.get_film_attribute_from_guessed_film(film, "screen_size")
             for film in guessed_films
@@ -238,8 +233,8 @@ class FilmProcessor:
         return film_resolutions
 
     def get_codecs_from_guessed_films(
-        self, guessed_films: List[MatchesDict]
-    ) -> List[str]:
+        self, guessed_films: list[MatchesDict]
+    ) -> list[str]:
         film_codecs = [
             self.get_film_attribute_from_guessed_film(film, "video_codec")
             for film in guessed_films
@@ -248,8 +243,8 @@ class FilmProcessor:
         return film_codecs
 
     def get_source_from_guessed_films(
-        self, guessed_films: List[MatchesDict]
-    ) -> List[str]:
+        self, guessed_films: list[MatchesDict]
+    ) -> list[str]:
         film_sources = [
             self.get_film_attribute_from_guessed_film(film, "source")
             for film in guessed_films
@@ -262,8 +257,8 @@ class FilmProcessor:
         return film_sources_cleaned
 
     def get_release_groups_from_guessed_films(
-        self, guessed_films: List[MatchesDict]
-    ) -> List[str]:
+        self, guessed_films: list[MatchesDict]
+    ) -> list[str]:
         release_groups = [
             self.get_film_attribute_from_guessed_film(film, "release_group")
             for film in guessed_films
@@ -296,13 +291,13 @@ class FilmProcessor:
 
     def create_film_list_dataframe(
         self,
-        film_file_paths: List[Path],
-        film_sizes: List[float],
-        film_titles: List[str],
-        film_resolutions: List[str],
-        film_codecs: List[str],
-        film_sources: List[str],
-        film_release_groups: List[str],
+        film_file_paths: list[Path],
+        film_sizes: list[float],
+        film_titles: list[str],
+        film_resolutions: list[str],
+        film_codecs: list[str],
+        film_sources: list[str],
+        film_release_groups: list[str],
     ) -> pd.DataFrame:
         """
         Combine the full file paths and film titles into a

@@ -66,7 +66,7 @@ def get_user_info_api_key() -> None:
         raise ValueError("No API key was set - please restart")
 
 
-def load_env_file() -> Tuple[str, List[Path], Path]:
+def load_env_file() -> Tuple[str, list[Path], Path]:
     settings = dotenv_values(ENV_FILE_PATH)
 
     expected_settings = ["API_KEY", "INPUT_FOLDERS", "OUTPUT_FOLDER"]
