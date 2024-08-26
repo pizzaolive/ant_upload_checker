@@ -56,9 +56,7 @@ class FilmProcessor:
         self, film_file_paths: List[Path]
     ) -> pd.DataFrame:
         film_sizes = self.get_film_sizes_from_file_paths(film_file_paths)
-
         guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
-
         film_titles = self.get_formatted_titles_from_guessed_films(guessed_films)
         film_resolutions = self.get_film_resolutions_from_guessed_films(guessed_films)
         film_codecs = self.get_codecs_from_guessed_films(guessed_films)
@@ -147,6 +145,8 @@ class FilmProcessor:
     def get_film_sizes_from_file_paths(self, file_paths: List[Path]) -> List[float]:
         film_sizes = [self.get_file_size_from_path(path) for path in file_paths]
 
+        return film_sizes
+
     def remove_paths_if_unopenable(self, paths):
         """
         If file does not exist or is not openable, remove from paths.
@@ -166,11 +166,6 @@ class FilmProcessor:
                 cleaned_paths.append(path)
 
         return cleaned_paths
-
-    def get_film_sizes_from_film_paths(self, film_paths):
-        film_sizes = [self.get_file_size_from_path(path) for path in film_paths]
-
-        return film_sizes
 
     def get_file_size_from_path(self, file_path: Path) -> float:
         file_size_in_bytes = file_path.stat().st_size
