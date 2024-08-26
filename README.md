@@ -70,10 +70,11 @@ If you want to do any development work, don't install from PyPi. Instead:
 
 
 ### Planned improvements
-- [ ] Enhance film check to include other attributes (codec, source info etc.)
+- [ ] Enhance film check to include other attributes (exact filename check, codec, source info etc.)
 - [ ] Continue code refactor, finish adding type hints
-- [ ] Add a --help response to aid setup
+- [ ] Add a CLI for those unable to use GUI
 - [ ] Increase max file path length
+- [ ] Add automatic torrent creator using torf
 
 #### Recent versions
 #### Version 1.6.1
