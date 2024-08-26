@@ -15,7 +15,7 @@ class FilmProcessor:
         self.file_extensions: list[str] = ["mp4", "avi", "mkv", "mpeg", "m2ts"]
         self.input_folders: list[str] = input_folders
         self.output_folder: Path = Path(output_folder)
-        self.film_list_df_types: Dict[str, str] = {
+        self.film_list_df_types: dict[str, str] = {
             "Full file path": "string",
             "Parsed film title": "string",
             "Film size (GB)": "float64",
