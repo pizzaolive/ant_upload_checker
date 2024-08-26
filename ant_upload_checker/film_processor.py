@@ -25,8 +25,8 @@ class FilmProcessor:
             "Release group": "string",
             "Already on ANT?": "string",
         }
-        self.csv_file_path = self.output_folder / "Film list.csv"
-        self.backup_csv_file_path = (
+        self.csv_file_path: Path = self.output_folder / "Film list.csv"
+        self.backup_csv_file_path: Path = (
             self.output_folder / "Film list old version backup.csv"
         )
 

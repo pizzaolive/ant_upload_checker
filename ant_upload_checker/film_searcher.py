@@ -145,8 +145,10 @@ class FilmSearcher:
 
                 if search_result:
                     return search_result
-            except:
-                logging.error("An unexpected error occured, attempting to skip film...")
+            except Exception as err:
+                logging.error(
+                    "An unexpected error occured, skipping film:\n%s", str(err)
+                )
 
         logging.info("--- Not found on ANT ---")
         return []
