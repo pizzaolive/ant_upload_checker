@@ -10,7 +10,7 @@ LOGGER = logging.getLogger(__name__)
 @pytest.fixture
 def return_mock_search_for_film_on_ant_not_found(monkeypatch):
     def mockreturn(test_arg, test_arg_2):
-        return "NOT FOUND"
+        return None
 
     monkeypatch.setattr(
         "test_film_searcher.FilmSearcher.search_for_film_title_on_ant", mockreturn
@@ -96,7 +96,7 @@ def test_check_if_film_exists_on_ant_false(
     actual_return = fs.check_if_film_exists_on_ant(film_title)
 
     assert f"Searching for {film_title}" in caplog.text
-    assert actual_return == "NOT FOUND"
+    assert actual_return == []
     assert "--- Not found on ANT ---" in caplog.text
 
     if "and" in film_title:
@@ -131,7 +131,7 @@ def test_replace_word_and_re_search(
         test_film, test_regex, test_replacement
     )
 
-    assert actual_return == "NOT FOUND"
+    assert actual_return is None
     assert "Searching for Test film jaffa as well..." in caplog.text
 
 
@@ -153,7 +153,7 @@ def test_search_for_film_if_contains_potential_time_true(
         test_film, format="time"
     )
 
-    assert actual_return == "NOT FOUND"
+    assert actual_return is None
     expected_log_info = films_four_numbers[test_film]
     assert expected_log_info in caplog.text
     assert "Film title may contain a date or time" in caplog.text
@@ -176,7 +176,7 @@ def test_search_for_film_if_contains_potential_time_false(
         test_film, format="time"
     )
 
-    assert actual_return == "NOT FOUND"
+    assert actual_return == []
     assert "Film title may contain a date or time" not in caplog.text
 
 
@@ -201,7 +201,7 @@ def test_search_for_film_if_contains_potential_date_true(
         test_film, format="date"
     )
 
-    assert actual_return == "NOT FOUND"
+    assert actual_return is None
     expected_log_info = films_with_dates_numbers[test_film]
     assert expected_log_info in caplog.text
     assert "Film title may contain a date or time" in caplog.text
@@ -231,7 +231,7 @@ def test_search_for_film_if_contains_potential_date_false(
         test_film, format="date"
     )
 
-    assert actual_return == "NOT FOUND"
+    assert actual_return == []
     assert "Film title may contain a date or time" not in caplog.text
 
 
@@ -253,7 +253,7 @@ def test_search_for_film_if_contains_aka_true(
     fs = FilmSearcher("test", "test_api_key")
     actual_return = fs.search_for_film_if_contains_aka(test_film)
 
-    assert actual_return == "NOT FOUND"
+    assert actual_return == []
     assert "Film title may contain an alternate title" in caplog.text
     assert (
         f"Searching for {films_with_alternate_titles[test_film][0]} as well"
@@ -281,7 +281,7 @@ def test_search_for_film_if_contains_aka_false(
     fs = FilmSearcher("test", "test_api_key")
     actual_return = fs.search_for_film_if_contains_aka(test_film)
 
-    assert actual_return == "NOT FOUND"
+    assert actual_return == []
     assert "Film title may contain an alternate title" not in caplog.text
     assert f"Searching for Test film as well" not in caplog.text
 
@@ -308,8 +308,36 @@ def test_check_if_film_resolution_exists_on_ant(test_input, test_output):
     assert actual_return == test_output
 
 
-test_values = [("file_path", "1080p", "NOT FOUND")]
-expected_values = ["NOT FOUND"]
+test_values = [
+    ("file_path", "1080p", []),
+    (
+        "C:/films/test_film_name.mkv",
+        "1080p",
+        [
+            {
+                "guid": "test_link",
+                "files": [{"size": "100", "name": "test_film_name.mkv"}],
+            }
+        ],
+    ),
+    (
+        "C:/films/test_film_name_2.mkv",
+        "1080p",
+        [
+            {
+                "guid": "test_link",
+                "files": [
+                    {"size": "1", "name": "unwanted_file.nfo"},
+                    {"size": "100", "name": "test_film_name_2.mkv"},
+                ],
+            }
+        ],
+    ),
+]
+expected_values = [
+    "NOT FOUND",
+    "Exact filename already exists on ANT: test_link",
+]
 
 
 @pytest.mark.parametrize(

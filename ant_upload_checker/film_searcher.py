@@ -12,8 +12,10 @@ class FilmSearcher:
     def __init__(self, film_list_df: pd.DataFrame, api_key: str):
         self.film_list_df: pd.DataFrame = film_list_df
         self.api_key: str = api_key
+        self.ant_url = "https://anthelion.me/api.php"
         self.session: requests.Session = requests.Session()
         self.not_found_value: str = "NOT FOUND"
+        self.guid_missing_message = "(Failed to extract URL from API response)"
 
         retries = Retry(
             total=3, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504]
@@ -47,7 +49,7 @@ class FilmSearcher:
             self.check_if_film_exists_on_ant
         )
 
-        processed_films = self.process_api_responses(films_to_process).drop(
+        processed_films = self.check_if_films_can_be_uploaded(films_to_process).drop(
             "API response", axis=1
         )
 
@@ -59,36 +61,23 @@ class FilmSearcher:
 
         return films_checked_on_ant
 
-    def process_api_responses(
-        self, films_to_process_with_api_responses: pd.DataFrame
-    ) -> pd.DataFrame:
-
-        processed_films = self.check_if_films_can_be_uploaded(
-            films_to_process_with_api_responses
-        )
-
-        return processed_films
-
     def check_if_resolution_exists_on_ant(
         self, film_resolution: str, api_response: list[dict[str, Any]]
     ) -> str:
-        failed_message = "(Failed to extract URL from API response)"
 
         if not film_resolution:
             ant_url_suffix = "On ANT, but could not get resolution from file name:"
 
             if api_response:
-                ant_url_info = (
-                    f"{ant_url_suffix} {api_response[0].get('guid',failed_message)}"
-                )
+                ant_url_info = f"{ant_url_suffix} {api_response[0].get('guid',self.guid_missing_message)}"
             else:
-                ant_url_info = f"{ant_url_suffix} {failed_message}"
+                ant_url_info = f"{ant_url_suffix} {self.guid_missing_message}"
 
             return ant_url_info
 
         for existing_upload in api_response:
             if existing_upload.get("resolution") == film_resolution:
-                return f"Resolution already uploaded: {existing_upload.get('guid',failed_message)}"
+                return f"Resolution already uploaded: {existing_upload.get('guid',self.guid_missing_message)}"
 
         return f"On ANT, but this resolution is missing from ANT"
 
@@ -107,21 +96,33 @@ class FilmSearcher:
         self,
         full_file_path: str,
         resolution: str,
-        api_response: Union[list[dict[str, Any], str]],
-    ):
-        if api_response == self.not_found_value:
-            return api_response
+        api_response: list[dict[str, Any]],
+    ) -> str:
+        if not api_response:
+            return self.not_found_value
 
         file_name = Path(full_file_path).name
 
-        for existing_upload in api_response:
-            uploaded_files = existing_upload.get("files", [])
-            if uploaded_files and file_name == uploaded_files[0].get("name"):
-                return f"Exact filename already exists on ANT: {existing_upload.get('guid')}"
+        filename_info_if_match = self.check_if_filename_exists_on_ant(
+            file_name, api_response
+        )
+        if filename_info_if_match is not None:
+            return filename_info_if_match
 
         return self.check_if_resolution_exists_on_ant(resolution, api_response)
 
-    def check_if_film_exists_on_ant(self, film_title: str):
+    def check_if_filename_exists_on_ant(
+        self, file_name: str, api_response: list[dict[str, Any]]
+    ) -> Union[str, None]:
+        for existing_upload in api_response:
+            uploaded_files = existing_upload.get("files", [])
+
+            if uploaded_files:
+                for file_info in uploaded_files:
+                    if file_name == file_info.get("name", ""):
+                        return f"Exact filename already exists on ANT: {existing_upload.get('guid',self.guid_missing_message)}"
+
+    def check_if_film_exists_on_ant(self, film_title: str) -> list[dict[str, Any]]:
         """
         Take a film title, and search for it using the ANT API.
         If an initial match is not found, re-search for a
@@ -136,18 +137,21 @@ class FilmSearcher:
             (self.search_for_film_if_contains_aka, ""),
         ]
         for search_function, optional_argument in title_checks:
-            if optional_argument:
-                search_result = search_function(film_title, optional_argument)
-            else:
-                search_result = search_function(film_title)
-            if search_result != self.not_found_value:
-                return search_result
+            try:
+                if optional_argument:
+                    search_result = search_function(film_title, optional_argument)
+                else:
+                    search_result = search_function(film_title)
+
+                if search_result:
+                    return search_result
+            except:
+                logging.error("An unexpected error occured, attempting to skip film...")
 
         logging.info("--- Not found on ANT ---")
+        return []
 
-        return search_result
-
-    def search_for_film_if_contains_and(self, film_title):
+    def search_for_film_if_contains_and(self, film_title: str) -> list[dict[str, Any]]:
         """
         If film title contains and or &, replace with the oppposite
         and search for the new title on ANT. Else, return NOT FOUND.
@@ -164,9 +168,11 @@ class FilmSearcher:
                 film_title, and_symbol_regex, " and "
             )
 
-        return self.not_found_value
+        return []
 
-    def search_for_film_if_contains_potential_date_or_time(self, film_title, format):
+    def search_for_film_if_contains_potential_date_or_time(
+        self, film_title: str, format: str
+    ) -> list[dict[str, Any]]:
         """
         If film title 4 numbers e.g. 1208 East of Bucharest,
         add colon in middle, re-search title on ANT.
@@ -189,9 +195,9 @@ class FilmSearcher:
                 film_title, numbers_regex, replacement_value
             )
 
-        return self.not_found_value
+        return []
 
-    def search_for_film_if_contains_aka(self, film_title):
+    def search_for_film_if_contains_aka(self, film_title: str) -> list[dict[str, Any]]:
         aka_regex = r"(?i)\saka\s"
 
         if re.search(aka_regex, film_title):
@@ -202,24 +208,35 @@ class FilmSearcher:
             for title in split_titles:
                 logging.info("-- Searching for %s as well...", title)
                 film_search = self.search_for_film_title_on_ant(title)
-                if film_search != self.not_found_value:
+                if film_search is not None:
                     return film_search
+        return []
 
-        return self.not_found_value
+    def replace_word_and_re_search(
+        self, film_title: str, regex_pattern: str, replacement: str
+    ) -> list[dict[str, Any]]:
+        cleaned_film_title = re.sub(
+            regex_pattern,
+            replacement,
+            film_title,
+        )
+        logging.info("-- Searching for %s as well...", cleaned_film_title)
+
+        return self.search_for_film_title_on_ant(cleaned_film_title)
 
     @sleep_and_retry
     @limits(calls=1, period=2)
-    def search_for_film_title_on_ant(self, film_title):
+    def search_for_film_title_on_ant(self, film_title: str) -> list[dict[str, Any]]:
         """
         Use the ANT API to search for a film title and
         return the first URL if found, else a NOT FOUND string
         """
-        url = "https://anthelion.me/api.php"
 
-        if self.api_key == "":
-            raise ValueError(
+        if not self.api_key:
+            logging.error(
                 "The API key entered is blank, please re-run and enter a valid API key"
             )
+            raise SystemExit("Exiting due to blank API key")
 
         payload = {
             "api_key": self.api_key,
@@ -228,7 +245,7 @@ class FilmSearcher:
             "o": "json",
         }
 
-        response = self.session.get(url, params=payload)
+        response = self.session.get(self.ant_url, params=payload)
         try:
             response.raise_for_status()
             response_json = response.json()
@@ -256,18 +273,7 @@ class FilmSearcher:
             logging.error("The following error occured: %s", err)
             raise SystemExit(err)
 
-        if response_json["response"]["total"] == 0:
-            return self.not_found_value
-        else:
+        if response_json["response"]["total"] > 0:
             return response_json["item"]
-
-    def replace_word_and_re_search(self, film_title, regex_pattern, replacement):
-        cleaned_film_title = re.sub(
-            regex_pattern,
-            replacement,
-            film_title,
-        )
-        logging.info("-- Searching for %s as well...", cleaned_film_title)
-        film_check = self.search_for_film_title_on_ant(cleaned_film_title)
-
-        return film_check
+        else:
+            return []
