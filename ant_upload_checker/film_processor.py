@@ -59,7 +59,7 @@ class FilmProcessor:
         guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
         film_titles = self.get_formatted_titles_from_guessed_films(guessed_films)
         film_resolutions = self.get_film_resolutions_from_guessed_films(guessed_films)
-        film_codecs = self.get_codecs_from_guessed_films(guessed_films)
+        film_codecs = self.get_codec_from_guessed_films(guessed_films)
         film_sources = self.get_source_from_guessed_films(guessed_films)
         release_groups = self.get_release_groups_from_guessed_films(guessed_films)
 
@@ -232,7 +232,7 @@ class FilmProcessor:
 
         return film_resolutions
 
-    def get_codecs_from_guessed_films(
+    def get_codec_from_guessed_films(
         self, guessed_films: list[MatchesDict]
     ) -> list[str]:
         film_codecs = [
@@ -240,7 +240,9 @@ class FilmProcessor:
             for film in guessed_films
         ]
 
-        return film_codecs
+        film_codecs_cleaned = [re.sub("\.", "", codec) for codec in film_codecs]
+
+        return film_codecs_cleaned
 
     def get_source_from_guessed_films(
         self, guessed_films: list[MatchesDict]

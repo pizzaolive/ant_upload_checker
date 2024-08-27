@@ -303,16 +303,17 @@ expected_resolution_values = [
 def test_check_if_film_resolution_exists_on_ant(test_input, test_output):
     fs = FilmSearcher("test", "test_api_key")
 
-    actual_return = fs.check_if_resolution_exists_on_ant(test_input[0], test_input[1])
+    actual_return = fs.check_remaining_dupe_properties(test_input[0], test_input[1])
 
     assert actual_return == test_output
 
 
 test_values = [
-    ("file_path", "1080p", []),
+    ("file_path", "1080p", "H264", []),
     (
         "C:/films/test_film_name.mkv",
         "1080p",
+        "H264",
         [
             {
                 "guid": "test_link",
@@ -323,9 +324,10 @@ test_values = [
     (
         "C:/films/test_film_name_2.mkv",
         "1080p",
+        "H264",
         [
             {
-                "guid": "test_link",
+                "guid": "test_link_2",
                 "files": [
                     {"size": "1", "name": "unwanted_file.nfo"},
                     {"size": "100", "name": "test_film_name_2.mkv"},
@@ -337,6 +339,7 @@ test_values = [
 expected_values = [
     "NOT FOUND",
     "Exact filename already exists on ANT: test_link",
+    "Exact filename already exists on ANT: test_link_2",
 ]
 
 
@@ -348,7 +351,7 @@ def test_check_if_film_is_duplicate(test_input, test_output):
     fs = FilmSearcher("test", "test_api_key")
 
     actual_return = fs.check_if_film_is_duplicate(
-        test_input[0], test_input[1], test_input[2]
+        test_input[0], test_input[1], test_input[2], test_input[3]
     )
 
     assert actual_return == test_output

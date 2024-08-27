@@ -61,31 +61,43 @@ class FilmSearcher:
 
         return films_checked_on_ant
 
-    def check_if_resolution_exists_on_ant(
-        self, film_resolution: str, api_response: list[dict[str, Any]]
+    def check_remaining_dupe_properties(
+        self, resolution: str, codec: str, api_response: list[dict[str, Any]]
     ) -> str:
 
-        if not film_resolution:
-            ant_url_suffix = "On ANT, but could not get resolution from file name:"
-
-            if api_response:
-                ant_url_info = f"{ant_url_suffix} {api_response[0].get('guid',self.guid_missing_message)}"
-            else:
-                ant_url_info = f"{ant_url_suffix} {self.guid_missing_message}"
-
-            return ant_url_info
+        if not resolution and not codec:
+            ant_info = (
+                f"Unable to dupe check film properties: on ANT, but could not get resolution or codec from file name. "
+                f"{api_response[0].get('guid',self.guid_missing_message)}"
+            )
+            return ant_info
 
         for existing_upload in api_response:
-            if existing_upload.get("resolution") == film_resolution:
-                return f"Resolution already uploaded: {existing_upload.get('guid',self.guid_missing_message)}"
+            existing_resolution = existing_upload.get("resolution", "")
+            existing_codec = existing_upload.get("codec", "")
+            existing_guid = existing_upload.get("guid", self.guid_missing_message)
 
-        return f"On ANT, but this resolution is missing from ANT"
+            if not codec and resolution and existing_resolution == resolution:
+                return (
+                    f"Partial dupe check: resolution ({resolution}) already exists, but could not get codec from file name. "
+                    f": {existing_guid}"
+                )
+            elif not resolution and codec and existing_codec == codec:
+                return (
+                    f"Partial dupe check: codec ({codec}) already exists, but could not get resolution from file name. "
+                    f": {existing_guid}"
+                )
+
+            if resolution == existing_resolution and codec == existing_codec:
+                return f"Duplicate - film resolution ({resolution}) and codec ({codec}) already exists on ANT: {existing_guid}"
+
+        return f"Not a duplicate - film resolution ({resolution}) AND codec ({codec}) does not already exist on ANT"
 
     def check_if_films_can_be_uploaded(self, processed_films: pd.DataFrame):
         processed_films = processed_films.copy()
         processed_films["Already on ANT?"] = processed_films.apply(
             lambda x: self.check_if_film_is_duplicate(
-                x["Full file path"], x["Resolution"], x["API response"]
+                x["Full file path"], x["Resolution"], x["Codec"], x["API response"]
             ),
             axis=1,
         )
@@ -96,6 +108,7 @@ class FilmSearcher:
         self,
         full_file_path: str,
         resolution: str,
+        codec: str,
         api_response: list[dict[str, Any]],
     ) -> str:
         if not api_response:
@@ -109,7 +122,7 @@ class FilmSearcher:
         if filename_info_if_match is not None:
             return filename_info_if_match
 
-        return self.check_if_resolution_exists_on_ant(resolution, api_response)
+        return self.check_remaining_dupe_properties(resolution, codec, api_response)
 
     def check_if_filename_exists_on_ant(
         self, file_name: str, api_response: list[dict[str, Any]]
@@ -120,7 +133,7 @@ class FilmSearcher:
             if uploaded_files:
                 for file_info in uploaded_files:
                     if file_name == file_info.get("name", ""):
-                        return f"Exact filename already exists on ANT: {existing_upload.get('guid',self.guid_missing_message)}"
+                        return f"Duplicate - exact filename already exists on ANT: {existing_upload.get('guid',self.guid_missing_message)}"
 
     def check_if_film_exists_on_ant(self, film_title: str) -> list[dict[str, Any]]:
         """
