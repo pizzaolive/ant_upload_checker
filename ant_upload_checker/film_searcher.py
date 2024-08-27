@@ -67,7 +67,7 @@ class FilmSearcher:
 
         if not resolution and not codec:
             ant_info = (
-                f"Unable to dupe check film properties: on ANT, but could not get resolution or codec from file name. "
+                f"Unable to dupe check film properties: on ANT, but could not get resolution or codec from file name "
                 f"{api_response[0].get('guid',self.guid_missing_message)}"
             )
             return ant_info
@@ -79,19 +79,19 @@ class FilmSearcher:
 
             if not codec and resolution and existing_resolution == resolution:
                 return (
-                    f"Partial dupe check: resolution ({resolution}) already exists, but could not get codec from file name. "
-                    f": {existing_guid}"
+                    f"Partial dupe check: resolution ({resolution}) already exists, but could not get codec from file name: "
+                    f"{existing_guid}"
                 )
             elif not resolution and codec and existing_codec == codec:
                 return (
-                    f"Partial dupe check: codec ({codec}) already exists, but could not get resolution from file name. "
-                    f": {existing_guid}"
+                    f"Partial dupe check: codec ({codec}) already exists, but could not get resolution from file name: "
+                    f"{existing_guid}"
                 )
 
             if resolution == existing_resolution and codec == existing_codec:
                 return f"Duplicate - film resolution ({resolution}) and codec ({codec}) already exists on ANT: {existing_guid}"
 
-        return f"Not a duplicate - film resolution ({resolution}) AND codec ({codec}) does not already exist on ANT"
+        return f"Not a duplicate - film resolution ({resolution}) and codec ({codec}) does not already exist on ANT"
 
     def check_if_films_can_be_uploaded(self, processed_films: pd.DataFrame):
         processed_films = processed_films.copy()

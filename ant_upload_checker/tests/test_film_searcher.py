@@ -43,6 +43,7 @@ def test_check_if_films_exist_on_ant(
             "Film size (GB)": [1.11, 1.22, 1.33, 1.44],
             "Parsed film title": ["Test", "Another film", "test film", "New film"],
             "Resolution": ["1080p", "1080p", "1080p", "1080p"],
+            "Codec": ["H264", "H264", "H264", "H264"],
             "Already on ANT?": ["link/torrentid=1", "NOT FOUND", np.nan, np.nan],
         }
     )
@@ -70,6 +71,7 @@ def test_check_if_films_exist_on_ant(
                 "test film",
             ],
             "Resolution": ["1080p", "1080p", "1080p", "1080p"],
+            "Codec": ["H264", "H264", "H264", "H264"],
             "Already on ANT?": [
                 "NOT FOUND",
                 "NOT FOUND",
@@ -286,28 +288,6 @@ def test_search_for_film_if_contains_aka_false(
     assert f"Searching for Test film as well" not in caplog.text
 
 
-test_resolution_values = [
-    ("", [{"guid": "test_link"}]),
-    ("", []),
-]
-expected_resolution_values = [
-    "On ANT, but could not get resolution from file name: test_link",
-    "On ANT, but could not get resolution from file name: (Failed to extract URL from API response)",
-]
-
-
-@pytest.mark.parametrize(
-    ("test_input", "test_output"),
-    zip(test_resolution_values, expected_resolution_values),
-)
-def test_check_if_film_resolution_exists_on_ant(test_input, test_output):
-    fs = FilmSearcher("test", "test_api_key")
-
-    actual_return = fs.check_remaining_dupe_properties(test_input[0], test_input[1])
-
-    assert actual_return == test_output
-
-
 test_values = [
     ("file_path", "1080p", "H264", []),
     (
@@ -335,11 +315,115 @@ test_values = [
             }
         ],
     ),
+    (
+        "C:/films/testing_film.mkv",
+        "720p",
+        "H264",
+        [
+            {
+                "guid": "test_link",
+                "files": [
+                    {"size": "1", "name": "testing_filmy.mkv"},
+                ],
+                "resolution": "720p",
+                "codec": "H265",
+            },
+            {  # duplicate resolution, codec
+                "guid": "test_link",
+                "files": [
+                    {"size": "1", "name": "testing_film_different_name.mkv"},
+                ],
+                "resolution": "720p",
+                "codec": "H264",
+            },
+        ],
+    ),
+    (
+        "C:/films/testing_film.mkv",
+        "2160p",
+        "H265",
+        [
+            {
+                "guid": "test_link",
+                "files": [
+                    {"size": "1", "name": "testing_film_non_exact_filename_match.mkv"},
+                ],
+                "resolution": "2160p",
+                "codec": "H265",
+            },
+        ],
+    ),
+    (
+        "C:/films/testing_film.mkv",
+        "2160p",
+        "H265",
+        [
+            {
+                "guid": "test_link",
+                "files": [
+                    {"size": "1", "name": "testing_film_non_exact_filename_match.mkv"},
+                ],
+                "resolution": "2160p",
+                "codec": "H264",  # not a dupe, as codec differs
+            },
+        ],
+    ),
+    (
+        "C:/films/testing_film.mkv",
+        "1080p",
+        "H264",
+        [
+            {
+                "guid": "test_link",
+                "files": [
+                    {"size": "1", "name": "testing_film_non_exact_filename_match.mkv"},
+                ],
+                "resolution": "2160p",  # not a dupe, as resolution differs
+                "codec": "H264",
+            },
+        ],
+    ),
+    (
+        "C:/films/testing_film.mkv",
+        "",  # missing resolution from guessed film
+        "H264",
+        [
+            {
+                "guid": "test_link",
+                "files": [
+                    {"size": "1", "name": "testing_film_non_exact_filename_match.mkv"},
+                ],
+                "resolution": "1080p",
+                "codec": "H264",
+            },
+        ],
+    ),
+    (
+        "C:/films/testing_film.mkv",
+        "1080p",
+        "",  # missing codec from guessed film
+        [
+            {
+                "guid": "test_link",
+                "files": [
+                    {"size": "1", "name": "testing_film_non_exact_filename_match.mkv"},
+                ],
+                "resolution": "1080p",
+                "codec": "H264",
+            },
+        ],
+    ),
 ]
 expected_values = [
     "NOT FOUND",
-    "Exact filename already exists on ANT: test_link",
-    "Exact filename already exists on ANT: test_link_2",
+    "Duplicate - exact filename already exists on ANT: test_link",
+    "Duplicate - exact filename already exists on ANT: test_link_2",
+    "Duplicate - film resolution (720p) and codec (H264) already exists on ANT: test_link",
+    "Duplicate - film resolution (2160p) and codec (H265) already exists on ANT: test_link",
+    "Not a duplicate - film resolution (2160p) and codec (H265) does not already exist on ANT",
+    "Not a duplicate - film resolution (1080p) and codec (H264) does not already exist on ANT",
+    "Partial dupe check: codec (H264) already exists, but could not get resolution from file name: test_link",
+    "Partial dupe check: resolution (1080p) already exists, but could not get codec from file name: test_link",
 ]
 
 
