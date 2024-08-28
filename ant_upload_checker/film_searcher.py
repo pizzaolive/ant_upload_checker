@@ -61,43 +61,72 @@ class FilmSearcher:
 
         return films_checked_on_ant
 
-    def check_remaining_dupe_properties(
-        self, resolution: str, codec: str, api_response: list[dict[str, Any]]
-    ) -> str:
-
-        if not resolution and not codec:
-            ant_info = (
-                f"Unable to dupe check film properties: on ANT, but could not get resolution or codec from file name "
-                f"{api_response[0].get('guid',self.guid_missing_message)}"
-            )
-            return ant_info
-
+    def perform_partial_dupe_check(
+        self, dupe_properties: dict[str, str], api_response: list[dict[str, Any]]
+    ):
         for existing_upload in api_response:
-            existing_resolution = existing_upload.get("resolution", "")
-            existing_codec = existing_upload.get("codec", "")
             existing_guid = existing_upload.get("guid", self.guid_missing_message)
 
-            if not codec and resolution and existing_resolution == resolution:
-                return (
-                    f"Partial dupe check: resolution ({resolution}) already exists, but could not get codec from file name: "
-                    f"{existing_guid}"
-                )
-            elif not resolution and codec and existing_codec == codec:
-                return (
-                    f"Partial dupe check: codec ({codec}) already exists, but could not get resolution from file name: "
-                    f"{existing_guid}"
-                )
+            if not all(dupe_properties.values()):
 
-            if resolution == existing_resolution and codec == existing_codec:
-                return f"Duplicate - film resolution ({resolution}) and codec ({codec}) already exists on ANT: {existing_guid}"
+            # return ant_info
+            # if not codec and resolution and existing_resolution == resolution:
+            #     return (
+            #         f"Partial dupe check: resolution ({resolution}) already exists, but could not get codec from file name: "
+            #         f"{existing_guid}"
+            #     )
+            # elif not resolution and codec and existing_codec == codec:
+            #     return (
+            #         f"Partial dupe check: codec ({codec}) already exists, but could not get resolution from file name: "
+            #         f"{existing_guid}"
+            #     )
+
+    def perform_full_dupe_check(
+        self, dupe_properties: dict[str, str], api_response: list[dict[str, Any]]
+    ):
+        for existing_upload in api_response:
+            existing_guid = existing_upload.get("guid", self.guid_missing_message)
+
+            is_duplicate = all(
+                dupe_properties[property] == existing_upload.get(property, "")
+                for property in dupe_properties
+            )
+            if is_duplicate:
+                return f"Duplicate - a film with the same properties ({'/'.join(dupe_properties.values())}) already exists: {existing_guid}"
 
         return f"Not a duplicate - film resolution ({resolution}) and codec ({codec}) does not already exist on ANT"
+
+    def check_remaining_dupe_properties(
+        self,
+        resolution: str,
+        codec: str,
+        source: str,
+        api_response: list[dict[str, Any]],
+    ) -> str:
+
+        dupe_properties = {"resolution": resolution, "codec": codec, "source": source}
+        missing_properties = [k for k, v in dupe_properties.items() if not v]
+
+        if missing_properties:
+            if len(missing_properties) == len(dupe_properties):
+                return (
+                    f"Unable to dupe check: on ANT, but could not get {'/'.join(dupe_properties.keys())} from filename. "
+                    f"{api_response[0].get('guid',self.guid_missing_message)}"
+                )
+            else:            
+                return self.perform_partial_dupe_check()
+            
+        return self.perform_full_dupe_check()
 
     def check_if_films_can_be_uploaded(self, processed_films: pd.DataFrame):
         processed_films = processed_films.copy()
         processed_films["Already on ANT?"] = processed_films.apply(
-            lambda x: self.check_if_film_is_duplicate(
-                x["Full file path"], x["Resolution"], x["Codec"], x["API response"]
+            lambda film: self.check_if_film_is_duplicate(
+                film["Full file path"],
+                film["Resolution"],
+                film["Codec"],
+                film["Source"],
+                film["API response"],
             ),
             axis=1,
         )
@@ -109,6 +138,7 @@ class FilmSearcher:
         full_file_path: str,
         resolution: str,
         codec: str,
+        source: str,
         api_response: list[dict[str, Any]],
     ) -> str:
         if not api_response:
@@ -122,7 +152,9 @@ class FilmSearcher:
         if filename_info_if_match is not None:
             return filename_info_if_match
 
-        return self.check_remaining_dupe_properties(resolution, codec, api_response)
+        return self.check_remaining_dupe_properties(
+            resolution, codec, source, api_response
+        )
 
     def check_if_filename_exists_on_ant(
         self, file_name: str, api_response: list[dict[str, Any]]
