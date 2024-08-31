@@ -32,7 +32,7 @@ def test_check_if_films_exist_on_ant(
 ):
     # pre dupe check, torrentid links would be skipped from searching
     # post 1.7.0, films are only skipped from searching
-    # if they are not: NOT FOUND or not duplicates
+    # if start with Duplicate:
     # (as these may have since been uploaded by others)
 
     caplog.set_level(logging.INFO)
@@ -102,6 +102,7 @@ def test_check_if_films_exist_on_ant(
                 "Resolution already uploaded: link/torrentid=1",
                 np.nan,
             ],
+            "Should skip": [True, False, False, False, False],
             "API response": [[], [], [], [], []],
         }
     )

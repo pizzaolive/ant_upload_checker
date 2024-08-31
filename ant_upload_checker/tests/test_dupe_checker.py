@@ -45,7 +45,7 @@ test_values = [
                 ],
                 "resolution": "720p",
                 "codec": "H265",
-                "source": "Blu-ray",
+                "media": "Blu-ray",
             },
             {  # duplicate resolution, codec, source
                 "guid": "test_link",
@@ -54,7 +54,7 @@ test_values = [
                 ],
                 "resolution": "720p",
                 "codec": "H264",
-                "source": "Blu-ray",
+                "media": "Blu-ray",
             },
         ],
     ),
@@ -71,7 +71,7 @@ test_values = [
                 ],
                 "resolution": "2160p",
                 "codec": "H265",
-                "source": "Blu-ray",
+                "media": "BLU-RAY",
             },
         ],
     ),
@@ -88,7 +88,7 @@ test_values = [
                 ],
                 "resolution": "2160p",
                 "codec": "H264",  # not a dupe, as codec differs
-                "source": "Blu-ray",
+                "media": "Blu-ray",
             },
         ],
     ),
@@ -105,7 +105,7 @@ test_values = [
                 ],
                 "resolution": "2160p",  # not a dupe, as resolution differs
                 "codec": "H264",
-                "source": "Blu-ray",
+                "media": "Blu-ray",
             },
         ],
     ),
@@ -122,7 +122,7 @@ test_values = [
                 ],
                 "resolution": "1080p",
                 "codec": "H264",
-                "source": "Blu-ray",
+                "media": "Blu-ray",
             },
         ],
     ),
@@ -139,7 +139,24 @@ test_values = [
                 ],
                 "resolution": "1080p",
                 "codec": "H264",
-                "source": "Blu-ray",
+                "media": "Blu-ray",
+            },
+        ],
+    ),
+    (
+        "C:/films/testing_film.mkv",
+        "",  # missing
+        "",  # missing codec from guessed film
+        "Web",
+        [
+            {
+                "guid": "test_link",
+                "files": [
+                    {"size": "1", "name": "testing_film_non_exact_filename_match.mkv"},
+                ],
+                "resolution": "1080p",
+                "codec": "H264",
+                "media": "WEB",
             },
         ],
     ),
@@ -153,7 +170,8 @@ expected_values = [
     "Not a duplicate: a film with 2160p/H265/Blu-ray does not already exist",
     "Not a duplicate: a film with 1080p/H264/Blu-ray does not already exist",
     "Partial duplicate: a film with H264/Blu-ray already exists. Could not extract and check resolution from filename. test_link",
-    "Partial duplicate: a film with 1080p already exists. Could not extract and check codec/source from filename. test_link",
+    "Partial duplicate: a film with 1080p already exists. Could not extract and check codec/media from filename. test_link",
+    "Partial duplicate: a film with Web already exists. Could not extract and check resolution/codec from filename. test_link",
 ]
 
 

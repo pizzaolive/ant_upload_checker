@@ -114,6 +114,7 @@ class FilmProcessor:
             pd.concat([current_film_list, existing_film_list_formatted])
             .drop_duplicates(subset=["Parsed film title"], keep="last")
             .reset_index(drop=True)
+            .fillna("")  # Fill NAs with empty strings for later dupe handling
         )
 
         self.stop_process_if_all_films_already_in_existing_csv(combined_film_list)
@@ -124,11 +125,13 @@ class FilmProcessor:
         self, combined_film_list_df: pd.DataFrame
     ) -> None:
         if all(
-            combined_film_list_df["Already on ANT?"].str.contains("torrentid", na=False)
+            combined_film_list_df["Already on ANT?"].str.contains(
+                r"^Duplicate:", regex=True, na=False
+            )
         ):
             logging.info(
-                "All films have already been searched and found on ANT in the previous "
-                "output file.\n\nEnding the process early.\n\n----"
+                "All films have already been searched and are duplicates. "
+                "\n\nEnding the process early.\n\n----"
             )
             sys.exit(0)
 
@@ -240,7 +243,7 @@ class FilmProcessor:
             for film in guessed_films
         ]
 
-        film_codecs_cleaned = [re.sub("\.", "", codec) for codec in film_codecs]
+        film_codecs_cleaned = [re.sub(r"\.", "", codec) for codec in film_codecs]
 
         return film_codecs_cleaned
 

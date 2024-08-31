@@ -9,10 +9,13 @@ class DupeChecker:
         self.guid_missing_message: str = "(Failed to extract URL from API response)"
         self.not_found_value: str = "NOT FOUND"
 
-    def check_if_films_can_be_uploaded(self):
+    def check_if_films_can_be_uploaded(self) -> pd.DataFrame:
         dupe_checked_films = self.films_to_dupe_check.copy()
 
-        dupe_checked_films["Already on ANT?"] = dupe_checked_films.apply(
+        films_to_skip = dupe_checked_films.loc[dupe_checked_films["Should skip"]]
+        films_to_dupe_check = dupe_checked_films.loc[~dupe_checked_films["Should skip"]]
+
+        dupe_checked_films["Already on ANT?"] = films_to_dupe_check.apply(
             lambda film: self.check_if_film_is_duplicate(
                 film["Full file path"],
                 film["Resolution"],
@@ -23,9 +26,13 @@ class DupeChecker:
             axis=1,
         )
 
-        dupe_checked_films.drop("API response", axis=1)
+        combined_films = (
+            pd.concat([films_to_skip, films_to_dupe_check])
+            .sort_index()
+            .drop(["Should skip", "API response"], axis=1)
+        )
 
-        return dupe_checked_films
+        return combined_films
 
     def check_if_film_is_duplicate(
         self,
@@ -46,7 +53,7 @@ class DupeChecker:
         if filename_info_if_match is not None:
             return filename_info_if_match
 
-        dupe_properties = {"resolution": resolution, "codec": codec, "source": source}
+        dupe_properties = {"resolution": resolution, "codec": codec, "media": source}
         return self.check_remaining_dupe_properties(dupe_properties, api_response)
 
     def check_if_filename_exists_on_ant(
@@ -95,7 +102,8 @@ class DupeChecker:
             existing_guid = existing_upload.get("guid", self.guid_missing_message)
 
             is_duplicate = all(
-                available_properties[prop] == existing_upload.get(prop)
+                available_properties[prop].lower()
+                == existing_upload.get(prop, "").lower()
                 for prop in available_properties
             )
             if is_duplicate:

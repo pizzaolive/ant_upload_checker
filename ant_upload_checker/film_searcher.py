@@ -29,15 +29,20 @@ class FilmSearcher:
         search for these on ANT, indicating whether they exist on ANT or not.
         """
 
-        should_skip_film = self.film_list_df["Already on ANT?"].str.contains(
-            r"^Duplicate:", regex=True, na=False
-        )
-        films_to_skip = self.film_list_df.loc[should_skip_film]
+        self.film_list_df["Should skip"] = self.film_list_df[
+            "Already on ANT?"
+        ].str.contains(r"^Duplicate:", regex=True, na=False)
+
+        films_to_skip = self.film_list_df.loc[self.film_list_df["Should skip"]]
 
         if not films_to_skip.empty:
             logging.info(
                 "Skipping %s films already found on ANT in the previous output file...",
                 len(films_to_skip),
+            )
+        else:
+            logging.info(
+                "No films were skipped as any existing film list did not contain duplicates."
             )
 
         films_to_process = (

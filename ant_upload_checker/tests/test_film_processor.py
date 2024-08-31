@@ -455,7 +455,7 @@ def test_combine_current_film_list_with_existing_csv(tmp_path, caplog):
             "Codec": ["test", "test"],
             "Source": ["test", "test"],
             "Release group": ["test", "test"],
-            "Already on ANT?": [pd.NA, "NOT FOUND"],
+            "Already on ANT?": ["", "NOT FOUND"], # Note first np.nan was filled with empty string
         }
     ).astype(
         {
