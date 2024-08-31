@@ -10,7 +10,7 @@ LOGGER = logging.getLogger(__name__)
 @pytest.fixture
 def return_mock_search_for_film_on_ant_not_found(monkeypatch):
     def mockreturn(test_arg, test_arg_2):
-        return None
+        return []
 
     monkeypatch.setattr(
         "test_film_searcher.FilmSearcher.search_for_film_title_on_ant", mockreturn
@@ -20,7 +20,7 @@ def return_mock_search_for_film_on_ant_not_found(monkeypatch):
 @pytest.fixture
 def return_mock_search_for_film_on_ant_torrentid(monkeypatch):
     def mockreturn(test_arg, test_arg_2):
-        return "url/torrentid=1"
+        return [{"guid": "url/torrentid=1"}]
 
     monkeypatch.setattr(
         "test_film_searcher.FilmSearcher.search_for_film_title_on_ant", mockreturn
@@ -30,6 +30,11 @@ def return_mock_search_for_film_on_ant_torrentid(monkeypatch):
 def test_check_if_films_exist_on_ant(
     return_mock_search_for_film_on_ant_not_found, caplog
 ):
+    # pre dupe check, torrentid links would be skipped from searching
+    # post 1.7.0, films are only skipped from searching
+    # if they are not: NOT FOUND or not duplicates
+    # (as these may have since been uploaded by others)
+
     caplog.set_level(logging.INFO)
 
     test_df = pd.DataFrame(
@@ -39,13 +44,26 @@ def test_check_if_films_exist_on_ant(
                 "C:/Movies/Another film (2020)/Another film (2020).mkv",
                 "C:/Movies/Test film (2020)/Test film (2020).mkv",
                 "C:/Movies/New film (2020)/New film (2020).mkv",
+                "C:/Movies/Testing film 1080p H264 Web-DL (2020).mkv",
             ],
-            "Film size (GB)": [1.11, 1.22, 1.33, 1.44],
-            "Parsed film title": ["Test", "Another film", "test film", "New film"],
-            "Resolution": ["1080p", "1080p", "1080p", "1080p"],
-            "Codec": ["H264", "H264", "H264", "H264"],
-            "Source": ["Blu-ray", "Blu-ray", "Blu-ray", "Web"],
-            "Already on ANT?": ["link/torrentid=1", "NOT FOUND", np.nan, np.nan],
+            "Film size (GB)": [1.11, 1.22, 1.33, 1.44, 2.0],
+            "Parsed film title": [
+                "Test",
+                "Another film",
+                "test film",
+                "New film",
+                "Testing film",
+            ],
+            "Resolution": ["1080p", "1080p", "1080p", "1080p", "1080p"],
+            "Codec": ["H264", "H264", "H264", "H264", "H264"],
+            "Source": ["Blu-ray", "Blu-ray", "Blu-ray", "Web", "Web"],
+            "Already on ANT?": [
+                "link/torrentid=1",
+                "NOT FOUND",
+                np.nan,
+                np.nan,
+                "Not a duplicate: a film with 1080p/H264/Web does not already exist",
+            ],
         }
     )
 
@@ -80,6 +98,7 @@ def test_check_if_films_exist_on_ant(
                 "link/torrentid=1",
                 "NOT FOUND",
             ],
+            "API response": [[], [], [{"guid": "link/torrentid=1"}], [], []],
         }
     )
 
@@ -288,171 +307,3 @@ def test_search_for_film_if_contains_aka_false(
     assert actual_return == []
     assert "Film title may contain an alternate title" not in caplog.text
     assert f"Searching for Test film as well" not in caplog.text
-
-
-test_values = [
-    ("file_path", "1080p", "H264", "Blu-ray", []),
-    (
-        "C:/films/test_film_name.mkv",
-        "1080p",
-        "H264",
-        "Blu-ray",
-        [
-            {
-                "guid": "test_link",
-                "files": [{"size": "100", "name": "test_film_name.mkv"}],
-            }
-        ],
-    ),
-    (
-        "C:/films/test_film_name_2.mkv",
-        "1080p",
-        "H264",
-        "Blu-ray",
-        [
-            {
-                "guid": "test_link_2",
-                "files": [
-                    {"size": "1", "name": "unwanted_file.nfo"},
-                    {"size": "100", "name": "test_film_name_2.mkv"},
-                ],
-            }
-        ],
-    ),
-    (
-        "C:/films/testing_film.mkv",
-        "720p",
-        "H264",
-        "Blu-ray",
-        [
-            {
-                "guid": "test_link",
-                "files": [
-                    {"size": "1", "name": "testing_filmy.mkv"},
-                ],
-                "resolution": "720p",
-                "codec": "H265",
-                "source": "Blu-ray",
-            },
-            {  # duplicate resolution, codec, source
-                "guid": "test_link",
-                "files": [
-                    {"size": "1", "name": "testing_film_different_name.mkv"},
-                ],
-                "resolution": "720p",
-                "codec": "H264",
-                "source": "Blu-ray",
-            },
-        ],
-    ),
-    (
-        "C:/films/testing_film.mkv",
-        "2160p",
-        "H265",
-        "Blu-ray",
-        [
-            {
-                "guid": "test_link",
-                "files": [
-                    {"size": "1", "name": "testing_film_non_exact_filename_match.mkv"},
-                ],
-                "resolution": "2160p",
-                "codec": "H265",
-                "source": "Blu-ray",
-            },
-        ],
-    ),
-    (
-        "C:/films/testing_film.mkv",
-        "2160p",
-        "H265",
-        "Blu-ray",
-        [
-            {
-                "guid": "test_link",
-                "files": [
-                    {"size": "1", "name": "testing_film_non_exact_filename_match.mkv"},
-                ],
-                "resolution": "2160p",
-                "codec": "H264",  # not a dupe, as codec differs
-                "source": "Blu-ray",
-            },
-        ],
-    ),
-    (
-        "C:/films/testing_film.mkv",
-        "1080p",
-        "H264",
-        "Blu-ray",
-        [
-            {
-                "guid": "test_link",
-                "files": [
-                    {"size": "1", "name": "testing_film_non_exact_filename_match.mkv"},
-                ],
-                "resolution": "2160p",  # not a dupe, as resolution differs
-                "codec": "H264",
-                "source": "Blu-ray",
-            },
-        ],
-    ),
-    (
-        "C:/films/testing_film.mkv",
-        "",  # missing resolution from guessed film
-        "H264",
-        "Blu-ray",
-        [
-            {
-                "guid": "test_link",
-                "files": [
-                    {"size": "1", "name": "testing_film_non_exact_filename_match.mkv"},
-                ],
-                "resolution": "1080p",
-                "codec": "H264",
-                "source": "Blu-ray",
-            },
-        ],
-    ),
-    (
-        "C:/films/testing_film.mkv",
-        "1080p",
-        "",  # missing codec from guessed film
-        "",  # missing source from guessed film
-        [
-            {
-                "guid": "test_link",
-                "files": [
-                    {"size": "1", "name": "testing_film_non_exact_filename_match.mkv"},
-                ],
-                "resolution": "1080p",
-                "codec": "H264",
-                "source": "Blu-ray",
-            },
-        ],
-    ),
-]
-expected_values = [
-    "NOT FOUND",
-    "Duplicate: exact filename already exists: test_link",
-    "Duplicate: exact filename already exists: test_link_2",
-    "Duplicate: a film with 720p/H264/Blu-ray already exists: test_link",
-    "Duplicate: a film with 2160p/H265/Blu-ray already exists: test_link",
-    "Not a duplicate: a film with 2160p/H265/Blu-ray does not already exist",
-    "Not a duplicate: a film with 1080p/H264/Blu-ray does not already exist",
-    "Partial duplicate: a film with H264/Blu-ray already exists. Could not extract and check resolution from filename. test_link",
-    "Partial duplicate: a film with 1080p already exists. Could not extract and check codec/source from filename. test_link",
-]
-
-
-@pytest.mark.parametrize(
-    ("test_input", "test_output"),
-    zip(test_values, expected_values),
-)
-def test_check_if_film_is_duplicate(test_input, test_output):
-    fs = FilmSearcher("test", "test_api_key")
-
-    actual_return = fs.check_if_film_is_duplicate(
-        test_input[0], test_input[1], test_input[2], test_input[3], test_input[4]
-    )
-
-    assert actual_return == test_output
