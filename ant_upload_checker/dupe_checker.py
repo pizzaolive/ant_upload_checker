@@ -13,9 +13,9 @@ class DupeChecker:
         dupe_checked_films = self.films_to_dupe_check.copy()
 
         films_to_skip = dupe_checked_films.loc[dupe_checked_films["Should skip"]]
-        films_to_dupe_check = dupe_checked_films.loc[~dupe_checked_films["Should skip"]]
+        films_to_dupe_check = dupe_checked_films.loc[~dupe_checked_films["Should skip"]].copy()
 
-        dupe_checked_films["Already on ANT?"] = films_to_dupe_check.apply(
+        films_to_dupe_check["Already on ANT?"] = films_to_dupe_check.apply(
             lambda film: self.check_if_film_is_duplicate(
                 film["Full file path"],
                 film["Resolution"],
