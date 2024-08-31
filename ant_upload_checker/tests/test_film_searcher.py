@@ -44,6 +44,7 @@ def test_check_if_films_exist_on_ant(
             "Parsed film title": ["Test", "Another film", "test film", "New film"],
             "Resolution": ["1080p", "1080p", "1080p", "1080p"],
             "Codec": ["H264", "H264", "H264", "H264"],
+            "Source": ["Blu-ray", "Blu-ray", "Blu-ray", "Web"],
             "Already on ANT?": ["link/torrentid=1", "NOT FOUND", np.nan, np.nan],
         }
     )
@@ -72,6 +73,7 @@ def test_check_if_films_exist_on_ant(
             ],
             "Resolution": ["1080p", "1080p", "1080p", "1080p"],
             "Codec": ["H264", "H264", "H264", "H264"],
+            "Source": ["Blu-ray", "Web", "Blu-ray", "Blu-ray"],
             "Already on ANT?": [
                 "NOT FOUND",
                 "NOT FOUND",
@@ -289,11 +291,12 @@ def test_search_for_film_if_contains_aka_false(
 
 
 test_values = [
-    ("file_path", "1080p", "H264", []),
+    ("file_path", "1080p", "H264", "Blu-ray", []),
     (
         "C:/films/test_film_name.mkv",
         "1080p",
         "H264",
+        "Blu-ray",
         [
             {
                 "guid": "test_link",
@@ -305,6 +308,7 @@ test_values = [
         "C:/films/test_film_name_2.mkv",
         "1080p",
         "H264",
+        "Blu-ray",
         [
             {
                 "guid": "test_link_2",
@@ -319,6 +323,7 @@ test_values = [
         "C:/films/testing_film.mkv",
         "720p",
         "H264",
+        "Blu-ray",
         [
             {
                 "guid": "test_link",
@@ -327,14 +332,16 @@ test_values = [
                 ],
                 "resolution": "720p",
                 "codec": "H265",
+                "source": "Blu-ray",
             },
-            {  # duplicate resolution, codec
+            {  # duplicate resolution, codec, source
                 "guid": "test_link",
                 "files": [
                     {"size": "1", "name": "testing_film_different_name.mkv"},
                 ],
                 "resolution": "720p",
                 "codec": "H264",
+                "source": "Blu-ray",
             },
         ],
     ),
@@ -342,6 +349,7 @@ test_values = [
         "C:/films/testing_film.mkv",
         "2160p",
         "H265",
+        "Blu-ray",
         [
             {
                 "guid": "test_link",
@@ -350,6 +358,7 @@ test_values = [
                 ],
                 "resolution": "2160p",
                 "codec": "H265",
+                "source": "Blu-ray",
             },
         ],
     ),
@@ -357,6 +366,7 @@ test_values = [
         "C:/films/testing_film.mkv",
         "2160p",
         "H265",
+        "Blu-ray",
         [
             {
                 "guid": "test_link",
@@ -365,6 +375,7 @@ test_values = [
                 ],
                 "resolution": "2160p",
                 "codec": "H264",  # not a dupe, as codec differs
+                "source": "Blu-ray",
             },
         ],
     ),
@@ -372,6 +383,7 @@ test_values = [
         "C:/films/testing_film.mkv",
         "1080p",
         "H264",
+        "Blu-ray",
         [
             {
                 "guid": "test_link",
@@ -380,6 +392,7 @@ test_values = [
                 ],
                 "resolution": "2160p",  # not a dupe, as resolution differs
                 "codec": "H264",
+                "source": "Blu-ray",
             },
         ],
     ),
@@ -387,6 +400,7 @@ test_values = [
         "C:/films/testing_film.mkv",
         "",  # missing resolution from guessed film
         "H264",
+        "Blu-ray",
         [
             {
                 "guid": "test_link",
@@ -395,6 +409,7 @@ test_values = [
                 ],
                 "resolution": "1080p",
                 "codec": "H264",
+                "source": "Blu-ray",
             },
         ],
     ),
@@ -402,6 +417,7 @@ test_values = [
         "C:/films/testing_film.mkv",
         "1080p",
         "",  # missing codec from guessed film
+        "",  # missing source from guessed film
         [
             {
                 "guid": "test_link",
@@ -410,20 +426,21 @@ test_values = [
                 ],
                 "resolution": "1080p",
                 "codec": "H264",
+                "source": "Blu-ray",
             },
         ],
     ),
 ]
 expected_values = [
     "NOT FOUND",
-    "Duplicate - exact filename already exists on ANT: test_link",
-    "Duplicate - exact filename already exists on ANT: test_link_2",
-    "Duplicate - film resolution (720p) and codec (H264) already exists on ANT: test_link",
-    "Duplicate - film resolution (2160p) and codec (H265) already exists on ANT: test_link",
-    "Not a duplicate - film resolution (2160p) and codec (H265) does not already exist on ANT",
-    "Not a duplicate - film resolution (1080p) and codec (H264) does not already exist on ANT",
-    "Partial dupe check: codec (H264) already exists, but could not get resolution from file name: test_link",
-    "Partial dupe check: resolution (1080p) already exists, but could not get codec from file name: test_link",
+    "Duplicate: exact filename already exists: test_link",
+    "Duplicate: exact filename already exists: test_link_2",
+    "Duplicate: a film with 720p/H264/Blu-ray already exists: test_link",
+    "Duplicate: a film with 2160p/H265/Blu-ray already exists: test_link",
+    "Not a duplicate: a film with 2160p/H265/Blu-ray does not already exist",
+    "Not a duplicate: a film with 1080p/H264/Blu-ray does not already exist",
+    "Partial duplicate: a film with H264/Blu-ray already exists. Could not extract and check resolution from filename. test_link",
+    "Partial duplicate: a film with 1080p already exists. Could not extract and check codec/source from filename. test_link",
 ]
 
 
@@ -435,7 +452,7 @@ def test_check_if_film_is_duplicate(test_input, test_output):
     fs = FilmSearcher("test", "test_api_key")
 
     actual_return = fs.check_if_film_is_duplicate(
-        test_input[0], test_input[1], test_input[2], test_input[3]
+        test_input[0], test_input[1], test_input[2], test_input[3], test_input[4]
     )
 
     assert actual_return == test_output

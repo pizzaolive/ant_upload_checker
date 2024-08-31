@@ -61,67 +61,55 @@ class FilmSearcher:
 
         return films_checked_on_ant
 
-    def perform_partial_dupe_check(
-        self, dupe_properties: dict[str, str], api_response: list[dict[str, Any]]
-    ):
-        properties_to_check = {k: v for k, v in dupe_properties if v}
-
+    def perform_dupe_check(
+        self,
+        available_properties: dict[str, str],
+        missing_properties: list[str],
+        api_response: list[dict[str, Any]],
+    ) -> str:
         """
-        Can definitely just condense this into one function with full dupe check
-        
+        With the available properties, check if the film is a full duplicate, partial duplicate,
+        or not a duplicate.
         """
 
-        for existing_upload in api_response:
-            existing_guid = existing_upload.get("guid", self.guid_missing_message)
-
-            is_partial_duplicate = all(
-                properties_to_check[prop] == existing_upload.get(prop)
-                for prop in properties_to_check
-            )
-            if is_partial_duplicate:
-                return (
-                    f"Partial dupe check: a film with {'/'.join(properties_to_check)} exists, "
-                    " but could not get other film properties from file name."
-                )
-
-    def perform_full_dupe_check(
-        self, dupe_properties: dict[str, str], api_response: list[dict[str, Any]]
-    ):
-        dupe_property_values = "/".join(dupe_properties.values())
+        available_properties_str = "/".join(available_properties.values())
 
         for existing_upload in api_response:
             existing_guid = existing_upload.get("guid", self.guid_missing_message)
 
             is_duplicate = all(
-                dupe_properties[property] == existing_upload.get(property, "")
-                for property in dupe_properties
+                available_properties[prop] == existing_upload.get(prop)
+                for prop in available_properties
             )
             if is_duplicate:
-                return f"Duplicate - a film with the same properties ({dupe_property_values}) already exists: {existing_guid}"
+                dupe_string = f"a film with {available_properties_str} already exists"
+                if missing_properties:
+                    return (
+                        f"Partial duplicate: {dupe_string}. Could not extract and check "
+                        f"{'/'.join(missing_properties)} from filename. {existing_guid}"
+                    )
+                else:
+                    return f"Duplicate: {dupe_string}: {existing_guid}"
 
-        return f"Not a duplicate - a film with {(dupe_property_values)} does not exist already"
+        return f"Not a duplicate: a film with {available_properties_str} does not already exist"
 
     def check_remaining_dupe_properties(
         self,
-        resolution: str,
-        codec: str,
-        source: str,
+        dupe_properties,
         api_response: list[dict[str, Any]],
     ) -> str:
-
-        dupe_properties = {"resolution": resolution, "codec": codec, "source": source}
         missing_properties = [k for k, v in dupe_properties.items() if not v]
+        available_properties = {k: v for k, v in dupe_properties.items() if v}
 
-        if missing_properties:
-            if len(missing_properties) == len(dupe_properties):
-                return (
-                    f"On ANT, but could not dupe check (could not extract {'/'.join(dupe_properties.keys())} from filename. "
-                    f"{api_response[0].get('guid',self.guid_missing_message)}"
-                )
-            else:
-                return self.perform_partial_dupe_check(dupe_properties, api_response)
+        if len(missing_properties) == len(dupe_properties):
+            return (
+                f"On ANT, but could not dupe check (could not extract {'/'.join(missing_properties)} from filename. "
+                f"{api_response[0].get('guid',self.guid_missing_message)}"
+            )
 
-        return self.perform_full_dupe_check()
+        return self.perform_dupe_check(
+            available_properties, missing_properties, api_response
+        )
 
     def check_if_films_can_be_uploaded(self, processed_films: pd.DataFrame):
         processed_films = processed_films.copy()
@@ -157,9 +145,8 @@ class FilmSearcher:
         if filename_info_if_match is not None:
             return filename_info_if_match
 
-        return self.check_remaining_dupe_properties(
-            resolution, codec, source, api_response
-        )
+        dupe_properties = {"resolution": resolution, "codec": codec, "source": source}
+        return self.check_remaining_dupe_properties(dupe_properties, api_response)
 
     def check_if_filename_exists_on_ant(
         self, file_name: str, api_response: list[dict[str, Any]]
@@ -170,7 +157,7 @@ class FilmSearcher:
             if uploaded_files:
                 for file_info in uploaded_files:
                     if file_name == file_info.get("name", ""):
-                        return f"Duplicate - exact filename already exists on ANT: {existing_upload.get('guid',self.guid_missing_message)}"
+                        return f"Duplicate: exact filename already exists: {existing_upload.get('guid',self.guid_missing_message)}"
 
     def check_if_film_exists_on_ant(self, film_title: str) -> list[dict[str, Any]]:
         """
