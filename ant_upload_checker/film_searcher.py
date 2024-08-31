@@ -24,17 +24,16 @@ class FilmSearcher:
     def check_if_films_exist_on_ant(self) -> pd.DataFrame:
         """
         Given pandas DataFrame of film list, if list contains
-        films that were on ANT and duplicates, then skip these films. 
+        films that were on ANT and duplicates, then skip these films.
         For any not found, non-dupes, or new films in the list,
         search for these on ANT, indicating whether they exist on ANT or not.
         """
-        films_to_skip = self.film_list_df.loc[
-            ~(
-                self.film_list_df["Already on ANT?"]
-                .astype(str)
-                .str.contains(f"{self.not_found_value}|Not a duplicate", regex=True)
-            )
-        ]
+
+        should_skip_film = self.film_list_df["Already on ANT?"].str.contains(
+            r"^Duplicate:", regex=True, na=False
+        )
+        films_to_skip = self.film_list_df.loc[should_skip_film]
+
         if not films_to_skip.empty:
             logging.info(
                 "Skipping %s films already found on ANT in the previous output file...",
@@ -54,6 +53,11 @@ class FilmSearcher:
             pd.concat([films_to_skip, films_to_process])
             .sort_values(by="Parsed film title")
             .reset_index(drop=True)
+        )
+
+        # Ensure NAs incl. those from old versions are converted to empty lists
+        films_to_dupe_check["API response"] = (
+            films_to_dupe_check["API response"].fillna("").apply(list)
         )
 
         return films_to_dupe_check
@@ -146,7 +150,7 @@ class FilmSearcher:
             for title in split_titles:
                 logging.info("-- Searching for %s as well...", title)
                 film_search = self.search_for_film_title_on_ant(title)
-                if film_search is not None:
+                if film_search != []:
                     return film_search
         return []
 

@@ -44,7 +44,7 @@ def test_check_if_films_exist_on_ant(
                 "C:/Movies/Another film (2020)/Another film (2020).mkv",
                 "C:/Movies/Test film (2020)/Test film (2020).mkv",
                 "C:/Movies/New film (2020)/New film (2020).mkv",
-                "C:/Movies/Testing film 1080p H264 Web-DL (2020).mkv",
+                "C:/Movies/An awesome test film 1080p H264 Web-DL (2020).mkv",
             ],
             "Film size (GB)": [1.11, 1.22, 1.33, 1.44, 2.0],
             "Parsed film title": [
@@ -52,17 +52,17 @@ def test_check_if_films_exist_on_ant(
                 "Another film",
                 "test film",
                 "New film",
-                "Testing film",
+                "An awesome test film",
             ],
             "Resolution": ["1080p", "1080p", "1080p", "1080p", "1080p"],
             "Codec": ["H264", "H264", "H264", "H264", "H264"],
             "Source": ["Blu-ray", "Blu-ray", "Blu-ray", "Web", "Web"],
             "Already on ANT?": [
-                "link/torrentid=1",
+                "Resolution already uploaded: link/torrentid=1",  # Pre 1.7.0, will be re-searched post 1.7.0
                 "NOT FOUND",
                 np.nan,
                 np.nan,
-                "Not a duplicate: a film with 1080p/H264/Web does not already exist",
+                "Duplicate: exact filename already exists: test_link",
             ],
         }
     )
@@ -72,33 +72,37 @@ def test_check_if_films_exist_on_ant(
     expected_df = pd.DataFrame(
         {
             "Full file path": [
+                "C:/Movies/An awesome test film 1080p H264 Web-DL (2020).mkv",
                 "C:/Movies/Another film (2020)/Another film (2020).mkv",
                 "C:/Movies/New film (2020)/New film (2020).mkv",
                 "C:/Movies/Test (2020)/Test (2020).mkv",
                 "C:/Movies/Test film (2020)/Test film (2020).mkv",
             ],
-            "Film size (GB)": [
-                1.22,
-                1.44,
-                1.11,
-                1.33,
-            ],
+            "Film size (GB)": [2.0, 1.22, 1.44, 1.11, 1.33],
             "Parsed film title": [
+                "An awesome test film",
                 "Another film",
                 "New film",
                 "Test",
                 "test film",
             ],
-            "Resolution": ["1080p", "1080p", "1080p", "1080p"],
-            "Codec": ["H264", "H264", "H264", "H264"],
-            "Source": ["Blu-ray", "Web", "Blu-ray", "Blu-ray"],
-            "Already on ANT?": [
-                "NOT FOUND",
-                "NOT FOUND",
-                "link/torrentid=1",
-                "NOT FOUND",
+            "Resolution": ["1080p", "1080p", "1080p", "1080p", "1080p"],
+            "Codec": ["H264", "H264", "H264", "H264", "H264"],
+            "Source": [
+                "Web",
+                "Blu-ray",
+                "Web",
+                "Blu-ray",
+                "Blu-ray",
             ],
-            "API response": [[], [], [{"guid": "link/torrentid=1"}], [], []],
+            "Already on ANT?": [
+                "Duplicate: exact filename already exists: test_link",
+                "NOT FOUND",
+                np.nan,
+                "Resolution already uploaded: link/torrentid=1",
+                np.nan,
+            ],
+            "API response": [[], [], [], [], []],
         }
     )
 
@@ -136,7 +140,7 @@ def test_check_if_film_exists_on_ant_true(
     actual_return = fs.check_if_film_exists_on_ant(film_title)
 
     assert f"Searching for {film_title}" in caplog.text
-    assert actual_return == "url/torrentid=1"
+    assert actual_return == [{"guid": "url/torrentid=1"}]
     assert "--- Not found on ANT ---" not in caplog.text
 
 
@@ -154,7 +158,7 @@ def test_replace_word_and_re_search(
         test_film, test_regex, test_replacement
     )
 
-    assert actual_return is None
+    assert actual_return == []
     assert "Searching for Test film jaffa as well..." in caplog.text
 
 
@@ -176,7 +180,7 @@ def test_search_for_film_if_contains_potential_time_true(
         test_film, format="time"
     )
 
-    assert actual_return is None
+    assert actual_return == []
     expected_log_info = films_four_numbers[test_film]
     assert expected_log_info in caplog.text
     assert "Film title may contain a date or time" in caplog.text
@@ -224,7 +228,7 @@ def test_search_for_film_if_contains_potential_date_true(
         test_film, format="date"
     )
 
-    assert actual_return is None
+    assert actual_return == []
     expected_log_info = films_with_dates_numbers[test_film]
     assert expected_log_info in caplog.text
     assert "Film title may contain a date or time" in caplog.text
@@ -279,11 +283,11 @@ def test_search_for_film_if_contains_aka_true(
     assert actual_return == []
     assert "Film title may contain an alternate title" in caplog.text
     assert (
-        f"Searching for {films_with_alternate_titles[test_film][0]} as well"
+        f"Searching for {films_with_alternate_titles[test_film][0]} as well..."
         in caplog.text
     )
     assert (
-        f"Searching for {films_with_alternate_titles[test_film][1]} as well"
+        f"Searching for {films_with_alternate_titles[test_film][1]} as well..."
         in caplog.text
     )
 
