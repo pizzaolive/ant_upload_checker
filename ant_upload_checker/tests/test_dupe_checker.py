@@ -182,19 +182,48 @@ test_values = [
             }
         ],
     ),
+    (
+        "C:/films/test_film_name.mkv",
+        "",
+        "",
+        "",
+        "test",
+        [
+            {
+                "guid": "test_link",
+                "files": [{"size": "100", "name": "test_film_name_x.mkv"}],
+            }
+        ],
+    ),
 ]
 expected_values = [
-    "NOT FOUND",
-    "Duplicate: exact filename already exists: test_link",
-    "Duplicate: exact filename already exists: test_link_2",
-    "Duplicate: a film with 720p/H264/Blu-ray already exists: test_link",
-    "Duplicate: a film with 2160p/H265/Blu-ray already exists: test_link",
-    "Not a duplicate: a film with 2160p/H265/Blu-ray does not already exist. test_link",
-    "Not a duplicate: a film with 1080p/H264/Blu-ray does not already exist. test_link",
-    "Partial duplicate: a film with H264/Blu-ray already exists. Could not extract and check resolution from filename. test_link",
-    "Partial duplicate: a film with 1080p already exists. Could not extract and check codec/media from filename. test_link",
-    "Partial duplicate: a film with Web already exists. Could not extract and check resolution/codec from filename. test_link",
-    "Release group 'KiNGDOM' is banned from ANT - do not upload",
+    (
+        "Uploadable",
+        "Film not found on ANT - does not already exist, or title failed to match",
+    ),
+    ("Duplicate", "Exact filename already exists: test_link"),
+    ("Duplicate", "Exact filename already exists: test_link_2"),
+    ("Duplicate", "A film with 720p/H264/Blu-ray already exists: test_link"),
+    ("Duplicate", "A film with 2160p/H265/Blu-ray already exists: test_link"),
+    ("Uploadable", "A film with 2160p/H265/Blu-ray does not already exist. test_link"),
+    ("Uploadable", "A film with 1080p/H264/Blu-ray does not already exist. test_link"),
+    (
+        "Duplicate - partial",
+        "A film with H264/Blu-ray already exists. Could not extract and check resolution from filename. test_link",
+    ),
+    (
+        "Duplicate - partial",
+        "A film with 1080p already exists. Could not extract and check codec/media from filename. test_link",
+    ),
+    (
+        "Duplicate - partial",
+        "A film with Web already exists. Could not extract and check resolution/codec from filename. test_link",
+    ),
+    ("Banned", "Release group 'KiNGDOM' is banned from ANT - do not upload"),
+    (
+        "Duplicate - potentially",
+        "On ANT, but could not dupe check (could not extract resolution/codec/media from filename). test_link",
+    ),
 ]
 
 

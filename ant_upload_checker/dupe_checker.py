@@ -8,7 +8,10 @@ class DupeChecker:
     def __init__(self, films_to_dupe_check: pd.DataFrame):
         self.films_to_dupe_check: pd.DataFrame = films_to_dupe_check
         self.guid_missing_message: str = "(Failed to extract URL from API response)"
-        self.not_found_value: str = "NOT FOUND"
+        self.not_found_message: tuple[str, str] = (
+            "Uploadable",
+            "Film not found on ANT - does not already exist, or title failed to match",
+        )
         self.banned_groups = constants.BANNED_GROUPS
 
     def check_if_films_can_be_uploaded(self) -> pd.DataFrame:
@@ -19,7 +22,7 @@ class DupeChecker:
             ~dupe_checked_films["Should skip"]
         ].copy()
 
-        films_to_dupe_check["Already on ANT?"] = films_to_dupe_check.apply(
+        films_to_dupe_check[["Already on ANT?", "Info"]] = films_to_dupe_check.apply(
             lambda film: self.check_if_film_is_duplicate(
                 film["Full file path"],
                 film["Resolution"],
@@ -29,6 +32,7 @@ class DupeChecker:
                 film["API response"],
             ),
             axis=1,
+            result_type="expand",
         )
 
         combined_films = (
@@ -49,11 +53,14 @@ class DupeChecker:
         api_response: list[dict[str, Any]],
     ) -> str:
         if not api_response:
-            return self.not_found_value
+            return self.not_found_message
 
         # Retain lower() to account for previous film list versions
         if release_group.lower() in self.banned_groups:
-            return f"Release group '{release_group}' is banned from ANT - do not upload"
+            return (
+                "Banned",
+                f"Release group '{release_group}' is banned from ANT - do not upload",
+            )
 
         file_name = Path(full_file_path).name
 
@@ -75,7 +82,10 @@ class DupeChecker:
             if uploaded_files:
                 for file_info in uploaded_files:
                     if file_name == file_info.get("name", ""):
-                        return f"Duplicate: exact filename already exists: {existing_upload.get('guid',self.guid_missing_message)}"
+                        return (
+                            "Duplicate",
+                            f"Exact filename already exists: {existing_upload.get('guid',self.guid_missing_message)}",
+                        )
 
     def check_remaining_dupe_properties(
         self,
@@ -87,8 +97,9 @@ class DupeChecker:
 
         if len(missing_properties) == len(dupe_properties):
             return (
+                "Duplicate - potentially",
                 f"On ANT, but could not dupe check (could not extract {'/'.join(missing_properties)} from filename). "
-                f"{api_response[0].get('guid',self.guid_missing_message)}"
+                f"{api_response[0].get('guid',self.guid_missing_message)}",
             )
 
         return self.perform_dupe_check(
@@ -118,13 +129,17 @@ class DupeChecker:
                 for prop in available_properties
             )
             if is_duplicate:
-                dupe_string = f"a film with {available_properties_str} already exists"
+                dupe_string = f"A film with {available_properties_str} already exists"
                 if missing_properties:
                     return (
-                        f"Partial duplicate: {dupe_string}. Could not extract and check "
-                        f"{'/'.join(missing_properties)} from filename. {existing_guid}"
+                        "Duplicate - partial",
+                        f"{dupe_string}. Could not extract and check "
+                        f"{'/'.join(missing_properties)} from filename. {existing_guid}",
                     )
                 else:
-                    return f"Duplicate: {dupe_string}: {existing_guid}"
+                    return ("Duplicate", f"{dupe_string}: {existing_guid}")
 
-        return f"Not a duplicate: a film with {available_properties_str} does not already exist. {existing_guid}"
+        return (
+            "Uploadable",
+            f"A film with {available_properties_str} does not already exist. {existing_guid}",
+        )

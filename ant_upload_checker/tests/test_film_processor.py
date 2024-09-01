@@ -409,7 +409,8 @@ def test_create_film_list_dataframe():
             "Codec": ["", ""],
             "Source": ["Blu-ray", "Web"],
             "Release group": ["", ""],
-            "Already on ANT?": [pd.NA, pd.NA],
+            "Already on ANT?": ["", ""],
+            "Info": ["", ""],
         }
     ).astype(
         {
@@ -421,6 +422,7 @@ def test_create_film_list_dataframe():
             "Source": "string",
             "Release group": "string",
             "Already on ANT?": "string",
+            "Info": "string",
         }
     )
 
@@ -439,6 +441,18 @@ def test_convert_bytes_to_gb():
 def test_combine_current_film_list_with_existing_csv(tmp_path, caplog):
     caplog.set_level(logging.INFO)
 
+    expected_dtypes = {
+        "Full file path": "string",
+        "Parsed film title": "string",
+        "Film size (GB)": "float64",
+        "Resolution": "string",
+        "Codec": "string",
+        "Source": "string",
+        "Release group": "string",
+        "Already on ANT?": "string",
+        "Info": "string",
+    }
+
     test_existing_film_df = pd.DataFrame(
         {
             "Full file path": ["test_path"],
@@ -449,6 +463,7 @@ def test_combine_current_film_list_with_existing_csv(tmp_path, caplog):
             "Source": ["test"],
             "Release group": ["test"],
             "Already on ANT?": ["NOT FOUND"],
+            "Info": [""],
         }
     )
     test_existing_film_df.to_csv(tmp_path.joinpath("Film list.csv"), index=False)
@@ -462,20 +477,10 @@ def test_combine_current_film_list_with_existing_csv(tmp_path, caplog):
             "Codec": ["test", "test"],
             "Source": ["test", "test"],
             "Release group": ["test", "test"],
-            "Already on ANT?": [pd.NA, pd.NA],
+            "Already on ANT?": ["", ""],
+            "Info": ["", ""],
         }
-    ).astype(
-        {
-            "Full file path": "string",
-            "Parsed film title": "string",
-            "Film size (GB)": "float64",
-            "Resolution": "string",
-            "Codec": "string",
-            "Source": "string",
-            "Release group": "string",
-            "Already on ANT?": "string",
-        }
-    )
+    ).astype(expected_dtypes)
 
     fp = FilmProcessor(input_folders="", output_folder=tmp_path)
 
@@ -499,19 +504,9 @@ def test_combine_current_film_list_with_existing_csv(tmp_path, caplog):
                 "",
                 "NOT FOUND",
             ],  # Note first np.nan was filled with empty string
+            "Info": ["", ""],
         }
-    ).astype(
-        {
-            "Full file path": "string",
-            "Parsed film title": "string",
-            "Film size (GB)": "float64",
-            "Resolution": "string",
-            "Codec": "string",
-            "Source": "string",
-            "Release group": "string",
-            "Already on ANT?": "string",
-        }
-    )
+    ).astype(expected_dtypes)
 
     pd.testing.assert_frame_equal(actual_df, expected_df)
 
@@ -591,6 +586,7 @@ def test_true_check_if_existing_csv_is_compatible(tmp_path, caplog):
             "Source": [pd.NA],
             "Release group": [pd.NA],
             "Already on ANT?": [pd.NA],
+            "Info": [pd.NA],
         }
     )
     test_existing_film_df.to_csv(tmp_path.joinpath("Film list.csv"), index=False)

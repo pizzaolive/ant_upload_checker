@@ -5,17 +5,16 @@ This script is intended to be used on a directory containing films. It scans for
 
 Currently the script checks if a film is a duplicate based on resolution, codec and source (AKA media). It also checks if the release group (only if extracted successfully) is on the banned list.
 
-Example CSV output:
-
-| Full file path                                                                                                                     | Parsed film title  | Film size (GB) | Resolution | Codec | Source  | Release group | Already on ANT?                   |
-| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------- | ---------- | ----- | ------- | ------------- | --------------------------------- |
-| C:\Movies\A great film (2001) 1080p H264 Blu-ray made_up_release_group.mkv      | A great film | 10.0       | 1080p      | H264 | Blu-ray | made_up_release_group |Not a duplicate: a film with 1080p/H264/Web does not already exists. link |
-| C:\Movies\Another great film (2002) 1080p H264 Blu-ray made_up_release_group.mkv      | Another great film | 7.0      | 1080p      | H264 | Blu-ray | made_up_release_group | NOT FOUND |
-| C:\Movies\A made up film (2001) 1080p H264 Blu-ray group_name.mkv      | A made up film | 10.0       | 1080p      | H264 | Blu-ray | group_name |Duplicate: exact filename already exists: link |
-| C:\Movies\25th Hour 2002 1080p BluRay DTS x264-GrapeHD.mkv                                                     | 25th Hour          | 18.9           | 1080p      | H264 | Blu-ray | GrapeHD       | Duplicate: a film with 1080p/H264/Blu-ray already exists: link |
-| C:\Movies\Batman Begins (2005) 1080p.mkv      | Batman Begins | 5.0          | 1080p      | | | | Partial duplicate: a film with 1080p already exists. Could not extract and check codec/media from filename. link|
-| C:\Movies\Film with no info.mkv      | Film with no info | 0.5    | | | | | On ANT, but could not dupe check (could not extract resolution/codec/media from filename). link|
-| C:\Movies\A.bad.film.2022.720p.WEB-DL.DD5.1.H.264-YIFY.mkv    | A bad film | 1.0    |720p |H264| Web | YIFY  | YIFY is banned from ANT - do not upload|
+#### Example CSV output:
+| Full file path                                                                   | Parsed film title  | Film size (GB) | Resolution | Codec | Source  | Release group         | Already on ANT?                                                                                                  |Info |
+|----------------------------------------------------------------------------------|--------------------|----------------|------------|-------|---------|-----------------------|------------------------------------------------------------------------------------------------------------------|-|
+| C:\Movies\A great film (2001) 1080p H264 Blu-ray made_up_release_group.mkv       | A great film       | 10.0           | 1080p      | H264  | Blu-ray | made_up_release_group | Uploadable                                    |film with 1080p/H264/Web does not already exists. link               |
+| C:\Movies\Another great film (2002) 1080p H264 Blu-ray made_up_release_group.mkv | Another great film | 7.0            | 1080p      | H264  | Blu-ray | made_up_release_group | Uploadable        | Film does not exist, or could not match title|
+| C:\Movies\A made up film (2001) 1080p H264 Blu-ray group_name.mkv                | A made up film     | 10.0           | 1080p      | H264  | Blu-ray | group_name            | Duplicate                                                                  | Exact filename already exists: link  |
+| C:\Movies\25th Hour 2002 1080p BluRay DTS x264-GrapeHD.mkv                       | 25th Hour          | 18.9           | 1080p      | H264  | Blu-ray | grapehd            | Duplicate                                               | A film with 1080p/H264/Blu-ray already exists: link     |
+| C:\Movies\Batman Begins (2005) 1080p.mkv                                         | Batman Begins      | 5.0            | 1080p      |       |         |                       | Duplicate - partial  | A film with 1080p already exists. Could not extract and check codec/media from filename. link |
+| C:\Movies\Film with no info.mkv                                                  | Film with no info  | 0.5            |            |       |         |                       | Duplicate - potentially               |         On ANT, but could not dupe check (could not extract resolution/codec/media from filename). test_link |
+| C:\Movies\A.bad.film.2022.720p.WEB-DL.DD5.1.H.264-YIFY.mkv                       | A bad film         | 1.0            | 720p       | H264  | Web     | yify                  | Banned                                                                          | Release group 'yify' is banned from ANT - do not upload|
 
 
 
@@ -81,7 +80,6 @@ If you want to do any development work, don't install from PyPi. Instead:
 
 
 ### Planned improvements
-- [ ] Improve output sort order, add additional CSV column for easier dupe navigation
 - [ ] Continue to add more film properties to dupe check
 - [ ] Continue code refactor, finish adding type hints
 - [ ] Add a CLI for those unable to use GUI

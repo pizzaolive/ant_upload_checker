@@ -24,6 +24,7 @@ class FilmProcessor:
             "Source": "string",
             "Release group": "string",
             "Already on ANT?": "string",
+            "Info": "string",
         }
         self.csv_file_path: Path = self.output_folder / "Film list.csv"
         self.backup_csv_file_path: Path = (
@@ -319,7 +320,8 @@ class FilmProcessor:
                 "Codec": film_codecs,
                 "Source": film_sources,
                 "Release group": film_release_groups,
-                "Already on ANT?": np.repeat(pd.NA, len(film_file_paths)),
+                "Already on ANT?": np.repeat("", len(film_file_paths)),
+                "Info": np.repeat("", len(film_file_paths)),
             }
         ).astype(self.film_list_df_types)
 
