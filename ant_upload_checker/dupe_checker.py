@@ -9,7 +9,7 @@ class DupeChecker:
         self.films_to_dupe_check: pd.DataFrame = films_to_dupe_check
         self.guid_missing_message: str = "(Failed to extract URL from API response)"
         self.not_found_message: tuple[str, str] = (
-            "Uploadable",
+            "Uploadable - potentially",
             "Film not found on ANT - does not already exist, or title failed to match",
         )
         self.banned_groups = constants.BANNED_GROUPS
@@ -37,8 +37,10 @@ class DupeChecker:
 
         combined_films = (
             pd.concat([films_to_skip, films_to_dupe_check])
-            .sort_index()
             .drop(["Should skip", "API response"], axis=1)
+            .sort_values(
+                by=["Already on ANT?", "Parsed film title"], ascending=[False, True]
+            )
         )
 
         return combined_films
