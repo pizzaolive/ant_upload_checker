@@ -82,61 +82,76 @@ def test_guessit_films():
             "screen_size": "2160p",
             "source": "Ultra HD Blu-ray",
             "video_codec": "H.265",
+            "release_group": "TEST",
         },
         {
             "title": "tick tick BOOM!",
             "screen_size": "720p",
             "source": "DVD",
             "video_codec": "MPEG-2",
+            "release_group": "TEST",
         },
         {
             "title": "Da 5 Bloods",
             "screen_size": "1080p",
             "source": "Blu-ray",
             "video_codec": "H.264",
+            "release_group": "TEST",
         },
         {
             "title": "Short term 12",
             "screen_size": "1080p",
             "source": "Blu-ray",
             "video_codec": "H.264",
+            "release_group": "TEST",
         },
         {
             "title": "X: First Class",
             "screen_size": "1080p",
             "source": "Blu-ray",
             "video_codec": "H.264",
+            "release_group": "TEST",
         },
         {
             "title": "Nick Fury: Agent of S.H.I.E.L.D.",
             "screen_size": "1080p",
             "source": "Blu-ray",
             "video_codec": "H.264",
+            "release_group": "TEST",
         },
         {
             "title": "L A Confidential",
             "screen_size": "1080p",
             "source": "Blu-ray",
             "video_codec": "H.264",
+            "release_group": "TEST",
         },
         {
             "title": "A I Artificial Intelligence",
             "screen_size": "1080p",
             "source": "Blu-ray",
             "video_codec": "H.264",
+            "release_group": "TEST",
         },
-        {"title": "G I Jane", "source": "Blu-ray", "video_codec": "H.264"},
+        {
+            "title": "G I Jane",
+            "source": "Blu-ray",
+            "video_codec": "H.264",
+            "release_group": "TEST",
+        },
         {
             "title": "E T the Extra-Terrestrial",
             "screen_size": "1080p",
             "source": "Blu-ray",
             "video_codec": "H.264",
+            "release_group": "TEST",
         },
         {
             "title": "S.W.A.T.",
             "screen_size": "1080p",
             "source": "Blu-ray",
             "video_codec": "H.264",
+            "release_group": "TEST",
         },
         {
             "title": "T E S Test film",
@@ -242,6 +257,31 @@ def test_get_codec_film_attribute_from_guessed_films(test_guessit_films):
         "H264",
         "H264",
         "H264",
+    ]
+
+    assert actual_list == expected_list
+
+
+def test_get_release_group_from_guessed_films(test_guessit_films):
+    fp = FilmProcessor("test", "test")
+
+    actual_list = fp.get_release_groups_from_guessed_films(test_guessit_films)
+
+    expected_list = [
+        "test",
+        "test",
+        "test",
+        "test",
+        "test",
+        "test",
+        "test",
+        "test",
+        "test",
+        "test",
+        "test",
+        "",
+        "",
+        "",
     ]
 
     assert actual_list == expected_list
@@ -455,7 +495,10 @@ def test_combine_current_film_list_with_existing_csv(tmp_path, caplog):
             "Codec": ["test", "test"],
             "Source": ["test", "test"],
             "Release group": ["test", "test"],
-            "Already on ANT?": ["", "NOT FOUND"], # Note first np.nan was filled with empty string
+            "Already on ANT?": [
+                "",
+                "NOT FOUND",
+            ],  # Note first np.nan was filled with empty string
         }
     ).astype(
         {

@@ -45,24 +45,30 @@ def test_check_if_films_exist_on_ant(
                 "C:/Movies/Test film (2020)/Test film (2020).mkv",
                 "C:/Movies/New film (2020)/New film (2020).mkv",
                 "C:/Movies/An awesome test film 1080p H264 Web-DL (2020).mkv",
+                "C:/Movies/Batman Begins 2160p H265 Blu-ray (2005).mkv",
+                "C:/Movies/zebras",
             ],
-            "Film size (GB)": [1.11, 1.22, 1.33, 1.44, 2.0],
+            "Film size (GB)": [1.11, 1.22, 1.33, 1.44, 2.0, 5.0, 1.0],
             "Parsed film title": [
                 "Test",
                 "Another film",
                 "test film",
                 "New film",
                 "An awesome test film",
+                "Batman Begins",
+                "zebras",
             ],
-            "Resolution": ["1080p", "1080p", "1080p", "1080p", "1080p"],
-            "Codec": ["H264", "H264", "H264", "H264", "H264"],
-            "Source": ["Blu-ray", "Blu-ray", "Blu-ray", "Web", "Web"],
+            "Resolution": ["1080p", "1080p", "1080p", "1080p", "1080p", "2160p", ""],
+            "Codec": ["H264", "H264", "H264", "H264", "H264", "H265", ""],
+            "Source": ["Blu-ray", "Blu-ray", "Blu-ray", "Web", "Web", "Blu-ray", ""],
             "Already on ANT?": [
                 "Resolution already uploaded: link/torrentid=1",  # Pre 1.7.0, will be re-searched post 1.7.0
                 "NOT FOUND",
                 np.nan,
                 np.nan,
                 "Duplicate: exact filename already exists: test_link",
+                "Partial duplicate: test_link",
+                "x is banned from ANT - do no not upload",
             ],
         }
     )
@@ -74,41 +80,41 @@ def test_check_if_films_exist_on_ant(
             "Full file path": [
                 "C:/Movies/An awesome test film 1080p H264 Web-DL (2020).mkv",
                 "C:/Movies/Another film (2020)/Another film (2020).mkv",
+                "C:/Movies/Batman Begins 2160p H265 Blu-ray (2005).mkv",
                 "C:/Movies/New film (2020)/New film (2020).mkv",
                 "C:/Movies/Test (2020)/Test (2020).mkv",
                 "C:/Movies/Test film (2020)/Test film (2020).mkv",
+                "C:/Movies/zebras",
             ],
-            "Film size (GB)": [2.0, 1.22, 1.44, 1.11, 1.33],
+            "Film size (GB)": [2.0, 1.22, 5.0, 1.44, 1.11, 1.33,1.0],
             "Parsed film title": [
                 "An awesome test film",
                 "Another film",
+                "Batman Begins",
                 "New film",
                 "Test",
                 "test film",
+                "zebras",
             ],
-            "Resolution": ["1080p", "1080p", "1080p", "1080p", "1080p"],
-            "Codec": ["H264", "H264", "H264", "H264", "H264"],
-            "Source": [
-                "Web",
-                "Blu-ray",
-                "Web",
-                "Blu-ray",
-                "Blu-ray",
-            ],
+            "Resolution": ["1080p", "1080p", "2160p", "1080p", "1080p", "1080p", ""],
+            "Codec": ["H264", "H264", "H265", "H264", "H264", "H264", ""],
+            "Source": ["Web", "Blu-ray", "Blu-ray", "Web", "Blu-ray", "Blu-ray", ""],
             "Already on ANT?": [
                 "Duplicate: exact filename already exists: test_link",
                 "NOT FOUND",
+                "Partial duplicate: test_link",
                 np.nan,
                 "Resolution already uploaded: link/torrentid=1",
                 np.nan,
+                "x is banned from ANT - do no not upload",
             ],
-            "Should skip": [True, False, False, False, False],
-            "API response": [[], [], [], [], []],
+            "Should skip": [True, False, True, False, False, False, True],
+            "API response": [[], [], [], [], [], [], []],
         }
     )
 
     assert (
-        "Skipping 1 films already found on ANT in the previous output file..."
+        "Skipping 3 films already found on ANT in the previous output file..."
         in caplog.text
     )
     pd.testing.assert_frame_equal(actual_df, expected_df)

@@ -4,12 +4,13 @@ import pytest
 
 
 test_values = [
-    ("file_path", "1080p", "H264", "Blu-ray", []),
+    ("file_path", "1080p", "H264", "Blu-ray", "group", []),
     (
         "C:/films/test_film_name.mkv",
         "1080p",
         "H264",
         "Blu-ray",
+        "group",
         [
             {
                 "guid": "test_link",
@@ -22,6 +23,7 @@ test_values = [
         "1080p",
         "H264",
         "Blu-ray",
+        "group",
         [
             {
                 "guid": "test_link_2",
@@ -37,6 +39,7 @@ test_values = [
         "720p",
         "H264",
         "Blu-ray",
+        "group",
         [
             {
                 "guid": "test_link",
@@ -63,6 +66,7 @@ test_values = [
         "2160p",
         "H265",
         "Blu-ray",
+        "group",
         [
             {
                 "guid": "test_link",
@@ -80,6 +84,7 @@ test_values = [
         "2160p",
         "H265",
         "Blu-ray",
+        "group",
         [
             {
                 "guid": "test_link",
@@ -97,6 +102,7 @@ test_values = [
         "1080p",
         "H264",
         "Blu-ray",
+        "group",
         [
             {
                 "guid": "test_link",
@@ -114,6 +120,7 @@ test_values = [
         "",  # missing resolution from guessed film
         "H264",
         "Blu-ray",
+        "group",
         [
             {
                 "guid": "test_link",
@@ -131,6 +138,7 @@ test_values = [
         "1080p",
         "",  # missing codec from guessed film
         "",  # missing source from guessed film
+        "group",
         [
             {
                 "guid": "test_link",
@@ -148,6 +156,7 @@ test_values = [
         "",  # missing
         "",  # missing codec from guessed film
         "Web",
+        "group",
         [
             {
                 "guid": "test_link",
@@ -158,6 +167,19 @@ test_values = [
                 "codec": "H264",
                 "media": "WEB",
             },
+        ],
+    ),
+    (
+        "C:/films/test_film_name.mkv",
+        "1080p",
+        "H264",
+        "Blu-ray",
+        "KiNGDOM",
+        [
+            {
+                "guid": "test_link",
+                "files": [{"size": "100", "name": "test_film_name.mkv"}],
+            }
         ],
     ),
 ]
@@ -172,6 +194,7 @@ expected_values = [
     "Partial duplicate: a film with H264/Blu-ray already exists. Could not extract and check resolution from filename. test_link",
     "Partial duplicate: a film with 1080p already exists. Could not extract and check codec/media from filename. test_link",
     "Partial duplicate: a film with Web already exists. Could not extract and check resolution/codec from filename. test_link",
+    "KiNGDOM is banned from ANT - do not upload",
 ]
 
 
@@ -183,7 +206,12 @@ def test_check_if_film_is_duplicate(test_input, test_output):
     dupe_checker = DupeChecker(pd.DataFrame())
 
     actual_return = dupe_checker.check_if_film_is_duplicate(
-        test_input[0], test_input[1], test_input[2], test_input[3], test_input[4]
+        test_input[0],
+        test_input[1],
+        test_input[2],
+        test_input[3],
+        test_input[4],
+        test_input[5],
     )
 
     assert actual_return == test_output

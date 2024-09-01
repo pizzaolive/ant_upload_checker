@@ -1,19 +1,23 @@
 from typing import Any, Union
 from pathlib import Path
 import pandas as pd
+from ant_upload_checker import constants
 
 
 class DupeChecker:
     def __init__(self, films_to_dupe_check: pd.DataFrame):
-        self.films_to_dupe_check: pd.dataFrame = films_to_dupe_check
+        self.films_to_dupe_check: pd.DataFrame = films_to_dupe_check
         self.guid_missing_message: str = "(Failed to extract URL from API response)"
         self.not_found_value: str = "NOT FOUND"
+        self.banned_groups = constants.BANNED_GROUPS
 
     def check_if_films_can_be_uploaded(self) -> pd.DataFrame:
         dupe_checked_films = self.films_to_dupe_check.copy()
 
         films_to_skip = dupe_checked_films.loc[dupe_checked_films["Should skip"]]
-        films_to_dupe_check = dupe_checked_films.loc[~dupe_checked_films["Should skip"]].copy()
+        films_to_dupe_check = dupe_checked_films.loc[
+            ~dupe_checked_films["Should skip"]
+        ].copy()
 
         films_to_dupe_check["Already on ANT?"] = films_to_dupe_check.apply(
             lambda film: self.check_if_film_is_duplicate(
@@ -21,6 +25,7 @@ class DupeChecker:
                 film["Resolution"],
                 film["Codec"],
                 film["Source"],
+                film["Release group"],
                 film["API response"],
             ),
             axis=1,
@@ -40,10 +45,15 @@ class DupeChecker:
         resolution: str,
         codec: str,
         source: str,
+        release_group: str,
         api_response: list[dict[str, Any]],
     ) -> str:
         if not api_response:
             return self.not_found_value
+
+        # Retain lower() to account for previous film list versions
+        if release_group.lower() in self.banned_groups:
+            return f"{release_group} is banned from ANT - do not upload"
 
         file_name = Path(full_file_path).name
 

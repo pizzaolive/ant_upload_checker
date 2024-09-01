@@ -28,10 +28,11 @@ class FilmSearcher:
         For any not found, non-dupes, or new films in the list,
         search for these on ANT, indicating whether they exist on ANT or not.
         """
+        regex_to_skip = r"^Duplicate|^Partial duplicate|is banned from ANT"
 
         self.film_list_df["Should skip"] = self.film_list_df[
             "Already on ANT?"
-        ].str.contains(r"^Duplicate:", regex=True, na=False)
+        ].str.contains(regex_to_skip, regex=True, na=False)
 
         films_to_skip = self.film_list_df.loc[self.film_list_df["Should skip"]]
 

@@ -265,7 +265,7 @@ class FilmProcessor:
         self, guessed_films: list[MatchesDict]
     ) -> list[str]:
         release_groups = [
-            self.get_film_attribute_from_guessed_film(film, "release_group")
+            self.get_film_attribute_from_guessed_film(film, "release_group").lower()
             for film in guessed_films
         ]
 
