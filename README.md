@@ -81,6 +81,7 @@ If you want to do any development work, don't install from PyPi. Instead:
 
 
 ### Planned improvements
+- [ ] Improve output sort order, add additional CSV column for easier dupe navigation
 - [ ] Continue to add more film properties to dupe check
 - [ ] Continue code refactor, finish adding type hints
 - [ ] Add a CLI for those unable to use GUI

@@ -53,7 +53,7 @@ class DupeChecker:
 
         # Retain lower() to account for previous film list versions
         if release_group.lower() in self.banned_groups:
-            return f"{release_group} is banned from ANT - do not upload"
+            return f"Release group '{release_group}' is banned from ANT - do not upload"
 
         file_name = Path(full_file_path).name
 

@@ -194,7 +194,7 @@ expected_values = [
     "Partial duplicate: a film with H264/Blu-ray already exists. Could not extract and check resolution from filename. test_link",
     "Partial duplicate: a film with 1080p already exists. Could not extract and check codec/media from filename. test_link",
     "Partial duplicate: a film with Web already exists. Could not extract and check resolution/codec from filename. test_link",
-    "KiNGDOM is banned from ANT - do not upload",
+    "Release group 'KiNGDOM' is banned from ANT - do not upload",
 ]
 
 
