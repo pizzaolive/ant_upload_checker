@@ -87,7 +87,7 @@ class DupeChecker:
 
         if len(missing_properties) == len(dupe_properties):
             return (
-                f"On ANT, but could not dupe check (could not extract {'/'.join(missing_properties)} from filename.) "
+                f"On ANT, but could not dupe check (could not extract {'/'.join(missing_properties)} from filename). "
                 f"{api_response[0].get('guid',self.guid_missing_message)}"
             )
 
