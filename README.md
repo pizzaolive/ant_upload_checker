@@ -14,8 +14,6 @@ Currently the script checks if a film is a duplicate based on resolution, codec 
 | C:\Movies\Batman Begins (2005) 1080p.mkv                                         | Batman Begins      | 5.0            | 1080p      |       |         |                       | Duplicate - partial  | A film with 1080p already exists. Could not extract and check codec/media from filename. link |
 | C:\Movies\A made up film (2001) 1080p H264 Blu-ray group_name.mkv                | A made up film     | 10.0           | 1080p      | H264  | Blu-ray | group_name            | Duplicate                                                                  | Exact filename already exists: link  |
 | C:\Movies\25th Hour 2002 1080p BluRay DTS x264-GrapeHD.mkv                       | 25th Hour          | 18.9           | 1080p      | H264  | Blu-ray | grapehd            | Duplicate                                               | A film with 1080p/H264/Blu-ray already exists: link     |
-
-
 | C:\Movies\A.bad.film.2022.720p.WEB-DL.DD5.1.H.264-YIFY.mkv                       | A bad film         | 1.0            | 720p       | H264  | Web     | yify                  | Banned                                                                          | Release group 'yify' is banned from ANT - do not upload|
 
 
