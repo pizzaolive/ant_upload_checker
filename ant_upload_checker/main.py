@@ -4,6 +4,7 @@ from ant_upload_checker.film_processor import FilmProcessor
 from ant_upload_checker.film_searcher import FilmSearcher
 from ant_upload_checker.output import write_film_list_to_csv
 from ant_upload_checker.film_uploader import FilmUploader
+from ant_upload_checker.dupe_checker import DupeChecker
 
 
 def main():
@@ -20,8 +21,12 @@ def main():
     film_list_combined = films.combine_with_existing_film_csv(film_list_df)
 
     film_searcher = FilmSearcher(film_list_combined, api_key)
-    films_checked_on_ant = film_searcher.check_if_films_exist_on_ant()
+    films_to_dupe_check = film_searcher.check_if_films_exist_on_ant()
 
+    dupe_checker = DupeChecker(films_to_dupe_check)
+    films_checked_on_ant = dupe_checker.check_if_films_can_be_uploaded()
+
+    # Need to update this
     films_for_upload = films_checked_on_ant.loc[
         ~films_checked_on_ant["Already on ANT?"].str.contains("torrentid")
     ]

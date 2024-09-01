@@ -25,8 +25,8 @@ class FilmProcessor:
             "Release group": "string",
             "Already on ANT?": "string",
         }
-        self.csv_file_path = self.output_folder / "Film list.csv"
-        self.backup_csv_file_path = (
+        self.csv_file_path: Path = self.output_folder / "Film list.csv"
+        self.backup_csv_file_path: Path = (
             self.output_folder / "Film list old version backup.csv"
         )
 
@@ -59,7 +59,7 @@ class FilmProcessor:
         guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
         film_titles = self.get_formatted_titles_from_guessed_films(guessed_films)
         film_resolutions = self.get_film_resolutions_from_guessed_films(guessed_films)
-        film_codecs = self.get_codecs_from_guessed_films(guessed_films)
+        film_codecs = self.get_codec_from_guessed_films(guessed_films)
         film_sources = self.get_source_from_guessed_films(guessed_films)
         release_groups = self.get_release_groups_from_guessed_films(guessed_films)
 
@@ -114,6 +114,7 @@ class FilmProcessor:
             pd.concat([current_film_list, existing_film_list_formatted])
             .drop_duplicates(subset=["Parsed film title"], keep="last")
             .reset_index(drop=True)
+            .fillna("")  # Fill NAs with empty strings for later dupe handling
         )
 
         self.stop_process_if_all_films_already_in_existing_csv(combined_film_list)
@@ -124,11 +125,13 @@ class FilmProcessor:
         self, combined_film_list_df: pd.DataFrame
     ) -> None:
         if all(
-            combined_film_list_df["Already on ANT?"].str.contains("torrentid", na=False)
+            combined_film_list_df["Already on ANT?"].str.contains(
+                r"^Duplicate:", regex=True, na=False
+            )
         ):
             logging.info(
-                "All films have already been searched and found on ANT in the previous "
-                "output file.\n\nEnding the process early.\n\n----"
+                "All films have already been searched and are duplicates. "
+                "\n\nEnding the process early.\n\n----"
             )
             sys.exit(0)
 
@@ -232,7 +235,7 @@ class FilmProcessor:
 
         return film_resolutions
 
-    def get_codecs_from_guessed_films(
+    def get_codec_from_guessed_films(
         self, guessed_films: list[MatchesDict]
     ) -> list[str]:
         film_codecs = [
@@ -240,7 +243,9 @@ class FilmProcessor:
             for film in guessed_films
         ]
 
-        return film_codecs
+        film_codecs_cleaned = [re.sub(r"\.", "", codec) for codec in film_codecs]
+
+        return film_codecs_cleaned
 
     def get_source_from_guessed_films(
         self, guessed_films: list[MatchesDict]
@@ -260,7 +265,7 @@ class FilmProcessor:
         self, guessed_films: list[MatchesDict]
     ) -> list[str]:
         release_groups = [
-            self.get_film_attribute_from_guessed_film(film, "release_group")
+            self.get_film_attribute_from_guessed_film(film, "release_group").lower()
             for film in guessed_films
         ]
 

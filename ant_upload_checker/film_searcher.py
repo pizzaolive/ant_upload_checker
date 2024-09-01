@@ -1,6 +1,8 @@
 import pandas as pd
 import requests
 import logging
+from pathlib import Path
+from typing import Any, Union
 from ratelimit import limits, sleep_and_retry
 import re
 from requests.adapters import HTTPAdapter, Retry
@@ -10,6 +12,7 @@ class FilmSearcher:
     def __init__(self, film_list_df: pd.DataFrame, api_key: str):
         self.film_list_df: pd.DataFrame = film_list_df
         self.api_key: str = api_key
+        self.ant_url = "https://anthelion.me/api.php"
         self.session: requests.Session = requests.Session()
         self.not_found_value: str = "NOT FOUND"
 
@@ -21,19 +24,26 @@ class FilmSearcher:
     def check_if_films_exist_on_ant(self) -> pd.DataFrame:
         """
         Given pandas DataFrame of film list, if list contains
-        films that already contain a torrentid from previous output file,
-        then skip these films. For any not found, or new films in the list,
+        films that were on ANT and duplicates, then skip these films.
+        For any not found, non-dupes, or new films in the list,
         search for these on ANT, indicating whether they exist on ANT or not.
         """
-        films_to_skip = self.film_list_df.loc[
-            self.film_list_df["Already on ANT?"]
-            .astype(str)
-            .str.contains("torrentid", regex=True)
-        ]
+        regex_to_skip = r"^Duplicate|^Partial duplicate|is banned from ANT"
+
+        self.film_list_df["Should skip"] = self.film_list_df[
+            "Already on ANT?"
+        ].str.contains(regex_to_skip, regex=True, na=False)
+
+        films_to_skip = self.film_list_df.loc[self.film_list_df["Should skip"]]
+
         if not films_to_skip.empty:
             logging.info(
                 "Skipping %s films already found on ANT in the previous output file...",
                 len(films_to_skip),
+            )
+        else:
+            logging.info(
+                "No films were skipped as any existing film list did not contain duplicates."
             )
 
         films_to_process = (
@@ -45,55 +55,20 @@ class FilmSearcher:
             self.check_if_film_exists_on_ant
         )
 
-        processed_films = self.process_api_responses(films_to_process).drop(
-            "API response", axis=1
-        )
-
-        films_checked_on_ant = (
-            pd.concat([films_to_skip, processed_films])
+        films_to_dupe_check = (
+            pd.concat([films_to_skip, films_to_process])
             .sort_values(by="Parsed film title")
             .reset_index(drop=True)
         )
 
-        return films_checked_on_ant
-
-    def process_api_responses(
-        self, films_to_process_with_api_responses: pd.DataFrame
-    ) -> pd.DataFrame:
-        processed_films = films_to_process_with_api_responses.copy()
-        processed_films["Already on ANT?"] = processed_films.apply(
-            lambda x: self.check_if_resolution_exists_on_ant(
-                x["Resolution"], x["API response"]
-            ),
-            axis=1,
+        # Ensure NAs incl. those from old versions are converted to empty lists
+        films_to_dupe_check["API response"] = (
+            films_to_dupe_check["API response"].fillna("").apply(list)
         )
 
-        return processed_films
+        return films_to_dupe_check
 
-    def check_if_resolution_exists_on_ant(
-        self, film_resolution: str, api_response
-    ) -> str:
-        if api_response == self.not_found_value:
-            return api_response
-
-        if film_resolution == "":
-            ant_url_suffix = "On ANT, but could not get resolution from file name: "
-            try:
-                ant_url_info = ant_url_suffix + f"{api_response[0]['guid']}"
-            except (IndexError, KeyError, TypeError) as e:
-                ant_url_info = (
-                    ant_url_suffix + "(Failed to extract URL from API response)"
-                )
-
-            return ant_url_info
-
-        for match in api_response:
-            if match["resolution"] == film_resolution:
-                return f"Resolution already uploaded: {match['guid']}"
-
-        return f"On ANT, but this resolution is missing from ANT"
-
-    def check_if_film_exists_on_ant(self, film_title: str):
+    def check_if_film_exists_on_ant(self, film_title: str) -> list[dict[str, Any]]:
         """
         Take a film title, and search for it using the ANT API.
         If an initial match is not found, re-search for a
@@ -108,18 +83,23 @@ class FilmSearcher:
             (self.search_for_film_if_contains_aka, ""),
         ]
         for search_function, optional_argument in title_checks:
-            if optional_argument:
-                search_result = search_function(film_title, optional_argument)
-            else:
-                search_result = search_function(film_title)
-            if search_result != self.not_found_value:
-                return search_result
+            try:
+                if optional_argument:
+                    search_result = search_function(film_title, optional_argument)
+                else:
+                    search_result = search_function(film_title)
+
+                if search_result:
+                    return search_result
+            except Exception as err:
+                logging.error(
+                    "An unexpected error occured, skipping film:\n%s", str(err)
+                )
 
         logging.info("--- Not found on ANT ---")
+        return []
 
-        return search_result
-
-    def search_for_film_if_contains_and(self, film_title):
+    def search_for_film_if_contains_and(self, film_title: str) -> list[dict[str, Any]]:
         """
         If film title contains and or &, replace with the oppposite
         and search for the new title on ANT. Else, return NOT FOUND.
@@ -136,9 +116,11 @@ class FilmSearcher:
                 film_title, and_symbol_regex, " and "
             )
 
-        return self.not_found_value
+        return []
 
-    def search_for_film_if_contains_potential_date_or_time(self, film_title, format):
+    def search_for_film_if_contains_potential_date_or_time(
+        self, film_title: str, format: str
+    ) -> list[dict[str, Any]]:
         """
         If film title 4 numbers e.g. 1208 East of Bucharest,
         add colon in middle, re-search title on ANT.
@@ -161,9 +143,9 @@ class FilmSearcher:
                 film_title, numbers_regex, replacement_value
             )
 
-        return self.not_found_value
+        return []
 
-    def search_for_film_if_contains_aka(self, film_title):
+    def search_for_film_if_contains_aka(self, film_title: str) -> list[dict[str, Any]]:
         aka_regex = r"(?i)\saka\s"
 
         if re.search(aka_regex, film_title):
@@ -174,24 +156,35 @@ class FilmSearcher:
             for title in split_titles:
                 logging.info("-- Searching for %s as well...", title)
                 film_search = self.search_for_film_title_on_ant(title)
-                if film_search != self.not_found_value:
+                if film_search != []:
                     return film_search
+        return []
 
-        return self.not_found_value
+    def replace_word_and_re_search(
+        self, film_title: str, regex_pattern: str, replacement: str
+    ) -> list[dict[str, Any]]:
+        cleaned_film_title = re.sub(
+            regex_pattern,
+            replacement,
+            film_title,
+        )
+        logging.info("-- Searching for %s as well...", cleaned_film_title)
+
+        return self.search_for_film_title_on_ant(cleaned_film_title)
 
     @sleep_and_retry
     @limits(calls=1, period=2)
-    def search_for_film_title_on_ant(self, film_title):
+    def search_for_film_title_on_ant(self, film_title: str) -> list[dict[str, Any]]:
         """
         Use the ANT API to search for a film title and
         return the first URL if found, else a NOT FOUND string
         """
-        url = "https://anthelion.me/api.php"
 
-        if self.api_key == "":
-            raise ValueError(
+        if not self.api_key:
+            logging.error(
                 "The API key entered is blank, please re-run and enter a valid API key"
             )
+            raise SystemExit("Exiting due to blank API key")
 
         payload = {
             "api_key": self.api_key,
@@ -200,7 +193,7 @@ class FilmSearcher:
             "o": "json",
         }
 
-        response = self.session.get(url, params=payload)
+        response = self.session.get(self.ant_url, params=payload)
         try:
             response.raise_for_status()
             response_json = response.json()
@@ -228,18 +221,7 @@ class FilmSearcher:
             logging.error("The following error occured: %s", err)
             raise SystemExit(err)
 
-        if response_json["response"]["total"] == 0:
-            return self.not_found_value
-        else:
+        if response_json["response"]["total"] > 0:
             return response_json["item"]
-
-    def replace_word_and_re_search(self, film_title, regex_pattern, replacement):
-        cleaned_film_title = re.sub(
-            regex_pattern,
-            replacement,
-            film_title,
-        )
-        logging.info("-- Searching for %s as well...", cleaned_film_title)
-        film_check = self.search_for_film_title_on_ant(cleaned_film_title)
-
-        return film_check
+        else:
+            return []
