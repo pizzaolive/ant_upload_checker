@@ -87,7 +87,7 @@ class DupeChecker:
 
         if len(missing_properties) == len(dupe_properties):
             return (
-                f"On ANT, but could not dupe check (could not extract {'/'.join(missing_properties)} from filename. "
+                f"On ANT, but could not dupe check (could not extract {'/'.join(missing_properties)} from filename.) "
                 f"{api_response[0].get('guid',self.guid_missing_message)}"
             )
 
@@ -107,6 +107,7 @@ class DupeChecker:
         """
 
         available_properties_str = "/".join(available_properties.values())
+        existing_guid = self.guid_missing_message
 
         for existing_upload in api_response:
             existing_guid = existing_upload.get("guid", self.guid_missing_message)
@@ -126,4 +127,4 @@ class DupeChecker:
                 else:
                     return f"Duplicate: {dupe_string}: {existing_guid}"
 
-        return f"Not a duplicate: a film with {available_properties_str} does not already exist"
+        return f"Not a duplicate: a film with {available_properties_str} does not already exist. {existing_guid}"
