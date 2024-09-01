@@ -1,3 +1,6 @@
+#### Version 1.7.0
+* Feature: add a dupe check to fully and partially dupe check the filename and other attributes (resolution/codec/source)
+
 #### Version 1.6.2
 * Patch - bug fix missing film sizes in the output csv
 

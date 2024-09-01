@@ -1,22 +1,32 @@
 # ANT upload checker
 
 ## What does this script do?
-This script is intended to be used on a directory containing films. It scans for films, parses their title and resolution, and checks whether a given film and its resolution already exists on ANT. The script outputs a csv file containing the film list along with information on whether it's been uploaded or not. The idea is to help find films in your library that could potentially be uploaded.
+This script is intended to be used on a directory containing films. It scans for films, parses some film properties, and checks whether a given film is already on ANT, and whether it's a duplicate or not. A CSV file will be created by the process, containing your film list. The idea is to help find films in your library that could potentially be uploaded.
+
+Currently the script checks if a film is a duplicate based on resolution, codec and source (AKA media). It also checks if the release group (only if extracted successfully) is on the banned list.
 
 Example CSV output:
 
 | Full file path                                                                                                                     | Parsed film title  | Film size (GB) | Resolution | Codec | Source  | Release group | Already on ANT?                   |
 | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------- | ---------- | ----- | ------- | ------------- | --------------------------------- |
-| C:\Movies\25th Hour 2002 1080p BluRay DTS x264-GrapeHD.mkv                                                     | 25th Hour          | 18.9           | 1080p      | H.264 | Blu-ray | GrapeHD       | Resolution already uploaded: link |
-| C:\Movies\A Clockwork Orange (1971) [imdbid-tt0066921] - [Bluray-1080p][HDR10][Opus 1.0][x265]-ZQ.mkv | A Clockwork Orange | 23.21          | 1080p      | H.265 | Blu-ray | ZQ            | Resolution already uploaded: link |
-| C:\Movies\A Man Called Otto (2022) [imdbid-tt7405458] - [Bluray-1080p][EAC3 5.1][x264]-playHD.mkv      | A Man Called Otto  | 16.83          | 1080p      | H.264 | Blu-ray | playHD        | Resolution already uploaded: link |
+| C:\Movies\A great film (2001) 1080p H264 Blu-ray made_up_release_group.mkv      | A great film | 10.0       | 1080p      | H264 | Blu-ray | made_up_release_group |Not a duplicate: a film with 1080p/H264/Web does not already exists. link |
+| C:\Movies\Another great film (2002) 1080p H264 Blu-ray made_up_release_group.mkv      | Another great film | 7.0      | 1080p      | H264 | Blu-ray | made_up_release_group | NOT FOUND |
+| C:\Movies\A made up film (2001) 1080p H264 Blu-ray group_name.mkv      | A made up film | 10.0       | 1080p      | H264 | Blu-ray | group_name |Duplicate: exact filename already exists: link |
+| C:\Movies\25th Hour 2002 1080p BluRay DTS x264-GrapeHD.mkv                                                     | 25th Hour          | 18.9           | 1080p      | H264 | Blu-ray | GrapeHD       | Duplicate: a film with 1080p/H264/Blu-ray already exists: link |
+| C:\Movies\Batman Begins (2005) 1080p.mkv      | Batman Begins | 5.0          | 1080p      | | | | Partial duplicate: a film with 1080p already exists. Could not extract and check codec/media from filename. link|
+| C:\Movies\Film with no info.mkv      | Film with no info | 0.5    | | | | | On ANT, but could not dupe check (could not extract resolution/codec/media from filename). link|
+| C:\Movies\A.bad.film.2022.720p.WEB-DL.DD5.1.H.264-YIFY.mkv    | A bad film | 1.0    |720p |H264| Web | YIFY  | YIFY is banned from ANT - do not upload|
+
+
+
+
 ## How does it work?
 
-The process searches through the given directory (or multiple directories), and finds all common video file formats (currently: mp4, avi, mkv, mpeg and m2ts). Using an existing package called [guessit](https://github.com/guessit-io/guessit) and some additional processing, film titles and their resolutions are parsed from the file paths. For each film, a get request is sent to ANT's API, to check whether it can be found already. For certain titles, if an initial match is not found, the title is tweaked and re-searched. For example, films containing "and" could be spelt with "and" or "&", so both titles are checked.
+The process searches through the given directory (or multiple directories), and finds all common video file formats (currently: mp4, avi, mkv, mpeg and m2ts). Using an existing package called [guessit](https://github.com/guessit-io/guessit) and some additional processing, film titles and their  properties are parsed. For each film, a get request is sent to ANT's API, to check whether it can be found already. For certain titles, if an initial match is not found, the title is tweaked and re-searched. For example, films containing "and" could be spelt with "and" or "&", so both titles are checked.
 
-The script outputs a csv file containing a list of films it's found and whether they've been found on ANT or not.
+The script outputs a csv file containing a list of films it's found and whether they've been found on ANT or not, and whether they are duplicates.
 
-If an existing film_list.csv is found in the output location specified, any films in this that have already been found on ANT will be skipped by the process. This means you can re-run the script without having to search through your whole film library again. It will not skip films that were not found on ANT, and any new films in your library.
+If an existing film_list.csv is found in the output location specified, any films in this that have already been found on ANT and are marked as duplicates (from version 1.7.0) will be skipped by the process. This means you can re-run the script without having to search through your whole film library again. It will not skip films that were not found on ANT or those that were not marked as duplicates (in case they've since been uploaded).
 
 This is a work in progress - please feel free to give helpful feedback and report bugs.
 
@@ -24,6 +34,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 * Non-english films may not be found on ANT if their titles do not match
 * Films with ellipsis may not be found. Currently guessit automatically removes these e.g. Tick Tick... BOOM! -> Tick Tick Boom!
 * Films with alternate titles (Film X AKA Film Y) will not be found on ANT
+* Some users are unable to use the script with a GUI (graphical user interface)- an alternative option will be added in the future
 
 ## Prerequisites
 * You must have Python v 3.8 or later installed: https://www.python.org/downloads/windows/
@@ -70,7 +81,7 @@ If you want to do any development work, don't install from PyPi. Instead:
 
 
 ### Planned improvements
-- [ ] Enhance film check to include other attributes (exact filename check, codec, source info etc.)
+- [ ] Continue to add more film properties to dupe check
 - [ ] Continue code refactor, finish adding type hints
 - [ ] Add a CLI for those unable to use GUI
 - [ ] Increase max file path length
