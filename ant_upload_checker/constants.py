@@ -1,4 +1,5 @@
 BANNED_GROUPS = [
+    "evo",
     "3lton",
     "4yeo",
     "ade",
