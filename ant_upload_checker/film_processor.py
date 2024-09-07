@@ -7,7 +7,6 @@ from pathlib import Path
 import re
 import sys
 import shutil
-from typing import List, Dict
 
 
 class FilmProcessor:

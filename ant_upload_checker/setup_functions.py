@@ -2,8 +2,7 @@ import logging
 import inquirer
 from pathlib import Path
 from dotenv import set_key, dotenv_values
-from typing import List, Tuple
-from ant_upload_checker.directory_selector import DirectorySelector
+from typing import Optional
 
 
 ENV_FILE_PATH = Path(".env").resolve()
@@ -34,9 +33,10 @@ def save_user_info_to_env() -> None:
         logging.info("User setting saved to '.env' file")
 
 
-def get_user_info_directories():
-    selector = DirectorySelector()
-    input_folders, output_folder = selector.run_directory_selector()
+def get_user_info_directories() -> None:
+    output_folder = get_user_output_folder()
+    input_folders = get_user_input_folders()
+
     input_directories_str = ",".join(input_folders)
 
     set_key(
@@ -49,6 +49,63 @@ def get_user_info_directories():
         key_to_set="OUTPUT_FOLDER",
         value_to_set=output_folder,
     )
+
+
+def prompt_user_for_info(info_required: str, prompt_message: str) -> str:
+    prompt = [inquirer.Text(info_required, message=prompt_message)]
+    response = inquirer.prompt(prompt)[info_required]
+
+    return response
+
+
+def get_user_output_folder() -> Path:
+    message = (
+        "Please enter your output folder path (where the film list CSV should be saved).\n"
+        "Example paths:\n"
+        " - Windows: C:/Media\n"
+        " - Linux: /home/username/media\n\n"
+    )
+
+    response = prompt_user_for_info("output_folder", message)
+    output_folder = return_as_path_if_valid(response)
+
+    return output_folder
+
+
+def get_user_input_folders() -> list[Path]:
+    message = (
+        "Please enter one or more input folders that contain your films.\n"
+        "Single folder path example:\n"
+        "- Windows: C:/Media/Films\n"
+        "- Linux: /home/username/media/films\n\n"
+        "For multiple folder paths, separate them using a comma e.g.:\n"
+        "- C:/Media/Films,E:/Media/Films\n"
+        "- /home/username/media/films,/home/username/media/old films"
+    )
+
+    response = prompt_user_for_info("input_folders", message)
+
+    input_folders = response.split(",")
+
+    valid_input_folder_paths = [
+        return_as_path_if_valid(folder) for folder in input_folders
+    ]
+
+    return valid_input_folder_paths
+
+
+def return_as_path_if_valid(folder_path_str: Optional[str]) -> Path:
+    if not folder_path_str:
+        raise ValueError("No folder path was selected in the dialog box, please re-run")
+
+    folder_path = Path(folder_path_str)
+
+    if not folder_path.is_dir():
+        raise ValueError(
+            f"Folder path '{folder_path_str}' does not exist. Please try a different path."
+        )
+
+    return folder_path
 
 
 def get_user_info_api_key() -> None:
@@ -66,7 +123,7 @@ def get_user_info_api_key() -> None:
         raise ValueError("No API key was set - please restart")
 
 
-def load_env_file() -> Tuple[str, list[Path], Path]:
+def load_env_file() -> tuple[str, list[Path], Path]:
     settings = dotenv_values(ENV_FILE_PATH)
 
     expected_settings = ["API_KEY", "INPUT_FOLDERS", "OUTPUT_FOLDER"]
