@@ -112,7 +112,9 @@ def return_as_path_if_valid(folder_path_str: Optional[str]) -> Path:
         raise ValueError("No folder path was selected in the dialog box, please re-run")
 
     folder_path_str_formatted = folder_path_str.lstrip()
-    folder_path = Path(folder_path_str_formatted)
+
+    # Enable ~ shorthand to be a valid path and resolve the absolute path
+    folder_path = Path(folder_path_str_formatted).expanduser().resolve()
 
     if not folder_path.is_dir():
         raise ValueError(
