@@ -37,12 +37,12 @@ def get_user_info_directories() -> None:
     output_folder = get_user_output_folder()
     input_folders = get_user_input_folders()
 
-    input_directories_str = ",".join(input_folders)
+    input_folders_str = ",".join(input_folders)
 
     set_key(
         dotenv_path=ENV_FILE_PATH,
         key_to_set="INPUT_FOLDERS",
-        value_to_set=input_directories_str,
+        value_to_set=input_folders_str,
     )
     set_key(
         dotenv_path=ENV_FILE_PATH,
@@ -58,25 +58,31 @@ def prompt_user_for_info(info_required: str, prompt_message: str) -> str:
     return response
 
 
-def get_user_output_folder() -> Path:
+def get_user_output_folder() -> str:
+    """
+    Ask user for output folder, validate it can be converted to a Path object
+    and it exists, then return as a string
+    """
     message = (
-        "Please enter your output folder path (where the film list CSV should be saved).\n"
-        "Example paths:\n"
-        " - Windows: C:/Media\n"
-        " - Linux: /home/username/media\n\n"
+        "Please enter the output location (where the film list CSV should be saved) "
+        "e.g. C:/Media or /home/username/media"
     )
 
     response = prompt_user_for_info("output_folder", message)
-    output_folder = return_as_path_if_valid(response)
+    output_folder_path = return_as_path_if_valid(response)
 
-    return output_folder
+    return str(output_folder_path)
 
 
-def get_user_input_folders() -> list[Path]:
+def get_user_input_folders() -> list[str]:
+    """
+    Ask user for one or more input volders, validate they can be converted to Path objects
+    and they exist, then return as list of strings
+    """
     message = (
-        "Please enter one or more input folders that contain your films.\n"
-        "If entering multiple, separate them with a comma e.g.\n"
-        "- C:/Media/Films,E:/Media/Films\n"
+        "Please enter one or more input folders that contain your films. "
+        "For multiple folders separate them with a comma e.g. "
+        "C:/Films,E:/Films"
     )
 
     response = prompt_user_for_info("input_folders", message)
@@ -87,7 +93,9 @@ def get_user_input_folders() -> list[Path]:
         return_as_path_if_valid(folder) for folder in input_folders
     ]
 
-    return valid_input_folder_paths
+    valid_input_folders_str = [str(folder) for folder in valid_input_folder_paths]
+
+    return valid_input_folders_str
 
 
 def return_as_path_if_valid(folder_path_str: Optional[str]) -> Path:

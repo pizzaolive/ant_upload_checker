@@ -44,7 +44,7 @@ def test_get_user_input_folders(monkeypatch, tmp_path, test_paths):
     monkeypatch.setattr(inquirer, "prompt", mock_prompt)
 
     actual_return = setup_functions.get_user_input_folders()
-    expected_return = [Path(folder) for folder in temp_paths]
+    expected_return = [str(folder) for folder in temp_paths]
 
     assert actual_return == expected_return
 
@@ -62,7 +62,7 @@ def test_get_user_output_folder(monkeypatch, tmp_path):
     monkeypatch.setattr(inquirer, "prompt", mock_prompt)
 
     actual_return = setup_functions.get_user_output_folder()
-    expected_return = Path(temp_path_str)
+    expected_return = temp_path_str
 
     assert actual_return == expected_return
 

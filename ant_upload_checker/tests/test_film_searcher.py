@@ -40,12 +40,12 @@ def test_check_if_films_exist_on_ant(
     test_df = pd.DataFrame(
         {
             "Full file path": [
-                "C:\Media\Films\Desert.Flower.2009.1080p.BluRay.x264.DTS-WiKi.mkv",
-                "C:\Media\Films\Dogville (2003) [imdbid-tt0276919] - [Bluray-1080p][DTS-HD MA 5.1][x265]-TAoE.mkv",
-                "C:\Media\Films\Aftersun (2022).mkv",
-                "C:\Media\Films\American Graffiti (1973) [imdbid-tt0069704] - [Remux-1080p Proper][FLAC 2.0][VC1]-KRaLiMaRKo.mkv",
-                "C:\Media\Films\A Man Called Otto (2022) [imdbid-tt7405458] - [Bluray-1080p][EAC3 5.1][x264]-playHD.mkv",
-                "C:\Media\Films\The Last Black Man in San Francisco (2019) [imdbid-tt4353250] - [Bluray-1080p][DTS-HD MA 5.1][x265]-CHD.mkv",
+                r"C:\Media\Films\Desert.Flower.2009.1080p.BluRay.x264.DTS-WiKi.mkv",
+                r"C:\Media\Films\Dogville (2003) [imdbid-tt0276919] - [Bluray-1080p][DTS-HD MA 5.1][x265]-TAoE.mkv",
+                r"C:\Media\Films\Aftersun (2022).mkv",
+                r"C:\Media\Films\American Graffiti (1973) [imdbid-tt0069704] - [Remux-1080p Proper][FLAC 2.0][VC1]-KRaLiMaRKo.mkv",
+                r"C:\Media\Films\A Man Called Otto (2022) [imdbid-tt7405458] - [Bluray-1080p][EAC3 5.1][x264]-playHD.mkv",
+                r"C:\Media\Films\The Last Black Man in San Francisco (2019) [imdbid-tt4353250] - [Bluray-1080p][DTS-HD MA 5.1][x265]-CHD.mkv",
             ],
             "Parsed film title": [
                 "Desert Flower",
@@ -98,12 +98,12 @@ def test_check_if_films_exist_on_ant(
     expected_df = pd.DataFrame(
         {
             "Full file path": [
-                "C:\Media\Films\A Man Called Otto (2022) [imdbid-tt7405458] - [Bluray-1080p][EAC3 5.1][x264]-playHD.mkv",
-                "C:\Media\Films\Aftersun (2022).mkv",
-                "C:\Media\Films\American Graffiti (1973) [imdbid-tt0069704] - [Remux-1080p Proper][FLAC 2.0][VC1]-KRaLiMaRKo.mkv",
-                "C:\Media\Films\Desert.Flower.2009.1080p.BluRay.x264.DTS-WiKi.mkv",
-                "C:\Media\Films\Dogville (2003) [imdbid-tt0276919] - [Bluray-1080p][DTS-HD MA 5.1][x265]-TAoE.mkv",
-                "C:\Media\Films\The Last Black Man in San Francisco (2019) [imdbid-tt4353250] - [Bluray-1080p][DTS-HD MA 5.1][x265]-CHD.mkv",
+                r"C:\Media\Films\A Man Called Otto (2022) [imdbid-tt7405458] - [Bluray-1080p][EAC3 5.1][x264]-playHD.mkv",
+                r"C:\Media\Films\Aftersun (2022).mkv",
+                r"C:\Media\Films\American Graffiti (1973) [imdbid-tt0069704] - [Remux-1080p Proper][FLAC 2.0][VC1]-KRaLiMaRKo.mkv",
+                r"C:\Media\Films\Desert.Flower.2009.1080p.BluRay.x264.DTS-WiKi.mkv",
+                r"C:\Media\Films\Dogville (2003) [imdbid-tt0276919] - [Bluray-1080p][DTS-HD MA 5.1][x265]-TAoE.mkv",
+                r"C:\Media\Films\The Last Black Man in San Francisco (2019) [imdbid-tt4353250] - [Bluray-1080p][DTS-HD MA 5.1][x265]-CHD.mkv",
             ],
             "Parsed film title": [
                 "A Man Called Otto",
