@@ -75,12 +75,8 @@ def get_user_output_folder() -> Path:
 def get_user_input_folders() -> list[Path]:
     message = (
         "Please enter one or more input folders that contain your films.\n"
-        "Single folder path example:\n"
-        "- Windows: C:/Media/Films\n"
-        "- Linux: /home/username/media/films\n\n"
-        "For multiple folder paths, separate them using a comma e.g.:\n"
+        "If entering multiple, separate them with a comma e.g.\n"
         "- C:/Media/Films,E:/Media/Films\n"
-        "- /home/username/media/films,/home/username/media/old films"
     )
 
     response = prompt_user_for_info("input_folders", message)
@@ -98,7 +94,8 @@ def return_as_path_if_valid(folder_path_str: Optional[str]) -> Path:
     if not folder_path_str:
         raise ValueError("No folder path was selected in the dialog box, please re-run")
 
-    folder_path = Path(folder_path_str)
+    folder_path_str_formatted = folder_path_str.lstrip()
+    folder_path = Path(folder_path_str_formatted)
 
     if not folder_path.is_dir():
         raise ValueError(
@@ -109,15 +106,14 @@ def return_as_path_if_valid(folder_path_str: Optional[str]) -> Path:
 
 
 def get_user_info_api_key() -> None:
-    prompt = [inquirer.Text("api_key", message="Please enter your API key from ANT")]
+    message = "Please enter your API key from ANT"
+    api_key = prompt_user_for_info("api_key", message)
 
-    user_api_key = inquirer.prompt(prompt)["api_key"]
-
-    if user_api_key:
+    if api_key:
         set_key(
             dotenv_path=ENV_FILE_PATH,
             key_to_set="API_KEY",
-            value_to_set=user_api_key,
+            value_to_set=api_key,
         )
     else:
         raise ValueError("No API key was set - please restart")
