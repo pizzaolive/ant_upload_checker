@@ -33,19 +33,11 @@ This is a work in progress - please feel free to give helpful feedback and repor
 * Non-english films may not be found on ANT if their titles do not match
 * Films with ellipsis may not be found. Currently guessit automatically removes these e.g. Tick Tick... BOOM! -> Tick Tick Boom!
 * Films with alternate titles (Film X AKA Film Y) will not be found on ANT
-* Some users are unable to use the script with a GUI (graphical user interface)- an alternative option will be added in the future
 
 ## Prerequisites
 * You must have Python v 3.8 or later installed: https://www.python.org/downloads/windows/
 * You must be a member of ANT
     * Please do not message me for an invite, or open issues requesting one, these will be ignored. ANT Staff is aware of and monitors this repo
-* If you are on Linux, note that some Python installations don't come with a package called Tkinter which is required. 
-    * If you are prompted to install it, choose the command based on your Linux system, or see here for more info: https://stackoverflow.com/questions/4783810/install-tkinter-for-python
-        * **Debian/Ubuntu:** `sudo apt install python3-tk -y`
-        * **Fedora:** `sudo dnf install -y python3-tkinter`
-        * **Arch:** `sudo pacman -Syu tk --noconfirm` 
-        * **REHL/CentOS6/CentOS7:** `sudo yum install -y python3-tkinter`
-        * **OpenSUSE:** `sudo zypper in -y python-tk`
 
 ## How to setup and run ant_upload_checker
 1. **Optional step: setup a virtual environment** (recomended but not required)
@@ -60,8 +52,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 3. **Run the package**
     * Once installed, type `ant-upload-checker` to run the package
     * You should be asked for your ANT API key - you can paste this in after copying it from ANT
-    * A dialog box should then open asking for your input folders (where your films are stored)
-    * Finally, another dialog box should ask you to specify your output folder (where the film list CSV should be written)
+    * You should then be asked to enter your output folder, then your input folder(s).
     * When you run it for a second time, you can skip this stage by selecting "No" when asked whether you want to overwrite your existing settings
 4. **Check the output file**
     * Open the output csv file to see which films already exist on the tracker
@@ -82,9 +73,8 @@ If you want to do any development work, don't install from PyPi. Instead:
 ### Planned improvements
 - [ ] Continue to add more film properties to dupe check
 - [ ] Continue code refactor, finish adding type hints
-- [ ] Add a CLI for those unable to use GUI
 - [ ] Increase max file path length
 - [ ] Add automatic torrent creator using torf
 
-See the [changelog](changelog.md) for recent changes.
+See the [changelog](https://github.com/pizzaolive/ant_upload_checker/blob/5a6d68e3772630efe6ca5a7ac8c7e7e233c1348f/changelog.md) for recent changes.
 
