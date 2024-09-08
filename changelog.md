@@ -1,3 +1,6 @@
+#### Version 1.8.0
+* Feature: Remove GUI in favour of inquirer prompts - this should allow users on headless servers to use the programme once again, and make installation slightly easier (no more tkinter issues)
+
 #### Version 1.7.0
 * Feature: add a dupe check to fully and partially dupe check the filename and other attributes (resolution/codec/source)
 
