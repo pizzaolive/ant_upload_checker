@@ -51,7 +51,15 @@ def get_user_info_directories() -> None:
     )
 
 
-def prompt_user_for_info(info_required: str, prompt_message: str) -> str:
+def prompt_user_for_info(
+    info_required: str,
+    prompt_message: str,
+    logging_message: Optional[str] = None,
+) -> str:
+
+    if logging_message:
+        logging.info(logging_message)
+
     prompt = [inquirer.Text(info_required, message=prompt_message)]
     response = inquirer.prompt(prompt)[info_required]
 
@@ -63,12 +71,13 @@ def get_user_output_folder() -> str:
     Ask user for output folder, validate it can be converted to a Path object
     and it exists, then return as a string
     """
-    message = (
-        "Please enter the output location (where the film list CSV should be saved) "
-        "e.g. C:/Media or /home/username/media"
+    logging_message = (
+        "\n\nPlease enter the output folder (where the film list CSV should be saved)\n"
+        "e.g. C:/Media or /home/username/media\n"
     )
+    prompt_message = "Output folder"
 
-    response = prompt_user_for_info("output_folder", message)
+    response = prompt_user_for_info("output_folder", prompt_message, logging_message)
     output_folder_path = return_as_path_if_valid(response)
 
     return str(output_folder_path)
@@ -79,13 +88,13 @@ def get_user_input_folders() -> list[str]:
     Ask user for one or more input volders, validate they can be converted to Path objects
     and they exist, then return as list of strings
     """
-    message = (
-        "Please enter one or more input folders that contain your films. "
-        "For multiple folders separate them with a comma e.g. "
-        "C:/Films,E:/Films"
+    logging_message = (
+        "\n\nPlease enter one or more input folders that contain your films.\n"
+        "Multiple folders should be separated with a comma e.g. C:/Films,E:/Films\n"
     )
+    prompt_message = "Input folder(s)"
 
-    response = prompt_user_for_info("input_folders", message)
+    response = prompt_user_for_info("input_folders", prompt_message, logging_message)
 
     input_folders = response.split(",")
 
