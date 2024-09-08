@@ -53,8 +53,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 3. **Run the package**
     * Once installed, type `ant-upload-checker` to run the package
     * You should be asked for your ANT API key - you can paste this in after copying it from ANT
-    * A dialog box should then open asking for your input folders (where your films are stored)
-    * Finally, another dialog box should ask you to specify your output folder (where the film list CSV should be written)
+    * You should then be asked to enter your output folder, then your input folder(s).
     * When you run it for a second time, you can skip this stage by selecting "No" when asked whether you want to overwrite your existing settings
 4. **Check the output file**
     * Open the output csv file to see which films already exist on the tracker
@@ -75,7 +74,6 @@ If you want to do any development work, don't install from PyPi. Instead:
 ### Planned improvements
 - [ ] Continue to add more film properties to dupe check
 - [ ] Continue code refactor, finish adding type hints
-- [ ] Add a CLI for those unable to use GUI
 - [ ] Increase max file path length
 - [ ] Add automatic torrent creator using torf
 
