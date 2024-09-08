@@ -33,7 +33,6 @@ This is a work in progress - please feel free to give helpful feedback and repor
 * Non-english films may not be found on ANT if their titles do not match
 * Films with ellipsis may not be found. Currently guessit automatically removes these e.g. Tick Tick... BOOM! -> Tick Tick Boom!
 * Films with alternate titles (Film X AKA Film Y) will not be found on ANT
-* Some users are unable to use the script with a GUI (graphical user interface)- an alternative option will be added in the future
 
 ## Prerequisites
 * You must have Python v 3.8 or later installed: https://www.python.org/downloads/windows/
@@ -77,5 +76,5 @@ If you want to do any development work, don't install from PyPi. Instead:
 - [ ] Increase max file path length
 - [ ] Add automatic torrent creator using torf
 
-See the [changelog](changelog.md) for recent changes.
+See the [changelog](https://github.com/pizzaolive/ant_upload_checker/blob/5a6d68e3772630efe6ca5a7ac8c7e7e233c1348f/changelog.md) for recent changes.
 
