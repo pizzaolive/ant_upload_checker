@@ -28,7 +28,8 @@ def check_if_user_wants_to_override_env_file() -> bool:
 
 def save_user_info_to_env() -> None:
     if not ENV_FILE_PATH.is_file() or check_if_user_wants_to_override_env_file():
-        get_user_info_api_key()
+        get_user_info_api_key("ANT")
+        get_user_info_api_key("TMDB")
         get_user_info_directories()
         logging.info("User setting saved to '.env' file")
 
@@ -124,24 +125,29 @@ def return_as_path_if_valid(folder_path_str: Optional[str]) -> Path:
     return folder_path
 
 
-def get_user_info_api_key() -> None:
-    message = "Please enter your API key from ANT"
+def get_user_info_api_key(api_source: str) -> None:
+    message = f"Please enter your API key from {api_source}"
     api_key = prompt_user_for_info("api_key", message)
 
     if api_key:
         set_key(
             dotenv_path=ENV_FILE_PATH,
-            key_to_set="API_KEY",
+            key_to_set=f"API_KEY_{api_source}",
             value_to_set=api_key,
         )
     else:
-        raise ValueError("No API key was set - please restart")
+        raise ValueError(f"No API key was set for {api_source} - please restart")
 
 
-def load_env_file() -> tuple[str, list[Path], Path]:
+def load_env_file() -> tuple[str, str, list[Path], Path]:
     settings = dotenv_values(ENV_FILE_PATH)
 
-    expected_settings = ["API_KEY", "INPUT_FOLDERS", "OUTPUT_FOLDER"]
+    expected_settings = [
+        "API_KEY_ANT",
+        "API_KEY_TMDB",
+        "INPUT_FOLDERS",
+        "OUTPUT_FOLDER",
+    ]
     missing_settings = [
         setting for setting in expected_settings if settings.get(setting) is None
     ]
@@ -152,7 +158,8 @@ def load_env_file() -> tuple[str, list[Path], Path]:
             "\nPlease restart"
         )
 
-    api_key = settings["API_KEY"]
+    api_key_ant = settings["API_KEY_ANT"]
+    api_key_tmdb = settings["API_KEY_TMDB"]
 
     input_folders_str = settings["INPUT_FOLDERS"].split(",")
     input_folders = [Path(folder) for folder in input_folders_str]
@@ -161,4 +168,4 @@ def load_env_file() -> tuple[str, list[Path], Path]:
 
     logging.info("User settings loaded from '.env' file\n")
 
-    return api_key, input_folders, output_folder
+    return api_key_ant, api_key_tmdb, input_folders, output_folder

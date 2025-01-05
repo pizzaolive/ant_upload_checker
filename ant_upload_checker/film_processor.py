@@ -17,6 +17,7 @@ class FilmProcessor:
         self.film_list_df_types: dict[str, str] = {
             "Full file path": "string",
             "Parsed film title": "string",
+            "Release year": "string",
             "Film size (GB)": "float64",
             "Resolution": "string",
             "Codec": "string",
@@ -57,6 +58,9 @@ class FilmProcessor:
     ) -> pd.DataFrame:
         film_sizes = self.get_film_sizes_from_file_paths(film_file_paths)
         guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
+        film_release_years = self.get_film_release_year_from_guessed_films(
+            guessed_films
+        )
         film_titles = self.get_formatted_titles_from_guessed_films(guessed_films)
         film_resolutions = self.get_film_resolutions_from_guessed_films(guessed_films)
         film_codecs = self.get_codec_from_guessed_films(guessed_films)
@@ -67,6 +71,7 @@ class FilmProcessor:
             film_file_paths,
             film_sizes,
             film_titles,
+            film_release_years,
             film_resolutions,
             film_codecs,
             film_sources,
@@ -223,7 +228,17 @@ class FilmProcessor:
         except:
             film_attribute = ""
 
-        return film_attribute
+        return str(film_attribute)
+
+    def get_film_release_year_from_guessed_films(
+        self, guessed_films: list[MatchesDict]
+    ) -> list[int]:
+        film_release_years = [
+            self.get_film_attribute_from_guessed_film(film, "year")
+            for film in guessed_films
+        ]
+
+        return film_release_years
 
     def get_film_resolutions_from_guessed_films(
         self, guessed_films: list[MatchesDict]
@@ -299,6 +314,7 @@ class FilmProcessor:
         film_file_paths: list[Path],
         film_sizes: list[float],
         film_titles: list[str],
+        film_release_years: list[str],
         film_resolutions: list[str],
         film_codecs: list[str],
         film_sources: list[str],
@@ -314,6 +330,7 @@ class FilmProcessor:
             {
                 "Full file path": film_file_paths,
                 "Parsed film title": film_titles,
+                "Release year": film_release_years,
                 "Film size (GB)": film_sizes,
                 "Resolution": film_resolutions,
                 "Codec": film_codecs,

@@ -1,3 +1,5 @@
+TMDB_URL = "https://api.themoviedb.org/3/search/movie"
+ANT_URL = "https://anthelion.me/api.php"
 BANNED_GROUPS = [
     "evo",
     "3lton",

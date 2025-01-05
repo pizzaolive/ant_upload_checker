@@ -68,11 +68,11 @@ def test_get_user_output_folder(monkeypatch, tmp_path):
 
 
 def test_get_user_info_api_key_empty(monkeypatch):
-    with pytest.raises(ValueError, match="No API key was set - please restart"):
+    with pytest.raises(ValueError, match="No API key was set for ANT - please restart"):
 
         def mock_prompt(_):
             return {"api_key": ""}
 
         monkeypatch.setattr(inquirer, "prompt", mock_prompt)
 
-        setup_functions.get_user_info_api_key()
+        setup_functions.get_user_info_api_key(api_source="ANT")
