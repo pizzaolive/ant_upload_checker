@@ -2,7 +2,7 @@ import logging
 from ant_upload_checker import setup_functions
 from ant_upload_checker import constants
 from ant_upload_checker.film_processor import FilmProcessor
-from ant_upload_checker.film_searcher_refactored import FilmSearcher
+from ant_upload_checker.film_searcher import FilmSearcher
 from ant_upload_checker.output import write_film_list_to_csv
 from ant_upload_checker.dupe_checker import DupeChecker
 
@@ -23,7 +23,11 @@ def main():
     film_list_combined = films.combine_with_existing_film_csv(film_list_df)
 
     film_searcher = FilmSearcher(
-        film_list_combined, api_key=api_key_tmdb, url=constants.TMDB_URL
+        film_list_combined,
+        api_key_ant=api_key_ant,
+        api_key_tmdb=api_key_tmdb,
+        ant_url=constants.ANT_URL,
+        tmdb_url=constants.TMDB_URL,
     )
     films_to_dupe_check = film_searcher.check_if_films_exist_on_ant()
 

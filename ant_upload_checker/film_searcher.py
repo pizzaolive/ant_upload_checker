@@ -1,18 +1,27 @@
-import pandas as pd
 import requests
 import logging
 from pathlib import Path
 from typing import Any, Union
 from ratelimit import limits, sleep_and_retry
-import re
 from requests.adapters import HTTPAdapter, Retry
+import pandas as pd
+import rapidfuzz
 
 
 class FilmSearcher:
-    def __init__(self, film_list_df: pd.DataFrame, api_key: str):
+    def __init__(
+        self,
+        film_list_df: pd.DataFrame,
+        api_key_ant: str,
+        api_key_tmdb: str,
+        ant_url: str,
+        tmdb_url: str,
+    ):
         self.film_list_df: pd.DataFrame = film_list_df
-        self.api_key: str = api_key
-        self.ant_url = "https://anthelion.me/api.php"
+        self.api_key_ant: str = api_key_ant
+        self.api_key_tmdb: str = api_key_tmdb
+        self.ant_url: str = ant_url
+        self.tmdb_url: str = tmdb_url
         self.session: requests.Session = requests.Session()
         self.not_found_value: str = "NOT FOUND"
 
@@ -51,6 +60,16 @@ class FilmSearcher:
             .sort_values(by="Parsed film title")
             .reset_index(drop=True)
         )
+
+        films_to_process["TMDB ID"] = films_to_process.apply(
+            lambda film: self.search_for_film_on_tmdb(
+                film["Parsed film title"],
+                film["Release year"],
+            ),
+            axis=1,
+            result_type="expand",
+        )
+
         films_to_process["API response"] = films_to_process["Parsed film title"].apply(
             self.check_if_film_exists_on_ant
         )
@@ -68,26 +87,19 @@ class FilmSearcher:
 
         return films_to_dupe_check
 
-    def check_if_film_exists_on_ant(self, film_title: str) -> list[dict[str, Any]]:
+    def check_if_film_exists_on_ant(self, film_id: str) -> list[dict[str, Any]]:
         """
         Take a film title, and search for it using the ANT API.
         If an initial match is not found, re-search for a
         modified version of the film title if it meets certain conditions.
         """
-        logging.info("\nSearching for %s...", film_title)
+        logging.info("\nSearching for %s...", film_id)
         title_checks = [
-            (self.search_for_film_title_on_ant, ""),
-            (self.search_for_film_if_contains_and, ""),
-            (self.search_for_film_if_contains_potential_date_or_time, "time"),
-            (self.search_for_film_if_contains_potential_date_or_time, "date"),
-            (self.search_for_film_if_contains_aka, ""),
+            (self.search_for_film_on_ant, ""),
         ]
-        for search_function, optional_argument in title_checks:
+        for search_function in title_checks:
             try:
-                if optional_argument:
-                    search_result = search_function(film_title, optional_argument)
-                else:
-                    search_result = search_function(film_title)
+                search_result = search_function(film_id)
 
                 if search_result:
                     return search_result
@@ -99,101 +111,95 @@ class FilmSearcher:
         logging.info("--- Not found on ANT ---")
         return []
 
-    def search_for_film_if_contains_and(self, film_title: str) -> list[dict[str, Any]]:
-        """
-        If film title contains and or &, replace with the oppposite
-        and search for the new title on ANT. Else, return NOT FOUND.
-        """
-        and_word_regex = r"(?i)\sand\s"
-        and_symbol_regex = r"(?i)\s&\s"
+    def search_for_film_on_tmdb(self, film_title: str, release_year: str):
+        if film_title == "":
+            logging.info("No film title, skipping")
+            return ""
+        logging.info(film_title)
+        # Avoid using release year in query due to bad metadata
+        # or incorrect year in filenames
+        payload = {
+            "api_key": self.api_key_tmdb,
+            "query": film_title,
+            "include_adult": "false",
+            "language": "en-us",
+        }
+        response_json = self.search_for_film_using_api(payload, url=self.tmdb_url)
 
-        if re.search(and_word_regex, film_title):
-            logging.info("-- Film contains 'and'")
-            return self.replace_word_and_re_search(film_title, and_word_regex, " & ")
-        elif re.search(and_symbol_regex, film_title):
-            logging.info("-- Film contains '&'")
-            return self.replace_word_and_re_search(
-                film_title, and_symbol_regex, " and "
+        if not response_json["results"]:
+            logging.info("Request to TMDB returned no results, skipping")
+            return ""
+
+        unmatched_films = []
+        for film in response_json["results"]:
+            response_release_year = film["release_date"][0:4]
+            title_match = (film["title"] == film_title) | (
+                film["original_title"] == film_title
             )
+            year_match = response_release_year == release_year
 
-        return []
+            if title_match and year_match:
+                logging.info(
+                    "---- Exact title and year match to TMDB. ID: %s", film["id"]
+                )
+                return film["id"]
+            corrected_year_match = (
+                response_release_year == str(int(release_year) + 1)
+            ) or (response_release_year == str(int(release_year) - 1))
 
-    def search_for_film_if_contains_potential_date_or_time(
-        self, film_title: str, format: str
-    ) -> list[dict[str, Any]]:
-        """
-        If film title 4 numbers e.g. 1208 East of Bucharest,
-        add colon in middle, re-search title on ANT.
-        Else, return NOT FOUND.
-        """
-        if format == "time":
-            numbers_regex = r"(?<=\b\d\d)(?=\d\d\b)"
-            replacement_value = ":"
-        elif format == "date":
-            numbers_regex = r"(?<=\b\d)(?=\d{1,2}\b)"
-            replacement_value = "/"
-        else:
-            raise ValueError("The format argument must be 'time' or 'date'")
+            if title_match and corrected_year_match:
+                info_message = (
+                    f"---- Exact title match but TMDB release year ({response_release_year}) "
+                    f"is one year later or before extracted from filename ({release_year}). ID: {film['id']}\n"
+                    "---- This may be due to an earlier premier date but is worth double checking."
+                )
+                logging.info(info_message)
+                return film["id"]
 
-        if re.search(numbers_regex, film_title):
+            if year_match or corrected_year_match:
+                unmatched_films.append(film)
+
+        all_film_titles = [film["title"] for film in unmatched_films]
+        best_fuzzy_match = rapidfuzz.process.extractOne(film_title, all_film_titles)
+
+        if best_fuzzy_match[1] > 85:
+            fuzzy_matched_film = unmatched_films[best_fuzzy_match[2]]
+
             logging.info(
-                "-- Film title may contain a date or time without punctuation."
+                "---- Warning: could not find exact film match, resorting to fuzzy matching. Manual check is recommended!\n"
+                f"---- TMDB film name: '{fuzzy_matched_film['title']}'. TMDB ID: {fuzzy_matched_film['id']} "
             )
-            return self.replace_word_and_re_search(
-                film_title, numbers_regex, replacement_value
-            )
+            return fuzzy_matched_film["id"]
 
-        return []
+        logging.info("Failed match film to TMDB, skipping")
+        return ""
 
-    def search_for_film_if_contains_aka(self, film_title: str) -> list[dict[str, Any]]:
-        aka_regex = r"(?i)\saka\s"
+    def search_for_film_on_ant(self, film_id: str) -> list[dict[str, Any]]:
+        payload = {
+            "api_key": self.api_key_ant,
+            "q": film_id,  # update to tmdb once tracker online again
+            "t": "movie",
+            "o": "json",
+        }
+        response_json = self.search_for_film_using_api(payload, url=self.ant_url)
 
-        if re.search(aka_regex, film_title):
-            logging.info("-- Film title may contain an alternate title")
-
-            split_titles = re.split(aka_regex, film_title)
-
-            for title in split_titles:
-                logging.info("-- Searching for %s as well...", title)
-                film_search = self.search_for_film_title_on_ant(title)
-                if film_search != []:
-                    return film_search
-        return []
-
-    def replace_word_and_re_search(
-        self, film_title: str, regex_pattern: str, replacement: str
-    ) -> list[dict[str, Any]]:
-        cleaned_film_title = re.sub(
-            regex_pattern,
-            replacement,
-            film_title,
-        )
-        logging.info("-- Searching for %s as well...", cleaned_film_title)
-
-        return self.search_for_film_title_on_ant(cleaned_film_title)
+        if response_json["response"]["total"] > 0:
+            return response_json["item"]
+        else:
+            return []
 
     @sleep_and_retry
-    @limits(calls=1, period=2)
-    def search_for_film_title_on_ant(self, film_title: str) -> list[dict[str, Any]]:
-        """
-        Use the ANT API to search for a film title and
-        return the first URL if found, else a NOT FOUND string
-        """
-
-        if not self.api_key:
+    @limits(calls=1, period=0.5)
+    def search_for_film_using_api(
+        self, payload: dict[str, str], url: str
+    ) -> dict[Any, Any]:
+        if not payload["api_key"]:
             logging.error(
                 "The API key entered is blank, please re-run and enter a valid API key"
             )
             raise SystemExit("Exiting due to blank API key")
 
-        payload = {
-            "api_key": self.api_key,
-            "q": film_title,
-            "t": "movie",
-            "o": "json",
-        }
-
-        response = self.session.get(self.ant_url, params=payload)
+        response = self.session.get(url, params=payload)
         try:
             response.raise_for_status()
 
@@ -234,7 +240,4 @@ class FilmSearcher:
             logging.error("An unknown error occured: %s", err)
             raise SystemExit(err)
 
-        if response_json["response"]["total"] > 0:
-            return response_json["item"]
-        else:
-            return []
+        return response_json
