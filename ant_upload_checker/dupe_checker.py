@@ -10,7 +10,7 @@ class DupeChecker:
         self.guid_missing_message: str = "(Failed to extract URL from API response)"
         self.not_found_message: tuple[str, str] = (
             "Uploadable - potentially",
-            "Film not found on ANT - does not already exist, or title failed to match",
+            "Film not found on ANT - does not already exist, or failed to match using TMDB ID",
         )
         self.banned_groups = constants.BANNED_GROUPS
 

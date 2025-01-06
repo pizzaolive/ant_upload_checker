@@ -70,7 +70,7 @@ class FilmSearcher:
             result_type="expand",
         )
 
-        films_to_process["API response"] = films_to_process["Parsed film title"].apply(
+        films_to_process["API response"] = films_to_process["TMDB ID"].apply(
             self.check_if_film_exists_on_ant
         )
 
@@ -95,7 +95,7 @@ class FilmSearcher:
         """
         logging.info("\nSearching for %s...", film_id)
         title_checks = [
-            (self.search_for_film_on_ant, ""),
+            self.search_for_film_on_ant,
         ]
         for search_function in title_checks:
             try:
@@ -111,6 +111,8 @@ class FilmSearcher:
         logging.info("--- Not found on ANT ---")
         return []
 
+    @sleep_and_retry
+    @limits(calls=1, period=0.25)
     def search_for_film_on_tmdb(self, film_title: str, release_year: str):
         if film_title == "":
             logging.info("No film title, skipping")
@@ -174,10 +176,12 @@ class FilmSearcher:
         logging.info("Failed match film to TMDB, skipping")
         return ""
 
+    @sleep_and_retry
+    @limits(calls=1, period=2)
     def search_for_film_on_ant(self, film_id: str) -> list[dict[str, Any]]:
         payload = {
             "api_key": self.api_key_ant,
-            "q": film_id,  # update to tmdb once tracker online again
+            "tmdb": film_id,
             "t": "movie",
             "o": "json",
         }
@@ -188,17 +192,9 @@ class FilmSearcher:
         else:
             return []
 
-    @sleep_and_retry
-    @limits(calls=1, period=0.5)
     def search_for_film_using_api(
         self, payload: dict[str, str], url: str
     ) -> dict[Any, Any]:
-        if not payload["api_key"]:
-            logging.error(
-                "The API key entered is blank, please re-run and enter a valid API key"
-            )
-            raise SystemExit("Exiting due to blank API key")
-
         response = self.session.get(url, params=payload)
         try:
             response.raise_for_status()
