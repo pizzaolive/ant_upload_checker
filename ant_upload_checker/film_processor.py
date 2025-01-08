@@ -1,12 +1,16 @@
-import pandas as pd
-import numpy as np
-from rebulk.match import MatchesDict
 import logging
-from guessit import guessit
-from pathlib import Path
 import re
 import sys
 import shutil
+from pathlib import Path
+
+import pandas as pd
+import numpy as np
+from rebulk.match import MatchesDict
+
+from guessit import guessit
+
+from ant_upload_checker.media_info_extractor import MediaInfoExtractor
 
 
 class FilmProcessor:
@@ -56,6 +60,11 @@ class FilmProcessor:
     def get_film_info_from_file_paths(
         self, film_file_paths: list[Path]
     ) -> pd.DataFrame:
+
+        media_info = MediaInfoExtractor(film_file_paths)
+        media_info.convert_paths_to_media_info()
+        film_runtimes = media_info.extract_metadata_from_media_info()
+
         film_sizes = self.get_film_sizes_from_file_paths(film_file_paths)
         guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
         film_release_years = self.get_film_release_year_from_guessed_films(
@@ -69,6 +78,7 @@ class FilmProcessor:
 
         film_list_df = self.create_film_list_dataframe(
             film_file_paths,
+            film_runtimes,
             film_sizes,
             film_titles,
             film_release_years,
@@ -312,6 +322,7 @@ class FilmProcessor:
     def create_film_list_dataframe(
         self,
         film_file_paths: list[Path],
+        film_runtimes: list[int],
         film_sizes: list[float],
         film_titles: list[str],
         film_release_years: list[str],
@@ -329,6 +340,7 @@ class FilmProcessor:
         films_df = pd.DataFrame(
             {
                 "Full file path": film_file_paths,
+                "Film runtime": film_runtimes,
                 "Parsed film title": film_titles,
                 "Release year": film_release_years,
                 "Film size (GB)": film_sizes,

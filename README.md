@@ -36,6 +36,7 @@ This is a work in progress - please feel free to give helpful feedback and repor
 
 ## Prerequisites
 * You must have Python v 3.8 or later installed: https://www.python.org/downloads/windows/
+* You must have MediaInfo installed: https://mediaarea.net/en/MediaInfo
 * You must be a member of ANT
     * Please do not message me for an invite, or open issues requesting one, these will be ignored. ANT Staff is aware of and monitors this repo
 

@@ -126,52 +126,62 @@ class FilmSearcher:
             "include_adult": "false",
             "language": "en-us",
         }
+
+        if release_year:
+            payload["primary_release_year"] = release_year
+
         response_json = self.search_for_film_using_api(payload, url=self.tmdb_url)
 
-        if not response_json["results"]:
-            logging.info("Request to TMDB returned no results, skipping")
-            return ""
-
         unmatched_films = []
-        for film in response_json["results"]:
-            response_release_year = film["release_date"][0:4]
-            title_match = (film["title"] == film_title) | (
-                film["original_title"] == film_title
-            )
-            year_match = response_release_year == release_year
 
-            if title_match and year_match:
+        if response_json["results"]:
+            for film in response_json["results"]:
+                title_match = film["title"] == film_title
+                if title_match:
+                    logging.info(
+                        "---- Exact title and year match to TMDB. ID: %s", film["id"]
+                    )
+                    return film["id"]
+                else:
+                    unmatched_films.append(film)
+
+        # expand API search this time, then fuzzy match
+        if release_year:
+            release_year_int = int(release_year)
+            expanded_release_years = [release_year_int + 1, release_year_int - 1]
+
+            for year in expanded_release_years:
+                payload["primary_release_year"] = year
+                response_json = self.search_for_film_using_api(
+                    payload, url=self.tmdb_url
+                )
+                if response_json["results"]:
+                    unmatched_films += response_json["results"]
+
+
+            if film_title =="Freaks":
+                pause = 1
+
+            # Now we have expanded the list of films - fuzzy match the best one
+            # Sort by popularity
+            unmatched_films_by_popularity = sorted(
+                unmatched_films, key=lambda x: x["popularity"], reverse=True
+            )
+
+            all_film_titles = [film["title"] for film in unmatched_films_by_popularity]
+            best_fuzzy_match = rapidfuzz.process.extractOne(film_title, all_film_titles)
+
+            if best_fuzzy_match and best_fuzzy_match[1] > 85:
+                fuzzy_matched_film = unmatched_films_by_popularity[best_fuzzy_match[2]]
+
                 logging.info(
-                    "---- Exact title and year match to TMDB. ID: %s", film["id"]
+                    "---- Warning: could not find exact film match, expanded release year and using "
+                    "fuzzy matching. Manual check is recommended!\n"
+                    f"---- Parsed film info: {film_title} ({release_year})\n"
+                    f"---- TMDB film name:   {fuzzy_matched_film['title']} ({fuzzy_matched_film["release_date"][0:4]}).\n"
+                    f"TMDB ID: {fuzzy_matched_film['id']}"
                 )
-                return film["id"]
-            corrected_year_match = (
-                response_release_year == str(int(release_year) + 1)
-            ) or (response_release_year == str(int(release_year) - 1))
-
-            if title_match and corrected_year_match:
-                info_message = (
-                    f"---- Exact title match but TMDB release year ({response_release_year}) "
-                    f"is one year later or before extracted from filename ({release_year}). ID: {film['id']}\n"
-                    "---- This may be due to an earlier premier date but is worth double checking."
-                )
-                logging.info(info_message)
-                return film["id"]
-
-            if year_match or corrected_year_match:
-                unmatched_films.append(film)
-
-        all_film_titles = [film["title"] for film in unmatched_films]
-        best_fuzzy_match = rapidfuzz.process.extractOne(film_title, all_film_titles)
-
-        if best_fuzzy_match[1] > 85:
-            fuzzy_matched_film = unmatched_films[best_fuzzy_match[2]]
-
-            logging.info(
-                "---- Warning: could not find exact film match, resorting to fuzzy matching. Manual check is recommended!\n"
-                f"---- TMDB film name: '{fuzzy_matched_film['title']}'. TMDB ID: {fuzzy_matched_film['id']} "
-            )
-            return fuzzy_matched_film["id"]
+                return fuzzy_matched_film["id"]
 
         logging.info("Failed match film to TMDB, skipping")
         return ""
@@ -198,16 +208,6 @@ class FilmSearcher:
         response = self.session.get(url, params=payload)
         try:
             response.raise_for_status()
-
-            # Handle tracker returning 200 when down
-            if response.status_code == 200 and "maintenance" in response.text.lower():
-                error_message = (
-                    "Tracker appears to be down for maintenance: '%s'",
-                    response.text,
-                )
-                logging.error(error_message)
-                raise SystemExit(error_message)
-
             response_json = response.json()
         except requests.exceptions.HTTPError as err:
             logging.error(
