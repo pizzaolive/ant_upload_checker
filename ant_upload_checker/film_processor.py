@@ -63,9 +63,8 @@ class FilmProcessor:
 
         media_info = MediaInfoExtractor(film_file_paths)
         media_info.convert_paths_to_media_info()
-        film_runtimes = media_info.extract_metadata_from_media_info()
+        metadata = media_info.extract_metadata_from_media_info()
 
-        film_sizes = self.get_film_sizes_from_file_paths(film_file_paths)
         guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
         film_release_years = self.get_film_release_year_from_guessed_films(
             guessed_films
@@ -78,11 +77,11 @@ class FilmProcessor:
 
         film_list_df = self.create_film_list_dataframe(
             film_file_paths,
-            film_runtimes,
-            film_sizes,
+            metadata["runtime"],
+            metadata["file_size"],
             film_titles,
             film_release_years,
-            film_resolutions,
+            metadata["resolution"],
             film_codecs,
             film_sources,
             release_groups,
@@ -184,20 +183,6 @@ class FilmProcessor:
                 cleaned_paths.append(path)
 
         return cleaned_paths
-
-    def get_file_size_from_path(self, file_path: Path) -> float:
-        file_size_in_bytes = file_path.stat().st_size
-        file_size = self.convert_bytes_to_gb(file_size_in_bytes)
-
-        return file_size
-
-    def convert_bytes_to_gb(self, num_in_bytes: int) -> float:
-        """
-        Convert bytes to correct unit of measurement as a string
-        """
-        num_in_gb = round((num_in_bytes / 1073741824), 2)
-
-        return num_in_gb
 
     def get_guessit_info_from_film_paths(
         self, file_paths: list[Path]
