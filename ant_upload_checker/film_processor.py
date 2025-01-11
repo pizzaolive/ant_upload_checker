@@ -61,17 +61,14 @@ class FilmProcessor:
         self, film_file_paths: list[Path]
     ) -> pd.DataFrame:
 
-        media_info = MediaInfoExtractor(film_file_paths)
-        media_info.convert_paths_to_media_info()
-        metadata = media_info.extract_metadata_from_media_info()
+        media_info_extractor = MediaInfoExtractor(film_file_paths)
+        metadata = media_info_extractor.extract_metadata_from_media_info()
 
         guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
         film_release_years = self.get_film_release_year_from_guessed_films(
             guessed_films
         )
         film_titles = self.get_formatted_titles_from_guessed_films(guessed_films)
-        film_resolutions = self.get_film_resolutions_from_guessed_films(guessed_films)
-        film_codecs = self.get_codec_from_guessed_films(guessed_films)
         film_sources = self.get_source_from_guessed_films(guessed_films)
         release_groups = self.get_release_groups_from_guessed_films(guessed_films)
 
@@ -82,7 +79,7 @@ class FilmProcessor:
             film_titles,
             film_release_years,
             metadata["resolution"],
-            film_codecs,
+            metadata["codec"],
             film_sources,
             release_groups,
         )
@@ -159,11 +156,6 @@ class FilmProcessor:
 
         return cleaned_paths
 
-    def get_film_sizes_from_file_paths(self, file_paths: list[Path]) -> list[float]:
-        film_sizes = [self.get_file_size_from_path(path) for path in file_paths]
-
-        return film_sizes
-
     def remove_paths_if_unopenable(self, paths):
         """
         If file does not exist or is not openable, remove from paths.
@@ -234,28 +226,6 @@ class FilmProcessor:
         ]
 
         return film_release_years
-
-    def get_film_resolutions_from_guessed_films(
-        self, guessed_films: list[MatchesDict]
-    ) -> list[str]:
-        film_resolutions = [
-            self.get_film_attribute_from_guessed_film(film, "screen_size")
-            for film in guessed_films
-        ]
-
-        return film_resolutions
-
-    def get_codec_from_guessed_films(
-        self, guessed_films: list[MatchesDict]
-    ) -> list[str]:
-        film_codecs = [
-            self.get_film_attribute_from_guessed_film(film, "video_codec")
-            for film in guessed_films
-        ]
-
-        film_codecs_cleaned = [re.sub(r"\.", "", codec) for codec in film_codecs]
-
-        return film_codecs_cleaned
 
     def get_source_from_guessed_films(
         self, guessed_films: list[MatchesDict]

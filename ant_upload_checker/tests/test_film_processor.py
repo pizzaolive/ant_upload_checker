@@ -237,31 +237,6 @@ def test_get_source_film_attribute_from_guessed_film(test_guessit_films):
     assert actual_list == expected_list
 
 
-def test_get_codec_film_attribute_from_guessed_films(test_guessit_films):
-    fp = FilmProcessor("test", "test")
-
-    actual_list = fp.get_codec_from_guessed_films(test_guessit_films)
-
-    expected_list = [
-        "H265",
-        "MPEG-2",
-        "H264",
-        "H264",
-        "H264",
-        "H264",
-        "H264",
-        "H264",
-        "H264",
-        "H264",
-        "H264",
-        "H264",
-        "H264",
-        "H264",
-    ]
-
-    assert actual_list == expected_list
-
-
 def test_get_release_group_from_guessed_films(test_guessit_films):
     fp = FilmProcessor("test", "test")
 
