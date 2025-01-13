@@ -1,3 +1,6 @@
+import re
+
+
 def convert_bytes_to_gb(num_in_bytes: int) -> float:
     """
     Convert bytes to GB
@@ -7,13 +10,16 @@ def convert_bytes_to_gb(num_in_bytes: int) -> float:
     return num_in_gb
 
 
-def convert_milliseconds_to_minutes(num_in_ms: int) -> int:
+def convert_milliseconds_to_minutes(milliseconds: int | float | str) -> int:
     """
     Convert milliseconds to minutes
     """
-    num_in_minutes = round(num_in_ms / 60000)
+    if type(milliseconds) is str:
+        milliseconds = float(milliseconds)
 
-    return num_in_minutes
+    minutes = round(milliseconds / 60000)
+
+    return minutes
 
 
 def convert_width_to_resolution(width: int) -> str:
@@ -37,3 +43,8 @@ def convert_video_codec_format(codec: str) -> str:
         pause = 1
 
     return converted_codec
+
+
+def normalise_title(title: str) -> str:
+    normalised_title = re.sub(r"[^\w\s]", "", title).lower()
+    return normalised_title

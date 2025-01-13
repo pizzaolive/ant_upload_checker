@@ -262,46 +262,6 @@ def test_get_release_group_from_guessed_films(test_guessit_films):
     assert actual_list == expected_list
 
 
-def test_fix_title_if_contains_acronym():
-    fp = FilmProcessor("test", "test")
-
-    test_list = [
-        "Atlantics",
-        "tick tick BOOM!",
-        "Da 5 Bloods",
-        "Short term 12",
-        "X: First Class",
-        "Nick Fury: Agent of S.H.I.E.L.D.",
-        "L A Confidential",
-        "A I Artificial Intelligence",
-        "G I Jane",
-        "E T the Extra-Terrestrial",
-        "S.W.A.T.",
-        "T E S Test film",
-        "T E.S.T Test film",
-    ]
-
-    actual_list = [fp.fix_title_if_contains_acronym(x) for x in test_list]
-
-    expected_list = [
-        "Atlantics",
-        "tick tick BOOM!",
-        "Da 5 Bloods",
-        "Short term 12",
-        "X: First Class",
-        "Nick Fury: Agent of S.H.I.E.L.D.",
-        "L.A. Confidential",
-        "A.I. Artificial Intelligence",
-        "G.I. Jane",
-        "E.T. the Extra-Terrestrial",
-        "S.W.A.T.",
-        "T.E.S. Test film",
-        "T.E.S.T. Test film",
-    ]
-
-    assert actual_list == expected_list
-
-
 def test_get_formatted_titles_from_guessed_films(test_guessit_films):
     fp = FilmProcessor("test", "test")
     actual_list = fp.get_formatted_titles_from_guessed_films(test_guessit_films)

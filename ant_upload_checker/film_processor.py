@@ -21,6 +21,7 @@ class FilmProcessor:
         self.film_list_df_types: dict[str, str] = {
             "Full file path": "string",
             "Parsed film title": "string",
+            "Runtime": "int64",
             "Release year": "string",
             "Film size (GB)": "float64",
             "Resolution": "string",
@@ -63,12 +64,17 @@ class FilmProcessor:
 
         media_info_extractor = MediaInfoExtractor(film_file_paths)
         metadata = media_info_extractor.extract_metadata_from_media_info()
-
         guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
-        film_release_years = self.get_film_release_year_from_guessed_films(
-            guessed_films
-        )
-        film_titles = self.get_formatted_titles_from_guessed_films(guessed_films)
+
+        metadata_df = pd.DataFrame(metadata)
+        guessit_df = pd.DataFrame(guessed_films)
+
+        films_df = pd.concat([metadata_df, guessit_df], axis=1)
+        films_df.insert(0, "File path", film_file_paths)
+
+        # Source: replace uhd blu ray with bluray
+        # release group - to lower
+
         film_sources = self.get_source_from_guessed_films(guessed_films)
         release_groups = self.get_release_groups_from_guessed_films(guessed_films)
 
@@ -76,8 +82,8 @@ class FilmProcessor:
             film_file_paths,
             metadata["runtime"],
             metadata["file_size"],
-            film_titles,
-            film_release_years,
+            # film_titles,
+            # film_release_years,
             metadata["resolution"],
             metadata["codec"],
             film_sources,
@@ -176,6 +182,12 @@ class FilmProcessor:
 
         return cleaned_paths
 
+    def preprocess_file_name(self, file_name: str) -> str:
+        cleaned_title = re.split(r"\bAKA\b", file_name, flags=re.IGNORECASE)[-1]
+        # cleaned_title = re.sub("-", " ", cleaned_title)
+
+        return cleaned_title
+
     def get_guessit_info_from_film_paths(
         self, file_paths: list[Path]
     ) -> list[MatchesDict]:
@@ -183,24 +195,12 @@ class FilmProcessor:
         Use guessit package to extract film information
         into ordered dictionary.
         """
-        guessed_films = [guessit(path) for path in file_paths]
+        cleaned_file_names = [
+            self.preprocess_file_name(path.stem) for path in file_paths
+        ]
+        guessed_films = [guessit(file_name) for file_name in cleaned_file_names]
 
         return guessed_films
-
-    def get_formatted_titles_from_guessed_films(
-        self, guessed_films: list[MatchesDict]
-    ) -> list[str]:
-        """
-        Get film titles from guessit objects, then fix titles missing
-        full stops within acronyms
-        """
-        titles = [
-            self.get_film_attribute_from_guessed_film(film, "title")
-            for film in guessed_films
-        ]
-        cleaned_titles = [self.fix_title_if_contains_acronym(title) for title in titles]
-
-        return cleaned_titles
 
     def get_film_attribute_from_guessed_film(
         self, guessed_film: MatchesDict, attribute: str
@@ -216,16 +216,6 @@ class FilmProcessor:
             film_attribute = ""
 
         return str(film_attribute)
-
-    def get_film_release_year_from_guessed_films(
-        self, guessed_films: list[MatchesDict]
-    ) -> list[int]:
-        film_release_years = [
-            self.get_film_attribute_from_guessed_film(film, "year")
-            for film in guessed_films
-        ]
-
-        return film_release_years
 
     def get_source_from_guessed_films(
         self, guessed_films: list[MatchesDict]
@@ -251,29 +241,6 @@ class FilmProcessor:
 
         return release_groups
 
-    def fix_title_if_contains_acronym(self, film_title: str) -> str:
-        """
-        After guessit has extracted film title, fix instances where
-        consecutive single letter words contain spaces instead of full stops.
-        e.g. L A Confidential -> L.A Confidential -> L.A. Confidential
-        e.g. S W A T -> S.W.A.T -> S.W.A.T.
-        """
-        acronym_spaces_as_full_stops = re.sub(
-            r"(?<=\b[A-Za-z]{1})\s(?=[A-Za-z]{1}\b)", ".", film_title
-        )
-
-        acronym_suffixed_with_a_full_stop = re.sub(
-            r"(?<=\.[A-Za-z])(\s|$)(?=[^\s])", ". ", acronym_spaces_as_full_stops
-        )
-
-        acronym_at_end_of_title_suffixed_with_full_stop = re.sub(
-            r"(?<=\..$)",
-            ".",
-            acronym_suffixed_with_a_full_stop,
-        )
-
-        return acronym_at_end_of_title_suffixed_with_full_stop
-
     def create_film_list_dataframe(
         self,
         film_file_paths: list[Path],
@@ -295,8 +262,8 @@ class FilmProcessor:
         films_df = pd.DataFrame(
             {
                 "Full file path": film_file_paths,
-                "Film runtime": film_runtimes,
                 "Parsed film title": film_titles,
+                "Runtime": film_runtimes,
                 "Release year": film_release_years,
                 "Film size (GB)": film_sizes,
                 "Resolution": film_resolutions,

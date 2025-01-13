@@ -6,6 +6,14 @@ from pymediainfo import MediaInfo
 
 from ant_upload_checker import utils
 
+"""
+Potential rules to think about
+Date, times in title
+Contains AKA - alternate title
+
+Remove brackets from file name e.g. avoid films with () being parsed short e.g birds of prey...
+"""
+
 
 class MediaInfoExtractor:
     def __init__(self, file_paths: list[Path]):
@@ -13,13 +21,12 @@ class MediaInfoExtractor:
         self.films: list[MediaInfo] = []
         self.convert_paths_to_media_info()
 
-    def convert_paths_to_media_info(self) -> list[MediaInfo]:
+    def convert_paths_to_media_info(self) -> None:
+        logging.info("Using MediaInfo to get metadata from films...")
         start_time = time.time()
         self.films = [MediaInfo.parse(file_path) for file_path in self.file_paths]
 
         logging.info(f"Time: {time.time() - start_time}")
-
-        return self.films
 
     def get_track_metadata(
         self,
@@ -91,5 +98,7 @@ class MediaInfoExtractor:
 
         for metadata_name, function in metadata_functions.items():
             metadata[metadata_name] = [function(film) for film in self.films]
+
+        logging.info("Finished extracting metadata using MediaInfo.")
 
         return metadata
