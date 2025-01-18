@@ -309,7 +309,7 @@ def test_get_film_resolutions_from_guessed_film(test_guessit_films):
     assert actual_list == expected_list
 
 
-def test_create_film_list_dataframe():
+def test_create_films_dataframe():
     fp = FilmProcessor("test", "test")
     test_film_paths = [
         Path(r"C:\X: First Class (2100)"),
@@ -322,7 +322,7 @@ def test_create_film_list_dataframe():
     test_film_resolutions = ["1080p", "1080p"]
     test_release_groups = ["", ""]
 
-    actual_df = fp.create_film_list_dataframe(
+    actual_df = fp.create_films_dataframe(
         test_film_paths,
         test_film_sizes,
         test_film_titles,

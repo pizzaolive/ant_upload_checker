@@ -11,13 +11,13 @@ import rapidfuzz
 class FilmSearcher:
     def __init__(
         self,
-        film_list_df: pd.DataFrame,
+        films_df: pd.DataFrame,
         api_key_ant: str,
         api_key_tmdb: str,
         ant_url: str,
         tmdb_url: str,
     ):
-        self.film_list_df: pd.DataFrame = film_list_df
+        self.films_df: pd.DataFrame = films_df
         self.api_key_ant: str = api_key_ant
         self.api_key_tmdb: str = api_key_tmdb
         self.ant_url: str = ant_url
@@ -39,11 +39,11 @@ class FilmSearcher:
         """
         regex_to_skip = r"^Duplicate|^Banned"
 
-        self.film_list_df["Should skip"] = self.film_list_df[
-            "Already on ANT?"
-        ].str.contains(regex_to_skip, regex=True, na=False)
+        self.films_df["Should skip"] = self.films_df["Already on ANT?"].str.contains(
+            regex_to_skip, regex=True, na=False
+        )
 
-        films_to_skip = self.film_list_df.loc[self.film_list_df["Should skip"]]
+        films_to_skip = self.films_df.loc[self.films_df["Should skip"]]
 
         if not films_to_skip.empty:
             logging.info(
@@ -56,30 +56,26 @@ class FilmSearcher:
             )
 
         films_to_process = (
-            self.film_list_df.drop(films_to_skip.index)
-            .sort_values(by="Parsed film title")
+            self.films_df.drop(films_to_skip.index)
+            .sort_values(by="title")
             .reset_index(drop=True)
         )
 
-        films_to_process["TMDB ID"] = films_to_process.apply(
-            lambda film: self.search_for_film_on_tmdb(
-                film["Parsed film title"], film["Release year"], film["Runtime"]
-            ),
-            axis=1,
-            result_type="expand",
-        )
+        films_dict = films_to_process.to_dict(orient="records")
+        for film in films_dict:
+            film["TMDB ID"] = self.search_for_film_on_tmdb(
+                film["title"], film["year"], film["runtime"], film["edition"]
+            )
+        for film in films_dict:
+            film["API response"] = self.check_if_film_exists_on_ant(
+                film["TMDB ID"], film["title"]
+            )
 
-        films_to_process["API response"] = films_to_process.apply(
-            lambda film: self.check_if_film_exists_on_ant(
-                film["TMDB ID"], film["Parsed film title"]
-            ),
-            axis=1,
-            result_type="expand",
-        )
+        processed_films = pd.DataFrame(films_dict)
 
         films_to_dupe_check = (
-            pd.concat([films_to_skip, films_to_process])
-            .sort_values(by="Parsed film title")
+            pd.concat([films_to_skip, processed_films])
+            .sort_values(by="title")
             .reset_index(drop=True)
         )
 
@@ -99,31 +95,23 @@ class FilmSearcher:
         modified version of the film title if it meets certain conditions.
         """
         logging.info("\nSearching for %s...", film_title)
-        title_checks = [
-            self.search_for_film_on_ant,
-        ]
-        for search_function in title_checks:
-            try:
-                search_result = search_function(tmdb_id)
 
-                if search_result:
-                    return search_result
-            except Exception as err:
-                logging.error(
-                    "An unexpected error occured, skipping film:\n%s", str(err)
-                )
+        if not tmdb_id:
+            return []
+
+        try:
+            search_result = self.search_for_film_on_ant(tmdb_id)
+            if search_result:
+                return search_result
+        except Exception as err:
+            logging.error("An unexpected error occured, skipping film:\n%s", str(err))
 
         logging.info("--- Not found on ANT ---")
         return []
 
-    def validate_tmdb_match(self, film: dict[str, Any], runtime: int) -> bool:
-        # TODO
-        # If film edition is 2in1, extended etc., do not rely on runtime?
-        # Fall back to presenting top match but ask for manual verification?
-
-        # Also pre-process before guessit
-        # Get words only similar to normalise function
-
+    def validate_tmdb_match(
+        self, film: dict[str, Any], runtime: int, edition: str
+    ) -> bool:
         payload = {
             "api_key": self.api_key_tmdb,
         }
@@ -135,6 +123,9 @@ class FilmSearcher:
             runtime_difference = abs(runtime - tmdb_runtime)
             if runtime_difference < 10:
                 logging.info("Runtime is similar")
+                return True
+            elif edition and edition != "theatrical":
+                logging.info("Edition is: %s. Not using runtime to verify", edition)
                 return True
             else:
                 logging.info("Runtime is different!")
@@ -148,7 +139,9 @@ class FilmSearcher:
 
     @sleep_and_retry
     @limits(calls=1, period=0.25)
-    def search_for_film_on_tmdb(self, film_title: str, release_year: str, runtime: int):
+    def search_for_film_on_tmdb(
+        self, film_title: str, release_year: int, runtime: int, edition: str
+    ):
         if film_title == "":
             logging.info("No film title, skipping")
             return ""
@@ -163,7 +156,7 @@ class FilmSearcher:
         }
 
         if release_year:
-            payload["primary_release_year"] = release_year
+            payload["primary_release_year"] = str(release_year)
 
         response_json = self.search_for_film_using_api(payload, url=self.tmdb_url)
 
@@ -177,9 +170,7 @@ class FilmSearcher:
                 ) == self.normalise_title(film_title)
 
                 if title_match and year_match:
-                    if film_title == "Gladiator":
-                        pause = 1
-                    if self.validate_tmdb_match(film, runtime):
+                    if self.validate_tmdb_match(film, runtime, edition):
                         logging.info(
                             "---- Exact title and year match to TMDB. ID: %s",
                             film["id"],
@@ -190,8 +181,7 @@ class FilmSearcher:
 
         # expand API search this time, then fuzzy match
         if release_year:
-            release_year_int = int(release_year)
-            expanded_release_years = [release_year_int + 1, release_year_int - 1]
+            expanded_release_years = [release_year + 1, release_year - 1]
 
             for year in expanded_release_years:
                 payload["primary_release_year"] = year
@@ -217,7 +207,7 @@ class FilmSearcher:
                     index = fuzzy_match_score[2]
                     fuzzy_matched_film = unmatched_films_by_popularity[index]
 
-                    if self.validate_tmdb_match(fuzzy_matched_film, runtime):
+                    if self.validate_tmdb_match(fuzzy_matched_film, runtime, edition):
                         logging.info(
                             "---- Warning: could not find exact film match, expanded release year and using "
                             "fuzzy matching. Manual check is recommended!\n"

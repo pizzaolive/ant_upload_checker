@@ -24,11 +24,11 @@ class DupeChecker:
 
         films_to_dupe_check[["Already on ANT?", "Info"]] = films_to_dupe_check.apply(
             lambda film: self.check_if_film_is_duplicate(
-                film["Full file path"],
-                film["Resolution"],
-                film["Codec"],
-                film["Source"],
-                film["Release group"],
+                film["file_path"],
+                film["resolution"],
+                film["codec"],
+                film["source"],
+                film["release_group"],
                 film["API response"],
             ),
             axis=1,
@@ -39,7 +39,7 @@ class DupeChecker:
             pd.concat([films_to_skip, films_to_dupe_check])
             .drop(["Should skip", "API response"], axis=1)
             .sort_values(
-                by=["Already on ANT?", "Parsed film title"], ascending=[False, True]
+                by=["Already on ANT?", "title"], ascending=[False, True]
             )
         )
 
@@ -57,8 +57,7 @@ class DupeChecker:
         if not api_response:
             return self.not_found_message
 
-        # Retain lower() to account for previous film list versions
-        if release_group.lower() in self.banned_groups:
+        if release_group in self.banned_groups:
             return (
                 "Banned",
                 f"Release group '{release_group}' is banned from ANT - do not upload",
