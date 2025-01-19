@@ -17,8 +17,7 @@ def main():
     )
 
     films = FilmProcessor(input_folders, output_folder)
-    film_file_paths = films.get_film_file_paths()
-    films_df = films.get_film_info_from_file_paths(film_file_paths)
+    films_df = films.get_film_info_from_file_paths()
 
     films_combined_df = films.combine_with_existing_film_csv(films_df)
 

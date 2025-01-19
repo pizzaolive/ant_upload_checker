@@ -199,7 +199,7 @@ test_values = [
 expected_values = [
     (
         "Uploadable - potentially",
-        "Film not found on ANT - does not already exist, or title failed to match",
+        "Film not found on ANT - does not already exist, or failed to match using TMDB ID",
     ),
     ("Duplicate", "Exact filename already exists: test_link"),
     ("Duplicate", "Exact filename already exists: test_link_2"),

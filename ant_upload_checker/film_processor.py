@@ -36,6 +36,7 @@ class FilmProcessor:
         self.backup_csv_file_path: Path = (
             self.output_folder / "Film list old version backup.csv"
         )
+        self.film_file_paths = self.get_film_file_paths()
 
     def get_film_file_paths(self) -> list[Path]:
         """
@@ -59,16 +60,14 @@ class FilmProcessor:
 
         return cleaned_paths
 
-    def get_film_info_from_file_paths(
-        self, film_file_paths: list[Path]
-    ) -> pd.DataFrame:
+    def get_film_info_from_file_paths(self) -> pd.DataFrame:
 
-        media_info_extractor = MediaInfoExtractor(film_file_paths)
+        media_info_extractor = MediaInfoExtractor(self.film_file_paths)
         metadata = media_info_extractor.extract_metadata_from_media_info()
-        guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
+        guessed_films = self.get_guessit_info_from_film_paths(self.film_file_paths)
 
         films_df = self.create_films_dataframe(
-            film_file_paths, metadata, guessed_films
+            self.film_file_paths, metadata, guessed_films
         ).pipe(self.clean_films_df)
 
         return films_df

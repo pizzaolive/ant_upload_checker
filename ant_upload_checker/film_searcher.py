@@ -1,7 +1,7 @@
 import requests
 import logging
 import re
-from typing import Any
+from typing import Any, Optional
 from ratelimit import limits, sleep_and_retry
 from requests.adapters import HTTPAdapter, Retry
 import pandas as pd
@@ -32,10 +32,9 @@ class FilmSearcher:
 
     def check_if_films_exist_on_ant(self) -> pd.DataFrame:
         """
-        Given pandas DataFrame of film list, if list contains
-        films that were on ANT and duplicates, then skip these films.
-        For any not found, non-dupes, or new films in the list,
-        search for these on ANT, indicating whether they exist on ANT or not.
+        If films DataFrame contains films that were on ANT and duplicates, then skip these.
+        For any not found, non-dupes, or new films,
+        search for these on TMDB, then ANT, indicating whether they exist on ANT or not.
         """
         regex_to_skip = r"^Duplicate|^Banned"
 
@@ -88,7 +87,7 @@ class FilmSearcher:
 
     def check_if_film_exists_on_ant(
         self, tmdb_id: str, film_title: str
-    ) -> list[dict[str, Any]]:
+    ) -> list[Optional[dict[str, Any]]]:
         """
         Take a film title, and search for it using the ANT API.
         If an initial match is not found, re-search for a
@@ -97,16 +96,18 @@ class FilmSearcher:
         logging.info("\nSearching for %s...", film_title)
 
         if not tmdb_id:
+            logging.info("--- Could not match film to TMDB, skipping ANT search.")
             return []
 
         try:
+            # TODO add in film title to fall back on title search if no TMDB ID could be found
             search_result = self.search_for_film_on_ant(tmdb_id)
             if search_result:
                 return search_result
         except Exception as err:
             logging.error("An unexpected error occured, skipping film:\n%s", str(err))
 
-        logging.info("--- Not found on ANT ---")
+        logging.info(f"--- TMDB {tmdb_id} Not found on ANT ---")
         return []
 
     def validate_tmdb_match(
@@ -122,13 +123,14 @@ class FilmSearcher:
         if tmdb_runtime is not None:
             runtime_difference = abs(runtime - tmdb_runtime)
             if runtime_difference < 10:
-                logging.info("Runtime is similar")
                 return True
             elif edition and edition != "theatrical":
-                logging.info("Edition is: %s. Not using runtime to verify", edition)
+                logging.info(
+                    "---- Edition is: %s. Not using runtime to verify", edition
+                )
                 return True
             else:
-                logging.info("Runtime is different!")
+                logging.info("---- Runtime does not match")
                 return False
 
         logging.info("No TMDB ID available, unable to verify")
@@ -146,7 +148,7 @@ class FilmSearcher:
             logging.info("No film title, skipping")
             return ""
 
-        logging.info(film_title)
+        logging.info(f"Searching for {film_title} on TMDB")
 
         payload = {
             "api_key": self.api_key_tmdb,
@@ -170,9 +172,10 @@ class FilmSearcher:
                 ) == self.normalise_title(film_title)
 
                 if title_match and year_match:
+                    logging.info("---- Title and year match")
                     if self.validate_tmdb_match(film, runtime, edition):
                         logging.info(
-                            "---- Exact title and year match to TMDB. ID: %s",
+                            "---- TMDB ID: %s",
                             film["id"],
                         )
                         return film["id"]
@@ -217,7 +220,7 @@ class FilmSearcher:
                         )
                         return fuzzy_matched_film["id"]
 
-        logging.info("Failed match film to TMDB, skipping")
+        logging.info("Failed to match film")
         return ""
 
     @sleep_and_retry
