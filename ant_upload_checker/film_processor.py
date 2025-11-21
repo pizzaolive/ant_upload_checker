@@ -191,7 +191,8 @@ class FilmProcessor:
         Use guessit package to extract film information
         into ordered dictionary.
         """
-        guessed_films = [guessit(path) for path in file_paths]
+        guessed_media = [guessit(path) for path in file_paths]
+        guessed_films = [media for media in guessed_media if media.get("type") == "movie"]
 
         return guessed_films
 

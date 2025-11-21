@@ -1,3 +1,7 @@
+#### Version 1.8.1
+* Script should exclude TV shows
+*
+
 #### Version 1.8.0
 * Feature: Remove GUI in favour of inquirer prompts - this should allow users on headless servers to use the programme once again, and make installation slightly easier (no more tkinter issues)
 
