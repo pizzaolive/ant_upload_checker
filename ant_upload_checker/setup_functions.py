@@ -43,11 +43,13 @@ def get_user_info_directories() -> None:
         dotenv_path=ENV_FILE_PATH,
         key_to_set="INPUT_FOLDERS",
         value_to_set=input_folders_str,
+        quote_mode="never"
     )
     set_key(
         dotenv_path=ENV_FILE_PATH,
         key_to_set="OUTPUT_FOLDER",
         value_to_set=output_folder,
+        quote_mode="never"
     )
 
 
@@ -102,7 +104,7 @@ def get_user_input_folders() -> list[str]:
         return_as_path_if_valid(folder) for folder in input_folders
     ]
 
-    valid_input_folders_str = [str(folder) for folder in valid_input_folder_paths]
+    valid_input_folders_str = [str(folder).rstrip("\\") for folder in valid_input_folder_paths]
 
     return valid_input_folders_str
 
@@ -111,7 +113,7 @@ def return_as_path_if_valid(folder_path_str: Optional[str]) -> Path:
     if not folder_path_str:
         raise ValueError("No folder path was selected in the dialog box, please re-run")
 
-    folder_path_str_formatted = folder_path_str.lstrip()
+    folder_path_str_formatted = folder_path_str.strip()
 
     # Enable ~ shorthand to be a valid path and resolve the absolute path
     folder_path = Path(folder_path_str_formatted).expanduser().resolve()
@@ -133,6 +135,7 @@ def get_user_info_api_key() -> None:
             dotenv_path=ENV_FILE_PATH,
             key_to_set="API_KEY",
             value_to_set=api_key,
+            quote_mode="never"
         )
     else:
         raise ValueError("No API key was set - please restart")

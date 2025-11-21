@@ -1,3 +1,7 @@
+#### Version 1.8.1
+* Script should now exclude TV shows
+* Attempt bug fix #40 where network paths were not being mapped to correct path
+
 #### Version 1.8.0
 * Feature: Remove GUI in favour of inquirer prompts - this should allow users on headless servers to use the programme once again, and make installation slightly easier (no more tkinter issues)
 

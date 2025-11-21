@@ -68,6 +68,7 @@ def test_film_paths():
         r"C:/S.W.A.T. (2100).1080p.mkv",
         r"C:/T.E.S. Test film (2010).1080p.mkv",
         r"C:/T.E.S.T. Test film (2010).1080p.mkv",
+        r"C:/The.Pitt.S01E01.700.A.M.2160p.MAX.WEB-DL.DDP5.1.x265-NTb"
     ]
     test_list = [Path(x) for x in test_list]
 
@@ -184,6 +185,7 @@ def test_get_guessit_info_from_film_paths(test_film_paths):
 
     expected_type = OrderedDict
     assert all([isinstance(x, expected_type) for x in actual_guessit_films])
+    assert all([x["type"] == "movie" for x in actual_guessit_films])
 
 
 def test_get_film_attribute_from_guessed_film(test_guessit_films):
