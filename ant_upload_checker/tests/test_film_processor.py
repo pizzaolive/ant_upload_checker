@@ -183,9 +183,17 @@ def test_get_guessit_info_from_film_paths(test_film_paths):
     fp = FilmProcessor("test", "test")
     actual_guessit_films = fp.get_guessit_info_from_film_paths(test_film_paths)
 
-    expected_type = OrderedDict
-    assert all([isinstance(x, expected_type) for x in actual_guessit_films])
-    assert all([x["type"] == "movie" for x in actual_guessit_films])
+    guessed_films, film_paths = zip(*actual_guessit_films)
+    
+    assert all([isinstance(x, Path) for x in film_paths])
+    assert all([isinstance(x, OrderedDict) for x in guessed_films])
+    assert all([x["type"] == "movie" for x in guessed_films])
+
+def test_get_guessit_info_from_film_paths_raises_error():
+    fp = FilmProcessor("test", "test")
+
+    with pytest.raises(ValueError):
+        fp.get_guessit_info_from_film_paths(  [Path("C:/The.Pitt.S01E01.700.A.M.2160p.MAX.WEB-DL.DDP5.1.x265-NTb")])
 
 
 def test_get_film_attribute_from_guessed_film(test_guessit_films):

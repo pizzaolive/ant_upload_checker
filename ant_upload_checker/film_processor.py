@@ -51,12 +51,16 @@ class FilmProcessor:
         cleaned_paths.sort()
 
         return cleaned_paths
+    
+
 
     def get_film_info_from_file_paths(
-        self, film_file_paths: list[Path]
+        self, media_file_paths: list[Path]
     ) -> pd.DataFrame:
-        film_sizes = self.get_film_sizes_from_file_paths(film_file_paths)
-        guessed_films = self.get_guessit_info_from_film_paths(film_file_paths)
+        guessed_film_tuples = self.get_guessit_info_from_film_paths(media_file_paths)
+        guessed_films, film_paths = zip(*guessed_film_tuples)
+
+        film_sizes = self.get_film_sizes_from_file_paths(film_paths)
         film_titles = self.get_formatted_titles_from_guessed_films(guessed_films)
         film_resolutions = self.get_film_resolutions_from_guessed_films(guessed_films)
         film_codecs = self.get_codec_from_guessed_films(guessed_films)
@@ -64,7 +68,7 @@ class FilmProcessor:
         release_groups = self.get_release_groups_from_guessed_films(guessed_films)
 
         film_list_df = self.create_film_list_dataframe(
-            film_file_paths,
+            film_paths,
             film_sizes,
             film_titles,
             film_resolutions,
@@ -192,12 +196,20 @@ class FilmProcessor:
         into ordered dictionary.
         """
         logging.info("Using Guessit to extract film information, may take a while...")
-        guessed_media = [guessit(path) for path in file_paths]
-        guessed_films = [media for media in guessed_media if media.get("type") == "movie"]
+        guessed_film_tuples = []
+        for file_path in file_paths:
+            guessed_media = guessit(file_path)
+            if guessed_media.get("type") == "movie":
+                guessed_film_tuples.append((guessed_media, file_path))
+            else:
+                logging.info(f"Dropping media not parsed as film: {file_path.stem}")
+
+        if not guessed_film_tuples:
+            raise ValueError("After parsing media paths, no films were found - exiting.")
 
         logging.info("Finished using Guessit to extract film information")
 
-        return guessed_films
+        return guessed_film_tuples
 
     def get_formatted_titles_from_guessed_films(
         self, guessed_films: list[MatchesDict]

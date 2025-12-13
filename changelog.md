@@ -1,4 +1,7 @@
 #### Version 1.8.1
+* Fix programme-breaking bug introduced in 1.8.1 where non-movie types were removed during guessing of files, but file sizes were extracted using all file paths, leading 'All arrays must be of same length' error
+
+#### Version 1.8.1
 * Script should now exclude TV shows
 * Attempt bug fix #40 where network paths were not being mapped to correct path
 
